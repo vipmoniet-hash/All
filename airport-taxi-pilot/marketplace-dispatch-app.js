@@ -8,6 +8,10 @@ const pay=m=>m==='bit'?'Bit':'наличные';
 const statusRu=s=>({awaiting_dispatch:dispatchLang==='he'?'חדש':'Новый',pool:dispatchLang==='he'?'פנוי':'Свободен',assigned:dispatchLang==='he'?'נלקח על ידי נהג':'Взят водителем',driver_enroute:dispatchLang==='he'?'הנהג בדרך':'Водитель в пути',completed:dispatchLang==='he'?'הושלם':'Завершён',cancelled:dispatchLang==='he'?'בוטל':'Отменён'})[s]||s;
 const fmt=d=>{const x=new Date(d),locale=dispatchLang==='he'?'he-IL':'ru-RU',tz='Asia/Jerusalem';const date=new Intl.DateTimeFormat('en-GB',{day:'2-digit',month:'2-digit',year:'numeric',timeZone:tz}).format(x);const weekday=new Intl.DateTimeFormat(locale,{weekday:'short',timeZone:tz}).format(x);const time=new Intl.DateTimeFormat('en-GB',{hour:'2-digit',minute:'2-digit',hour12:false,timeZone:tz}).format(x);return date+' ('+weekday+') '+time;};
 const money=n=>Number(n||0).toLocaleString('ru-RU',{maximumFractionDigits:2});
+const TOPUP_VAT_RATE=0.18;
+const topupCredits=t=>Number(t?.credits??t?.amount??0);
+const topupVat=t=>Number(t?.vatAmount??(topupCredits(t)*TOPUP_VAT_RATE).toFixed(2));
+const topupTotal=t=>Number(t?.totalAmount??(topupCredits(t)+topupVat(t)).toFixed(2));
 
 const HE_REPLACEMENTS=[
   ['VanClick Taxi 1–4 · изолированная тестовая среда','VanClick Taxi 1–4 · סביבת בדיקה מבודדת'],
@@ -417,9 +421,9 @@ function render(){
   if(q('#quickPool'))q('#quickPool').textContent=c.pool||0;
   if(q('#quickActive'))q('#quickActive').textContent=(c.assigned||0)+(c.driver_enroute||0);
 
-  q('#topups').innerHTML=(state.topups||[]).filter(t=>t.status==='pending').map(t=>`<div class="topup"><b>${esc(t.driverId)}</b> · ${money(t.amount)} ₪ · ${pay(t.method)} <button onclick="approve('${t.id}')">Подтвердить</button><button class="danger" onclick="rejectT('${t.id}')">Отклонить</button></div>`).join('')||'<p class="muted">Нет ожидающих пополнений</p>';
+  q('#topups').innerHTML=(state.topups||[]).filter(t=>t.status==='pending').map(t=>`<div class="topup"><b>${esc(t.driverId)}</b> · ${money(topupCredits(t))} ${tr('кредитов','קרדיטים')} · ${money(topupTotal(t))} ₪ ${tr('к оплате, включая НДС 18%','לתשלום כולל מע״מ 18%')} · ${pay(t.method)} <button onclick="approve('${t.id}')">${tr('Подтвердить','אישור')}</button><button class="danger" onclick="rejectT('${t.id}')">${tr('Отклонить','דחייה')}</button></div>`).join('')||`<p class="muted">${tr('Нет ожидающих пополнений','אין טעינות ממתינות')}</p>`;
 
-  q('#drivers').innerHTML=(state.drivers||[]).map(d=>`<div class="driver-row"><b>${esc(d.name)}</b> · ${esc(d.phone)} · ${esc(d.vehiclePlate||'—')} · баланс ${money(d.wallet)} ₪ · завершено ${Number(d.completedTrips||0)} · ${d.verified?'проверен':'НЕ проверен'} · ${d.active?'активен':'выключен'} ${!d.verified?`<button onclick="verifyDriver('${d.id}')">Проверить + включить</button>`:`<button onclick="toggleDriver('${d.id}',${d.active?'false':'true'})">${d.active?'Выключить':'Включить'}</button>`} <button class="secondary" onclick="resetDriverPin('${d.id}')">Сменить PIN</button></div>`).join('');
+  q('#drivers').innerHTML=(state.drivers||[]).map(d=>`<div class="driver-row"><b>${esc(d.name)}</b> · ${esc(d.phone)} · ${esc(d.vehiclePlate||'—')} · ${tr('баланс','יתרה')} ${money(d.wallet)} ${tr('кредитов','קרדיטים')} · завершено ${Number(d.completedTrips||0)} · ${d.verified?'проверен':'НЕ проверен'} · ${d.active?'активен':'выключен'} ${!d.verified?`<button onclick="verifyDriver('${d.id}')">Проверить + включить</button>`:`<button onclick="toggleDriver('${d.id}',${d.active?'false':'true'})">${d.active?'Выключить':'Включить'}</button>`} <button class="secondary" onclick="resetDriverPin('${d.id}')">Сменить PIN</button></div>`).join('');
 
   q('#log').innerHTML=(state.events||[]).slice(0,150).map(e=>`<div class="logrow"><b>${esc(e.type)}</b> · ${esc(e.orderId||'—')}<br><span class="muted">${fmt(e.at)} · ${esc(e.actor||'system')}</span></div>`).join('')||'<p class="muted">Журнал пуст</p>';
 }
