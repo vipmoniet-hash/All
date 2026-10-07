@@ -293,19 +293,19 @@ export async function registerDriver(input){return transact(db=>{`,
 patchFile('server.js',({replaceOnce})=>{
   replaceOnce(
     "import { ensureDb, readDb, resetDb } from './src/persistence.js';",
-    "import { ensureDb, readDb, resetDb } from './src/persistence.js';\\nimport { marketplaceAuthRequired, configureDriverPin, driverLogin, dispatchLogin, sessionForToken, logoutToken } from './src/auth.js';",
+    "import { ensureDb, readDb, resetDb } from './src/persistence.js';\nimport { marketplaceAuthRequired, configureDriverPin, driverLogin, dispatchLogin, sessionForToken, logoutToken } from './src/auth.js';",
     'marketplace auth imports'
   );
 
   replaceOnce(
     "const statusFor=code=>({",
-    "const bearerToken=req=>{const h=String(req.headers.authorization||'');const m=h.match(/^Bearer\\s+(.+)$/i);return m?m[1]:'';};\\nasync function enforceMarketplaceAuth(req,url){if(!marketplaceAuthRequired())return;if(url.pathname.startsWith('/api/auth/'))return;if(url.pathname.startsWith('/api/dispatch/')){const s=await sessionForToken(bearerToken(req));if(!s||s.role!=='dispatch')throw new Error('UNAUTHORIZED');return;}const m=url.pathname.match(/^\\/api\\/drivers\\/([^/]+)/);if(m){const s=await sessionForToken(bearerToken(req));if(!s||s.role!=='driver'||s.driverId!==decodeURIComponent(m[1]))throw new Error('UNAUTHORIZED');}}\\nconst statusFor=code=>({",
+    "const bearerToken=req=>{const h=String(req.headers.authorization||'');const m=h.match(/^Bearer\\s+(.+)$/i);return m?m[1]:'';};\nasync function enforceMarketplaceAuth(req,url){if(!marketplaceAuthRequired())return;if(url.pathname.startsWith('/api/auth/'))return;if(url.pathname.startsWith('/api/dispatch/')){const s=await sessionForToken(bearerToken(req));if(!s||s.role!=='dispatch')throw new Error('UNAUTHORIZED');return;}const m=url.pathname.match(/^\\/api\\/drivers\\/([^/]+)/);if(m){const s=await sessionForToken(bearerToken(req));if(!s||s.role!=='driver'||s.driverId!==decodeURIComponent(m[1]))throw new Error('UNAUTHORIZED');}}\nconst statusFor=code=>({",
     'marketplace auth helpers'
   );
 
   replaceOnce(
     "if(url.pathname.startsWith('/api/')){",
-    "if(url.pathname.startsWith('/api/')){\\n      if(req.method==='GET'&&url.pathname==='/api/auth/status')return json(res,200,{required:marketplaceAuthRequired()});\\n      if(req.method==='POST'&&url.pathname==='/api/auth/driver/login'){const b=await body(req);return json(res,200,await driverLogin(b.driverId,b.pin));}\\n      if(req.method==='POST'&&url.pathname==='/api/auth/dispatch/login'){const b=await body(req);return json(res,200,await dispatchLogin(b.pin));}\\n      if(req.method==='POST'&&url.pathname==='/api/auth/logout')return json(res,200,await logoutToken(bearerToken(req)));\\n      await enforceMarketplaceAuth(req,url);",
+    "if(url.pathname.startsWith('/api/')){\n      if(req.method==='GET'&&url.pathname==='/api/auth/status')return json(res,200,{required:marketplaceAuthRequired()});\n      if(req.method==='POST'&&url.pathname==='/api/auth/driver/login'){const b=await body(req);return json(res,200,await driverLogin(b.driverId,b.pin));}\n      if(req.method==='POST'&&url.pathname==='/api/auth/dispatch/login'){const b=await body(req);return json(res,200,await dispatchLogin(b.pin));}\n      if(req.method==='POST'&&url.pathname==='/api/auth/logout')return json(res,200,await logoutToken(bearerToken(req)));\n      await enforceMarketplaceAuth(req,url);",
     'marketplace auth routes and guard'
   );
 
@@ -329,7 +329,7 @@ patchFile('server.js',({replaceOnce})=>{
 
   replaceOnce(
     "m=url.pathname.match(/^\\/api\\/dispatch\\/drivers\\/([^/]+)\\/verification$/);if(req.method==='POST'&&m)return json(res,200,await setDriverVerification(m[1],await body(req)));",
-    "m=url.pathname.match(/^\\/api\\/dispatch\\/drivers\\/([^/]+)\\/verification$/);if(req.method==='POST'&&m)return json(res,200,await setDriverVerification(m[1],await body(req)));\\n      m=url.pathname.match(/^\\/api\\/dispatch\\/drivers\\/([^/]+)\\/pin$/);if(req.method==='POST'&&m){const b=await body(req);return json(res,200,await configureDriverPin(m[1],b.pin));}",
+    "m=url.pathname.match(/^\\/api\\/dispatch\\/drivers\\/([^/]+)\\/verification$/);if(req.method==='POST'&&m)return json(res,200,await setDriverVerification(m[1],await body(req)));\n      m=url.pathname.match(/^\\/api\\/dispatch\\/drivers\\/([^/]+)\\/pin$/);if(req.method==='POST'&&m){const b=await body(req);return json(res,200,await configureDriverPin(m[1],b.pin));}",
     'driver PIN endpoint'
   );
 
