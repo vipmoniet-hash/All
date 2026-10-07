@@ -74,7 +74,7 @@ function finalFareForTrip(baseFare, tripAt) {
     (minute >= 7*60 && minute <= 9*60+30) ||
     (minute >= 14*60 && minute <= 18*60)
   );
-  const shabbat=parts?.weekday===6;
+  const shabbat=Number.isFinite(minute) && ((parts?.weekday===5 && minute>=16*60) || (parts?.weekday===6 && minute<=20*60));
   const peakSurchargePct=peak?5:0;
   const shabbatSurchargePct=shabbat?15:0;
   const surchargePct=peakSurchargePct+shabbatSurchargePct;
