@@ -284,16 +284,12 @@ function normalizeTripAt(value) {
 
   const serviceRel='src/service.js';
   let service=read(serviceRel);
-  service=mustReplace(
-    service,
-    "largeLuggage:Number(input.largeLuggage||0),smallLuggage:Number(input.smallLuggage||0),",
-    "largeLuggage:Number(input.largeLuggage||0),smallLuggage:Number(input.smallLuggage||0),",
-    'Taxi4 locate luggage fields'
-  );
   if(!service.includes("LARGE_LUGGAGE_REQUIRES_LARGE_VEHICLE")){
-    service=service.replace(
+    service=mustReplace(
+      service,
       "const quote = quoteAirportRoute(input.fromArea, input.toArea, input.tripAt, input.paymentMethod);",
-      "if(Number(input.largeLuggage||0)>4)throw new Error('LARGE_LUGGAGE_REQUIRES_LARGE_VEHICLE');const quote = quoteAirportRoute(input.fromArea, input.toArea, input.tripAt, input.paymentMethod);"
+      "if(Number(input.largeLuggage||0)>4)throw new Error('LARGE_LUGGAGE_REQUIRES_LARGE_VEHICLE');const quote = quoteAirportRoute(input.fromArea, input.toArea, input.tripAt, input.paymentMethod);",
+      'Taxi4 server large luggage guard'
     );
   }
   write(serviceRel,service);
