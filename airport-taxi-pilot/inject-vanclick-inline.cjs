@@ -64,3 +64,20 @@ require('child_process').execFileSync(process.execPath,[path.join(__dirname,'rep
     }
   }
 }
+
+/* TAXI4_DEEP_INSPECT */
+{
+  const files=[
+    [path.join(root,'src','pricing.js'),['quoteAirportRoute','export','fare']],
+    [path.join(root,'src','service.js'),['createClientBooking','quotedFare','fare']],
+    [path.join(root,'src','routing.js'),['routeDecisionWithHandoff']]
+  ];
+  for(const [file,needles] of files){
+    if(!fs.existsSync(file)) continue;
+    const src=fs.readFileSync(file,'utf8');
+    for(const needle of needles){
+      const idx=src.indexOf(needle);
+      if(idx>=0) console.log('TAXI4_DEEP_INSPECT',path.basename(file),needle,'\\n'+src.slice(Math.max(0,idx-2500),Math.min(src.length,idx+8000)));
+    }
+  }
+}
