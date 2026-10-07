@@ -55,10 +55,14 @@
   <section id="walletPane" class="pane">
     <div class="panel wallet-panel">
       <div class="panel-head"><div><small>ארנק נהג</small><h2>טעינת יתרה</h2></div><div class="wallet-balance"><span id="walletBig">—</span> ₪</div></div>
-      <p>העמלה על נסיעה משולמת מהארנק לפני חשיפת פרטי הלקוח. טעינה ב-Bit או במזומן נכנסת לשימוש לאחר אישור הדיספצ׳ר.</p>
-      <form id="topup" class="topup">
-        <label><span>סכום</span><input name="amount" type="number" min="1" inputmode="numeric" placeholder="לדוגמה 200" required></label>
-        <label><span>אמצעי טעינה</span><select name="method"><option value="bit">Bit</option><option value="cash">מזומן</option></select></label>
+      <p>העמלה על נסיעה משולמת מהארנק לפני חשיפת פרטי הלקוח. טעינת הארנק מתבצעת <b>רק דרך Bit</b> ולאחר אישור הדיספצ׳ר.</p>
+      <div class="bit-destination">
+        <div><small>שלחו את התשלום ב-Bit למספר</small><strong dir="ltr">+972 54-571-8740</strong></div>
+        <button id="copyBit" type="button">העתק מספר</button>
+      </div>
+      <form id="topup" class="topup bit-only">
+        <label><span>הסכום ששלחתם ב-Bit</span><input name="amount" type="number" min="1" inputmode="numeric" placeholder="לדוגמה 200" required></label>
+        <input type="hidden" name="method" value="bit">
         <button type="submit">שלח לאישור</button>
       </form>
       <div id="topupStatus" class="form-status"></div>
