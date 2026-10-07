@@ -1,0 +1,53 @@
+:root{
+  --blue:#1769e0;--blue-dark:#0e55bd;--blue-soft:#eaf3ff;--gold:#d6b06a;
+  --ink:#101828;--muted:#667085;--bg:#f6f8fb;--surface:#fff;--line:#dce4ed;
+  --dark:#1d1c1a;--green:#128a50;--green-soft:#eaf7f0;--red:#c2414b;--red-soft:#fff0f1;
+  --shadow:0 12px 36px rgba(20,45,77,.08);
+  font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Noto Sans Hebrew",Arial,sans-serif;
+  color-scheme:light
+}
+*{box-sizing:border-box}
+html{background:var(--bg)}
+body{margin:0;background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased;padding-bottom:76px}
+button,input,select{font:inherit}
+button{cursor:pointer}
+.hidden{display:none!important}
+.appbar{position:sticky;top:0;z-index:30;background:rgba(255,255,255,.96);border-bottom:1px solid rgba(16,24,40,.07);box-shadow:0 5px 20px rgba(16,24,40,.05);backdrop-filter:blur(14px)}
+.appbar-inner{max-width:980px;min-height:68px;margin:auto;padding:0 12px;display:flex;align-items:center;gap:10px}
+.brand{display:flex;align-items:center;gap:9px;min-width:0}
+.brand-mark{width:38px;height:38px;flex:0 0 38px;display:grid;place-items:center;border-radius:10px;background:var(--dark);color:#fff;font-weight:950;box-shadow:0 5px 15px rgba(23,105,224,.18)}
+.brand-copy{min-width:0}.brand-copy b,.brand-copy small{display:block}.brand-copy b{font-size:15px;white-space:nowrap}.brand-copy small{margin-top:3px;color:var(--muted);font-size:10.5px;white-space:nowrap}
+.online-dot{display:inline-block;width:7px;height:7px;margin-inline-end:4px;border-radius:50%;background:var(--green);box-shadow:0 0 0 3px rgba(18,138,80,.10)}
+.head-actions{margin-inline-start:auto;display:flex;align-items:center;gap:7px}
+.wallet-chip{min-width:74px;padding:6px 9px;border-radius:11px;background:#f7f9fc;border:1px solid var(--line);text-align:center}.wallet-chip span,.wallet-chip b{display:block}.wallet-chip span{font-size:9.5px;color:var(--muted)}.wallet-chip b{font-size:15px;line-height:1.05}
+.iconbtn,.install-btn{min-height:38px;border-radius:10px;border:1px solid var(--line);background:#fff;color:var(--ink);font-weight:850}.iconbtn{width:38px;font-size:18px}.install-btn{padding:0 10px;color:var(--blue)}
+.driver-switch{display:none;max-width:90px;min-height:38px;border:1px solid var(--line);border-radius:10px;background:#fff}
+body.test-mode .driver-switch{display:block}
+.shell{max-width:980px;margin:auto;padding:12px 10px 28px}
+.daybar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:2px 2px 12px}.daybar small,.daybar b{display:block}.daybar small{color:var(--muted);font-size:11px}.daybar b{font-size:14px;margin-top:2px}.availability{display:flex;align-items:center;gap:6px;padding:6px 9px;border-radius:999px;background:var(--green-soft);color:#176c45;font-size:11px;font-weight:800}.availability span{width:7px;height:7px;border-radius:50%;background:var(--green)}
+.install-banner{margin-bottom:10px;padding:12px;display:flex;align-items:center;gap:12px;background:var(--blue-soft);border:1px solid #cfe0f8;border-radius:14px}.install-banner div{min-width:0}.install-banner b,.install-banner small{display:block}.install-banner b{font-size:13px}.install-banner small{margin-top:2px;color:#475467;font-size:11px}.install-banner button{margin-inline-start:auto;min-height:38px;padding:0 11px;border:0;border-radius:10px;background:var(--blue);color:#fff;font-weight:850;white-space:nowrap}
+.tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;padding:5px;background:#fff;border:1px solid var(--line);border-radius:14px;position:sticky;top:78px;z-index:20;box-shadow:0 6px 20px rgba(20,45,77,.04)}.tabs button{min-height:42px;border:0;border-radius:10px;background:transparent;color:#667085;font-weight:850}.tabs button.active{background:var(--dark);color:#fff}.tabs span{font-size:10px}
+.pane{display:none;margin-top:10px}.pane.active{display:block}
+.ride{margin-bottom:10px;overflow:hidden;background:#fff;border:1px solid var(--line);border-radius:17px;box-shadow:var(--shadow)}
+.ride-statusline{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 13px;background:#fbfcfe;border-bottom:1px solid #edf1f5}.ride-statusline b{font-size:12px}.ride-statusline time{color:var(--muted);font-size:11px}
+.ride-main{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;padding:14px 14px 10px}.route{font-size:16px;font-weight:900;line-height:1.35}.route small{display:block;margin-top:4px;color:var(--muted);font-size:11px;font-weight:650}.fare{text-align:left;min-width:86px}.fare strong{display:block;color:var(--ink);font-size:27px;line-height:1}.fare small{display:block;margin-top:4px;color:var(--muted);font-size:10px}
+.facts{display:flex;flex-wrap:wrap;gap:6px;padding:0 14px 12px}.fact{padding:6px 8px;border-radius:9px;background:#f3f6fa;color:#344054;font-size:11px;font-weight:750}.fact.flight{background:var(--blue-soft);color:var(--blue-dark)}.fact.payment{background:#faf6ee;color:#6b5427}
+.moneybar{display:grid;grid-template-columns:1fr 1fr 1fr;border-top:1px solid #edf1f5;border-bottom:1px solid #edf1f5;background:#fbfcfe}.moneybar>div{padding:9px 7px;text-align:center}.moneybar span,.moneybar b{display:block}.moneybar span{color:var(--muted);font-size:9.5px}.moneybar b{margin-top:2px;font-size:14px}.moneybar .net b{color:var(--green);font-size:16px}
+.actions{padding:10px 13px;display:flex;gap:8px}.actions button,.actions a{min-height:46px;display:flex;align-items:center;justify-content:center;border-radius:11px;text-decoration:none;font-weight:900}.buy{width:100%;border:1px solid var(--dark);background:var(--dark);color:#fff}.buy:active{transform:translateY(1px)}.secondary{flex:1;border:1px solid #cfe0f8;background:#fff;color:var(--blue)}.primary{flex:1;border:1px solid var(--dark);background:var(--dark);color:#fff}.danger{border:1px solid #f1c8cc;background:var(--red-soft);color:#9d2f39}
+.private{padding:12px 14px;background:#fff}.client-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}.client-row b{font-size:15px}.client-actions{display:flex;gap:6px}.client-actions a{min-width:42px;height:40px;display:grid;place-items:center;border-radius:10px;background:#f3f6fa;border:1px solid var(--line);text-decoration:none;color:var(--ink);font-weight:900}.address{margin-top:8px;padding:10px 11px;border:1px solid var(--line);border-radius:11px;background:#fbfcfe}.address small,.address b{display:block}.address small{color:var(--muted);font-size:10px}.address b{margin-top:3px;font-size:13px;line-height:1.4}.address a{display:inline-flex;margin-top:7px;color:var(--blue);font-size:11px;font-weight:850;text-decoration:none}.notes{margin-top:8px;padding:9px 10px;border-radius:10px;background:#fff9ec;color:#6b5427;font-size:11px}.warning{padding:8px 13px;background:#fff6e8;color:#8a6018;font-size:11px;font-weight:750}
+.panel{padding:17px;background:#fff;border:1px solid var(--line);border-radius:17px;box-shadow:var(--shadow)}.panel-head{display:flex;align-items:flex-start;gap:12px}.panel-head small{color:var(--muted);font-size:10px}.panel-head h2{margin:2px 0 0;font-size:20px}.wallet-balance{margin-inline-start:auto;color:var(--ink);font-size:22px;font-weight:950}.panel>p{color:var(--muted);font-size:12px;line-height:1.55}
+.topup{display:grid;grid-template-columns:1fr 1fr auto;gap:8px}.topup label{display:grid;gap:5px}.topup label span{font-size:11px;color:#475467;font-weight:750}.topup input,.topup select,.topup button{min-height:46px;padding:10px;border:1px solid var(--line);border-radius:11px;background:#fff}.topup button{align-self:end;background:var(--dark);color:#fff;border-color:var(--dark);font-weight:900}.form-status{margin-top:9px;color:var(--green);font-size:12px;font-weight:800}.topup-history{margin-top:13px;color:#475467;font-size:12px}.topup-item{padding:9px 0;border-top:1px solid #edf1f5}
+.empty{padding:42px 16px;text-align:center;color:var(--muted);font-size:13px}.empty strong{display:block;margin-bottom:5px;color:#344054;font-size:15px}
+.skeleton-card{height:190px;border-radius:17px;background:linear-gradient(90deg,#eef2f6 25%,#f7f9fb 37%,#eef2f6 63%);background-size:400% 100%;animation:shine 1.35s ease infinite}@keyframes shine{0%{background-position:100% 0}100%{background-position:0 0}}
+.status{display:inline-flex;padding:5px 7px;border-radius:999px;background:var(--green-soft);color:#176c45;font-size:10px;font-weight:850}
+.toast{position:fixed;z-index:100;left:50%;bottom:88px;transform:translate(-50%,16px);max-width:min(90vw,420px);padding:10px 13px;border-radius:11px;background:#101828;color:#fff;opacity:0;pointer-events:none;transition:.2s;font-size:12px;box-shadow:0 12px 34px rgba(16,24,40,.24)}.toast.show{opacity:1;transform:translate(-50%,0)}
+.bottom-nav{display:none}
+@media(max-width:680px){
+  .appbar-inner{min-height:62px}.brand-mark{width:34px;height:34px;flex-basis:34px}.brand-copy b{font-size:14px}.brand-copy small{font-size:9.5px}.wallet-chip{min-width:68px;padding:5px 7px}.wallet-chip b{font-size:14px}.iconbtn{display:none}.install-btn{display:none!important}
+  .shell{padding:8px 8px 20px}.daybar{margin:2px 3px 9px}.availability{font-size:10px}
+  .desktop-tabs{display:none}.pane{margin-top:8px}
+  .ride{border-radius:15px;margin-bottom:8px}.ride-statusline{padding:8px 11px}.ride-main{padding:12px 12px 9px}.route{font-size:15px}.fare strong{font-size:25px}.facts{padding:0 12px 10px}.moneybar>div{padding:8px 5px}.actions{padding:9px 11px}
+  .private{padding:11px 12px}.panel{padding:14px;border-radius:15px}.topup{grid-template-columns:1fr}.topup button{width:100%}
+  .bottom-nav{position:fixed;display:grid;grid-template-columns:repeat(4,1fr);z-index:60;left:0;right:0;bottom:0;padding:5px 7px calc(5px + env(safe-area-inset-bottom));background:rgba(255,255,255,.97);border-top:1px solid rgba(16,24,40,.08);box-shadow:0 -8px 24px rgba(20,45,77,.08);backdrop-filter:blur(14px)}
+  .bottom-nav button{position:relative;min-height:56px;border:0;border-radius:11px;background:transparent;color:#667085;display:grid;place-items:center;align-content:center;gap:1px}.bottom-nav button span{font-size:17px;font-weight:900;line-height:1}.bottom-nav button b{font-size:10px}.bottom-nav button.active{background:#f2f5f9;color:var(--dark)}.bottom-nav em{position:absolute;top:4px;inset-inline-start:50%;margin-inline-start:9px;min-width:16px;height:16px;padding:0 4px;display:none;place-items:center;border-radius:999px;background:var(--blue);color:#fff;font-size:9px;font-style:normal;font-weight:900}.bottom-nav em.has{display:grid}
+}
