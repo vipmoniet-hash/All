@@ -25,6 +25,7 @@ const base='http://127.0.0.1:'+port;
   delete env.MARKETPLACE_DISPATCH_1_4_PIN;
   delete env.MARKETPLACE_DISPATCH_5_6_PIN;
   delete env.MARKETPLACE_DISPATCH_PIN;
+  delete env.MARKETPLACE_ADMIN_PIN_HASH;
   delete env.MARKETPLACE_DISPATCH_1_4_PIN_HASH;
   delete env.MARKETPLACE_DISPATCH_5_6_PIN_HASH;
   const probe=spawnSync(process.execPath,['server.js'],{cwd:root,encoding:'utf8',timeout:1500,env});
@@ -37,6 +38,8 @@ const base='http://127.0.0.1:'+port;
   delete env.MARKETPLACE_DISPATCH_1_4_PIN;
   delete env.MARKETPLACE_DISPATCH_5_6_PIN;
   delete env.MARKETPLACE_DISPATCH_PIN;
+  delete env.MARKETPLACE_DISPATCH_1_4_PIN_HASH;
+  delete env.MARKETPLACE_DISPATCH_5_6_PIN_HASH;
   const probe=spawnSync(process.execPath,['server.js'],{cwd:root,encoding:'utf8',timeout:600,env});
   assert.notEqual(probe.status,1,'Admin-only mode must not fail startup merely because dispatchers are not assigned yet');
 }
