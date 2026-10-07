@@ -10,7 +10,8 @@
   <form id="staffAuthForm" class="auth-card">
     <span class="eyebrow">VANCLICK STAFF</span>
     <h2 data-t="loginTitle">Вход в VanClick</h2>
-    <p data-t="loginText">Введите свой PIN. Система сама откроет вашу рабочую линию.</p>
+    <p data-t="loginText">Введите телефон и PIN из VanClick. Администратор и назначенные диспетчеры работают в одном центре по обеим линиям.</p>
+    <input id="staffPhone" inputmode="tel" autocomplete="username" placeholder="Телефон">
     <input id="staffPin" inputmode="numeric" pattern="[0-9]*" autocomplete="current-password" placeholder="PIN" required>
     <button class="primary" type="submit" data-t="login">Войти</button>
     <div id="staffAuthStatus" class="muted"></div>
@@ -25,7 +26,7 @@
   </div>
 </header>
 <main class="wrap">
-  <section class="hero"><span class="eyebrow">STAFF ONLY</span><h1 data-t="title">Единый центр управления</h1><p data-t="lead">Admin управляет обеими линиями из одного экрана. Каждый диспетчер видит только свою линию.</p></section>
+  <section class="hero"><span class="eyebrow">STAFF ONLY</span><h1 data-t="title">Единый центр управления</h1><p data-t="lead">Admin и назначенные диспетчеры управляют обеими линиями из одного экрана. Owner-only настройки остаются только у администратора.</p></section>
   <section id="readinessBanner" class="readiness-banner" hidden></section>
   <section id="metrics" class="metrics"></section>
 
