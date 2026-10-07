@@ -87,6 +87,19 @@ export function id(prefix) { return \`\${prefix}_\${crypto.randomBytes(6).toStri
   );
 });
 
+patchFile('server.js',({replaceOnce})=>{
+  replaceOnce(
+    "import { ensureDb, readDb, resetDb } from './src/persistence.js';",
+    "import { ensureDb, readDb, resetDb, persistenceStats } from './src/persistence.js';",
+    'persistence telemetry import'
+  );
+  replaceOnce(
+    "await ensureDb();",
+    "await ensureDb();\\nconsole.log('PERSISTENCE_BACKEND',JSON.stringify(persistenceStats()));",
+    'startup persistence backend telemetry'
+  );
+});
+
 if(process.env.DATABASE_URL){
   try{require.resolve('pg',{paths:[root]});}
   catch{
