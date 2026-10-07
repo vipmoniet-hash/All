@@ -302,3 +302,15 @@ button,input,select,textarea{font-family:var(--font-ui)!important}
   }
 }
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+
+#bookingCard .price-breakdown{
+  margin:12px 0 0;padding:10px 0;border-top:1px solid #eadfca;border-bottom:1px solid #eadfca;
+  display:grid;gap:7px
+}
+#bookingCard .price-breakdown>div{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  color:#667085;font-size:12.5px
+}
+#bookingCard .price-breakdown b{color:#344054;font-size:13px}
+#bookingCard #bitFeeLine{color:#6b5427}
+#bookingCard #bitFeeLine b{color:#8b6423}
