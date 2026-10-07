@@ -49,3 +49,6 @@ if(fs.existsSync(clientJs)){
   fs.writeFileSync(clientJs,js);
   console.log('REMOVED childSeats from Taxi 1–4 client payload');
 }
+
+// Apply full Taxi 1–4 driver-safe fare audit after unpacking source data.
+require('child_process').execFileSync(process.execPath,[path.join(__dirname,'reprice-taxi4.cjs'),root],{stdio:'inherit'});
