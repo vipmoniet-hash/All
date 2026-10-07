@@ -88,3 +88,6 @@ require('child_process').execFileSync(process.execPath,[path.join(__dirname,'ver
 
 // Concurrent quote and booking spike gate.
 require('child_process').execFileSync(process.execPath,[path.join(__dirname,'verify-marketplace-load.mjs'),root],{stdio:'inherit'});
+
+// Unified VanClick staging HTTP isolation gate.
+require('child_process').execFileSync(process.execPath,[path.join(__dirname,'verify-unified-staging.mjs'),root],{stdio:'inherit'});
