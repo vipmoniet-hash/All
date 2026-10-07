@@ -95,3 +95,6 @@ require('child_process').execFileSync(process.execPath,[path.join(__dirname,'ver
 
 // Transactional Postgres persistence contract gate.
 require('child_process').execFileSync(process.execPath,[path.join(__dirname,'verify-postgres-state-store.mjs')],{stdio:'inherit'});
+
+// DATABASE_URL runtime persistence switch gate.
+require('child_process').execFileSync(process.execPath,[path.join(__dirname,'verify-postgres-runtime.cjs'),root],{stdio:'inherit'});
