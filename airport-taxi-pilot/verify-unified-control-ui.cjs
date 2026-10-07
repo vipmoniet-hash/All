@@ -10,8 +10,7 @@ for(const needle of [
   '/api/auth/status',
   '/api/auth/dispatch/login',
   "role==='admin'",
-  "role==='dispatcher_1_4'",
-  "role==='dispatcher_5_6'",
+  "role==='dispatcher'",
   '/api/unified/admin/state',
   '/api/unified/large/state',
   '/api/unified/large/orders/',
@@ -55,7 +54,6 @@ assert.ok(ui.includes("year:'numeric'"),'unified control dates must show full ye
 console.log('UNIFIED_CONTROL_UI_OK',JSON.stringify({
   roleLogin:true,
   adminView:true,
-  dispatcher1to4Routing:true,
-  dispatcher5to6View:true,
+  unifiedDispatcherView:true,
   largeActions:true
 }));
