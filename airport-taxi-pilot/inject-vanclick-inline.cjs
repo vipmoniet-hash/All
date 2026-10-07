@@ -103,3 +103,6 @@ require('child_process').execFileSync(process.execPath,[path.join(__dirname,'ver
 
 // Server-enforced admin / dispatcher scope isolation gate.
 require('child_process').execFileSync(process.execPath,[path.join(__dirname,'verify-unified-roles.mjs'),root],{stdio:'inherit'});
+
+// Large 5-6 dispatcher workflow gate.
+require('child_process').execFileSync(process.execPath,[path.join(__dirname,'verify-large-workflow.mjs'),root],{stdio:'inherit'});
