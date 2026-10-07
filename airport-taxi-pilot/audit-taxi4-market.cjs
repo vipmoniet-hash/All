@@ -112,3 +112,28 @@ const out={
   topBadRoadKm:badRoad.slice(0,40)
 };
 console.log('TAXI4_MARKET_AUDIT',JSON.stringify(out));
+
+const coordOf=x=>{
+  const lat=x.lat ?? x.latitude ?? x.Latitude;
+  const lon=x.lon ?? x.lng ?? x.longitude ?? x.Longitude ?? x.long;
+  if(!Number.isFinite(Number(lat))||!Number.isFinite(Number(lon))) return null;
+  return Number(lat).toFixed(6)+','+Number(lon).toFixed(6);
+};
+const rawByName=new Map(pricing.locations.map(x=>[x.nameHe,x]));
+const externalCovered=new Set(rows.filter(r=>r.benchmark!=null).map(r=>r.name));
+const exactCoordinateAliasCandidates=[];
+const groups=new Map();
+for(const x of pricing.locations){
+  const k=coordOf(x); if(!k) continue;
+  if(!groups.has(k)) groups.set(k,[]);
+  groups.get(k).push(x.nameHe);
+}
+for(const names of groups.values()){
+  if(names.length<2) continue;
+  const coveredNames=names.filter(n=>externalCovered.has(n));
+  const uncoveredNames=names.filter(n=>!externalCovered.has(n));
+  if(coveredNames.length && uncoveredNames.length){
+    exactCoordinateAliasCandidates.push({uncovered:uncoveredNames,covered:coveredNames});
+  }
+}
+console.log('TAXI4_COORD_ALIAS_CANDIDATES',JSON.stringify(exactCoordinateAliasCandidates));
