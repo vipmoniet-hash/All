@@ -10,7 +10,7 @@ await fs.rm(dataDir,{recursive:true,force:true});
 
 const child=spawn(process.execPath,['server.js'],{
   cwd:root,
-  env:{...process.env,PORT:String(port),TAXI4_DATA_DIR:dataDir,MARKETPLACE_AUTH_REQUIRED:'1',MARKETPLACE_ADMIN_PIN:'864200'},
+  env:{...process.env,PORT:String(port),TAXI4_DATA_DIR:dataDir,MARKETPLACE_AUTH_REQUIRED:'1',MARKETPLACE_ADMIN_PIN:'864200',MARKETPLACE_DISPATCH_PIN:'753100'},
   stdio:['ignore','pipe','pipe']
 });
 let output='';
@@ -43,9 +43,17 @@ try{
   assert.equal(x.r.status,401,'wrong dispatcher PIN is rejected');
 
   x=await call('/api/auth/dispatch/login',{method:'POST',body:{pin:'864200'}});
-  assert.equal(x.r.status,200,'dispatcher can log in');
+  assert.equal(x.r.status,200,'administrator can log in');
+  assert.equal(x.j.role,'admin','admin PIN receives admin role');
   const adminToken=x.j.token;
-  assert.ok(adminToken,'dispatcher login returns a token');
+  assert.ok(adminToken,'administrator login returns a token');
+
+  x=await call('/api/auth/dispatch/login',{method:'POST',body:{pin:'753100'}});
+  assert.equal(x.r.status,200,'dispatcher can log in');
+  assert.equal(x.j.role,'dispatch','dispatcher PIN receives dispatch role');
+  const dispatchToken=x.j.token;
+  x=await call('/api/dispatch/state',{token:dispatchToken});
+  assert.equal(x.r.status,200,'dispatcher role can manage dispatch state');
 
   x=await call('/api/dispatch/drivers/drv-001/pin',{method:'POST',token:adminToken,body:{pin:'4321'}});
   assert.equal(x.r.status,200,'dispatcher can configure driver PIN');
@@ -78,6 +86,7 @@ try{
 
   console.log('MARKETPLACE_V1_AUTH_E2E_OK',JSON.stringify({
     dispatchProtected:true,
+    adminAndDispatcherRoles:true,
     driverProtected:true,
     roleIsolation:true,
     logout:true
