@@ -32,7 +32,7 @@ assert.ok(dispatch.includes("Русский"),'dispatch UI must expose Russian l
 
 assert.ok(client.includes('נמצאת בבדיקת המוקד'),'client confirmation must describe staff review before publication');
 assert.ok(dispatch.includes('Отправить в общий пул'),'dispatch UI must expose explicit staff publication action');
-assert.ok(dispatch.includes("awaiting_dispatch:'Новый'"),'dispatch UI must label private incoming rides as new');
+assert.ok(dispatch.includes("awaiting_dispatch:dispatchLang==='he'?'חדש':'Новый'"),'dispatch UI must label private incoming rides in both languages');
 assert.ok(dispatch.includes('publicRideText'),'dispatch UI must build privacy-safe WhatsApp ride text');
 assert.ok(dispatch.includes('copyRideForGroup'),'dispatch UI must support one-tap single ride copy');
 assert.ok(dispatch.includes('exportVisibleForGroup'),'dispatch UI must support batch export of visible rides');
