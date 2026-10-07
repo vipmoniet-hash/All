@@ -1,0 +1,131 @@
+{
+  "version": "2026-10-07-safe-compact-aliases-v1",
+  "rule": "Exact Hebrew letters/digits after removing punctuation/spacing only; ambiguous compact keys excluded.",
+  "count": 31,
+  "aliases": {
+    "אלי-עד": {
+      "benchmark": 720,
+      "matchedCity": "אליעד"
+    },
+    "באקה-גת": {
+      "benchmark": 360,
+      "matchedCity": "באקה ג'ת"
+    },
+    "בית גן": {
+      "benchmark": 600,
+      "matchedCity": "בית ג'ן"
+    },
+    "בני עי\"ש": {
+      "benchmark": 215,
+      "matchedCity": "בני עיש"
+    },
+    "בסמ\"ה": {
+      "benchmark": 440,
+      "matchedCity": "בסמה"
+    },
+    "גבעת ח\"ן": {
+      "benchmark": 195,
+      "matchedCity": "גבעת חן"
+    },
+    "גבעת כ\"ח": {
+      "benchmark": 110,
+      "matchedCity": "גבעת כח"
+    },
+    "גבעת ניל\"י": {
+      "benchmark": 380,
+      "matchedCity": "גבעת נילי"
+    },
+    "דגניה א": {
+      "benchmark": 550,
+      "matchedCity": "דגניה א'"
+    },
+    "דגניה ב": {
+      "benchmark": 550,
+      "matchedCity": "דגניה ב'"
+    },
+    "דוב\"ב": {
+      "benchmark": 770,
+      "matchedCity": "דובב"
+    },
+    "חפצי-בה": {
+      "benchmark": 500,
+      "matchedCity": "חפציבה"
+    },
+    "יד רמב\"ם": {
+      "benchmark": 145,
+      "matchedCity": "יד רמבם"
+    },
+    "כפר ביל\"ו": {
+      "benchmark": 155,
+      "matchedCity": "כפר בילו"
+    },
+    "כפר הרא\"ה": {
+      "benchmark": 305,
+      "matchedCity": "כפר הראה"
+    },
+    "כפר הרי\"ף": {
+      "benchmark": 255,
+      "matchedCity": "כפר הריף"
+    },
+    "כפר חב\"ד": {
+      "benchmark": 130,
+      "matchedCity": "כפר חבד"
+    },
+    "כפר חסידים א": {
+      "benchmark": 420,
+      "matchedCity": "כפר חסידים א'"
+    },
+    "כפר חסידים ב": {
+      "benchmark": 420,
+      "matchedCity": "כפר חסידים ב'"
+    },
+    "כפר מל\"ל": {
+      "benchmark": 175,
+      "matchedCity": "כפר מלל"
+    },
+    "כרם מהר\"ל": {
+      "benchmark": 400,
+      "matchedCity": "כרם מהרל"
+    },
+    "מצפה אבי\"ב": {
+      "benchmark": 440,
+      "matchedCity": "מצפה אביב"
+    },
+    "נווה אטי\"ב": {
+      "benchmark": 900,
+      "matchedCity": "נווה אטיב"
+    },
+    "נח\"ל עוז": {
+      "benchmark": 410,
+      "matchedCity": "נחל עוז"
+    },
+    "ניל\"י": {
+      "benchmark": 200,
+      "matchedCity": "נילי"
+    },
+    "ניר ח\"ן": {
+      "benchmark": 345,
+      "matchedCity": "ניר חן"
+    },
+    "ניר עם": {
+      "benchmark": 370,
+      "matchedCity": "נירעם"
+    },
+    "נתיב הל\"ה": {
+      "benchmark": 260,
+      "matchedCity": "נתיב הלה"
+    },
+    "עין הנצי\"ב": {
+      "benchmark": 650,
+      "matchedCity": "עין הנציב"
+    },
+    "פעמי תש\"ז": {
+      "benchmark": 410,
+      "matchedCity": "פעמי תשז"
+    },
+    "תלמי ביל\"ו": {
+      "benchmark": 400,
+      "matchedCity": "תלמי בילו"
+    }
+  }
+}
