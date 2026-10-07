@@ -79,10 +79,15 @@ try{
   const smallId=x.j.orders[0].id;
 
   x=await json('/api/dispatch/state');
-  assert.equal(x.r.status,200,'staff state must remain available');
-  assert.ok(Array.isArray(x.j.largeOrders),'staff state must expose isolated large shadow orders');
-  assert.ok(x.j.largeOrders.some(o=>o.id===largeId),'staff must see the large shadow booking');
-  assert.ok(Array.isArray(x.j.unifiedOrders),'staff state must expose a common order contract');
+  assert.equal(x.r.status,200,'small dispatch state must remain available');
+  assert.ok(Array.isArray(x.j.orders)&&x.j.orders.every(o=>(o.serviceType||'taxi_1_4')==='taxi_1_4'),'small dispatch state stays isolated to Taxi 1-4');
+  assert.equal('largeOrders' in x.j,false,'small dispatch state must not expose Large 5-6');
+
+  x=await json('/api/unified/admin/state');
+  assert.equal(x.r.status,200,'unified admin state must remain available in auth-disabled staging');
+  assert.ok(Array.isArray(x.j.largeOrders),'admin state must expose isolated large shadow orders');
+  assert.ok(x.j.largeOrders.some(o=>o.id===largeId),'admin must see the large shadow booking');
+  assert.ok(Array.isArray(x.j.unifiedOrders),'admin state must expose a common order contract');
   assert.ok(x.j.unifiedOrders.some(o=>o.id===largeId&&o.serviceType==='large_5_6'),'common contract must include large 5-6');
   assert.ok(x.j.unifiedOrders.some(o=>o.id===smallId&&o.serviceType==='taxi_1_4'),'common contract must include Taxi 1-4');
 
