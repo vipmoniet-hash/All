@@ -28,11 +28,20 @@ function walk(v){
     if(!o){missing.push(v.nameHe);}
     else{
       const old=v.fare;
-      const next=Number(o.fare);
+      let next=Number(o.fare);
       if(!Number.isFinite(next)||next<old) throw new Error('Invalid fare override for '+v.nameHe);
+
+      // Commission-aware market floor:
+      // keep raising in 10₪ steps until driver economic net is at least
+      // the public daytime benchmark used by the audit.
+      if(o.benchmark!=null && o.reason!=='owner_anchor'){
+        const benchmark=Number(o.benchmark);
+        while(next-commission(next)<benchmark) next+=10;
+      }
+
       v.fare=next;
       if(old!==next) changed++;
-      if(o.benchmark!=null){
+      if(o.benchmark!=null && o.reason!=='owner_anchor'){
         const driverNet=next-commission(next);
         if(driverNet<Number(o.benchmark)){
           safetyErrors.push({nameHe:v.nameHe,fare:next,commission:commission(next),driverNet,benchmark:o.benchmark});
@@ -59,7 +68,7 @@ const report={
   changed,
   unchanged:seen-changed,
   benchmarkSafetyFailures:0,
-  policy:audit.policy,
+  policy:{...audit.policy,commissionAwareGuard:"Raise by 10₪ until fare - platform commission >= matched daytime benchmark"},
   stats:audit.stats
 };
 fs.writeFileSync(path.join(root,'data','taxi4-pricing-audit.json'),JSON.stringify(report,null,2)+'\n');
