@@ -56,6 +56,7 @@ require('child_process').execFileSync(process.execPath,[path.join(__dirname,'pat
 require('child_process').execFileSync(process.execPath,[path.join(__dirname,'patch-marketplace-v1.cjs'),root],{stdio:'inherit'});
 require('child_process').execFileSync(process.execPath,[path.join(__dirname,'patch-marketplace-resilience.cjs'),root],{stdio:'inherit'});
 require('child_process').execFileSync(process.execPath,[path.join(__dirname,'patch-unified-staging.cjs'),root],{stdio:'inherit'});
+require('child_process').execFileSync(process.execPath,[path.join(__dirname,'patch-unified-roles.cjs'),root],{stdio:'inherit'});
 require('child_process').execFileSync(process.execPath,[path.join(__dirname,'patch-postgres-runtime.cjs'),root],{stdio:'inherit'});
 require('child_process').execFileSync(process.execPath,['--check',path.join(root,'server.js')],{stdio:'inherit'});
 console.log('MARKETPLACE_SERVER_SYNTAX_OK');
