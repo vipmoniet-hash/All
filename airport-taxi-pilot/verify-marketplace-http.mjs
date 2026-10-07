@@ -44,6 +44,10 @@ const post=(pathname,body={})=>json(pathname,{
 
 try{
   await waitForHealth();
+  {
+    const r=await fetch(base+'/test');
+    assert.equal(r.status,404,'public test hub must be disabled by default');
+  }
 
   const bookingBody={
     passengers:2,
