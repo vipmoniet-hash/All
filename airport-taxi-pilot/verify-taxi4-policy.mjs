@@ -32,8 +32,20 @@ assert.equal(eveningEdge.fare, 180, '18:00 remains peak');
 const eveningAfter = pricing.quoteAirportRoute('ראשון לציון','נתב״ג','2026-10-05T18:01');
 assert.equal(eveningAfter.fare, 170, '18:01 leaves afternoon peak');
 
+const fridayBefore = pricing.quoteAirportRoute('ראשון לציון','נתב״ג','2026-10-09T15:59');
+assert.equal(fridayBefore.fare, 180, 'Friday 15:59 has peak only, Shabbat has not started');
+
+const fridayStart = pricing.quoteAirportRoute('ראשון לציון','נתב״ג','2026-10-09T16:00');
+assert.equal(fridayStart.fare, 205, 'Friday 16:00 starts commercial Shabbat and stacks with peak');
+
 const shabbat = pricing.quoteAirportRoute('ראשון לציון','נתב״ג','2026-10-10T11:00');
 assert.equal(shabbat.fare, 200, 'Shabbat +15%, rounded up to 5');
+
+const saturdayEnd = pricing.quoteAirportRoute('ראשון לציון','נתב״ג','2026-10-10T20:00');
+assert.equal(saturdayEnd.fare, 200, 'Saturday 20:00 remains inside commercial Shabbat');
+
+const saturdayAfter = pricing.quoteAirportRoute('ראשון לציון','נתב״ג','2026-10-10T20:01');
+assert.equal(saturdayAfter.fare, 170, 'Saturday 20:01 exits commercial Shabbat');
 
 const overlap = pricing.quoteAirportRoute('ראשון לציון','נתב״ג','2026-10-10T15:00');
 assert.equal(overlap.fare, 205, 'peak + Shabbat additive 20%, rounded up to 5');
@@ -49,6 +61,10 @@ console.log('TAXI4_POLICY_TEST_OK', JSON.stringify({
   afternoonPeak:afternoonPeak.fare,
   eveningEdge:eveningEdge.fare,
   eveningAfter:eveningAfter.fare,
+  fridayBefore:fridayBefore.fare,
+  fridayStart:fridayStart.fare,
   shabbat:shabbat.fare,
+  saturdayEnd:saturdayEnd.fare,
+  saturdayAfter:saturdayAfter.fare,
   overlap:overlap.fare
 }));
