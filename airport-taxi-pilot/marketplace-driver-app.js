@@ -1,13 +1,82 @@
 /* MARKETPLACE_V1_DRIVER_UI */
 const API=window.TAXI4_API_BASE||location.origin;
 const q=s=>document.querySelector(s),qa=s=>[...document.querySelectorAll(s)];
-let driverId=q('#driver')?.value||'',marketState=null,poolFilter='all';
+let driverId=sessionStorage.getItem('taxi4_driver_id')||q('#driver')?.value||'',marketState=null,poolFilter='all',authRequired=false,authToken=sessionStorage.getItem('taxi4_driver_token')||'';
 
 const esc=v=>String(v??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
 const pay=m=>m==='bit'?'Bit':'מזומן';
 const fmt=d=>new Date(d).toLocaleString('he-IL',{weekday:'short',day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
 const dayKey=d=>new Date(d).toLocaleDateString('en-CA',{timeZone:'Asia/Jerusalem'});
 const money=n=>Number(n||0).toLocaleString('he-IL',{maximumFractionDigits:2});
+
+function authFetch(url,opts={}){
+  const headers={...(opts.headers||{})};
+  if(authToken)headers.authorization='Bearer '+authToken;
+  return fetch(url,{...opts,headers});
+}
+function ensureDriverAuthUi(){
+  if(!q('#driverAuthOverlay')){
+    const wrap=document.createElement('div');
+    wrap.id='driverAuthOverlay';
+    wrap.className='auth-overlay hidden';
+    wrap.innerHTML=`<form id="driverAuthForm" class="auth-card">
+      <h2>כניסת נהג</h2>
+      <p>הזן מספר טלפון או קוד נהג ואת ה-PIN שקיבלת מ-VanClick.</p>
+      <input name="driverId" inputmode="tel" autocomplete="username" placeholder="טלפון / קוד נהג" required>
+      <input name="pin" type="password" inputmode="numeric" autocomplete="current-password" pattern="\\d{4,12}" placeholder="PIN" required>
+      <button class="buy">כניסה</button>
+      <div id="driverAuthStatus"></div>
+    </form>`;
+    document.body.appendChild(wrap);
+    q('#driverAuthForm').onsubmit=async e=>{
+      e.preventDefault();
+      const b=Object.fromEntries(new FormData(e.target));
+      q('#driverAuthStatus').textContent='';
+      try{
+        const r=await fetch(API+'/api/auth/driver/login',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(b)});
+        const j=await r.json();
+        if(!r.ok)throw Error(j.error);
+        authToken=j.token;driverId=j.driver.id;
+        sessionStorage.setItem('taxi4_driver_token',authToken);
+        sessionStorage.setItem('taxi4_driver_id',driverId);
+        let option=[...q('#driver').options].find(x=>x.value===driverId);
+        if(!option){option=document.createElement('option');option.value=driverId;option.textContent=j.driver.name||driverId;q('#driver').appendChild(option);}
+        q('#driver').value=driverId;
+        q('#driverAuthOverlay').classList.add('hidden');
+        q('#driverLogout')?.classList.remove('hidden');
+        q('#driver').classList.add('hidden');
+        await load(true);
+      }catch(err){q('#driverAuthStatus').textContent=err.message==='INVALID_CREDENTIALS'?'פרטי כניסה שגויים':err.message;}
+    };
+  }
+}
+function showDriverLogin(message=''){
+  ensureDriverAuthUi();
+  authToken='';
+  sessionStorage.removeItem('taxi4_driver_token');
+  q('#driverAuthStatus').textContent=message;
+  q('#driverAuthOverlay').classList.remove('hidden');
+}
+async function driverLogout(){
+  try{if(authToken)await authFetch(API+'/api/auth/logout',{method:'POST'});}catch{}
+  authToken='';driverId='';
+  sessionStorage.removeItem('taxi4_driver_token');sessionStorage.removeItem('taxi4_driver_id');
+  showDriverLogin();
+}
+async function initDriverAuth(){
+  ensureDriverAuthUi();
+  const r=await fetch(API+'/api/auth/status',{cache:'no-store'});
+  const j=await r.json();
+  authRequired=!!j.required;
+  if(!authRequired){
+    q('#driverLogout')?.classList.add('hidden');
+    return true;
+  }
+  q('#driver').classList.add('hidden');
+  q('#driverLogout')?.classList.remove('hidden');
+  if(!authToken){showDriverLogin();return false;}
+  return true;
+}
 
 function ensureMarketplaceUi(){
   if(!q('#marketplaceDevBadge')){
@@ -16,6 +85,14 @@ function ensureMarketplaceUi(){
     badge.className='marketplace-dev-badge';
     badge.textContent='VanClick Taxi 1–4 · סביבת בדיקה מבודדת';
     q('.shell')?.prepend(badge);
+  }
+  if(!q('#driverLogout')){
+    const logout=document.createElement('button');
+    logout.id='driverLogout';
+    logout.className='secondary hidden';
+    logout.textContent='יציאה';
+    logout.onclick=driverLogout;
+    q('.top-actions')?.appendChild(logout);
   }
   if(!q('#driverStats')){
     const stats=document.createElement('section');
@@ -127,16 +204,19 @@ function renderState(){
 }
 
 async function load(silent=false){
-  driverId=q('#driver')?.value||driverId;
+  if(!authRequired)driverId=q('#driver')?.value||driverId;
+  if(authRequired&&!authToken){showDriverLogin();return;}
   try{
-    const r=await fetch(`${API}/api/drivers/${encodeURIComponent(driverId)}/state`,{cache:'no-store'}),s=await r.json();
+    const r=await authFetch(`${API}/api/drivers/${encodeURIComponent(driverId)}/state`,{cache:'no-store'}),s=await r.json();
+    if(r.status===401&&authRequired){showDriverLogin('נדרש להתחבר מחדש');return;}
     if(!r.ok)throw Error(s.error);
     marketState=s;renderState();
   }catch(e){if(!silent)alert(e.message);}
 }
 
 async function post(url,body={}){
-  const r=await fetch(url,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body)}),j=await r.json();
+  const r=await authFetch(url,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body)}),j=await r.json();
+  if(r.status===401&&authRequired){showDriverLogin('נדרש להתחבר מחדש');throw Error('UNAUTHORIZED');}
   if(!r.ok)throw Error(j.error);return j;
 }
 
@@ -176,14 +256,18 @@ q('#topup').onsubmit=async e=>{
   try{await post(`${API}/api/drivers/${driverId}/topups`,b);q('#topupStatus').textContent='הבקשה נשלחה לאישור';e.target.reset();await load(true)}
   catch(err){q('#topupStatus').textContent=err.message}
 };
-q('#driver').onchange=()=>load();
+q('#driver').onchange=()=>{if(!authRequired)load();};
 q('#refresh').onclick=()=>load();
 qa('.tabs button').forEach(b=>b.onclick=()=>{
   qa('.tabs button').forEach(x=>x.classList.toggle('active',x===b));
   qa('.pane').forEach(x=>x.classList.toggle('active',x.id===b.dataset.tab));
 });
 
-ensureMarketplaceUi();
-q('#today').textContent=new Date().toLocaleDateString('he-IL',{weekday:'long',day:'2-digit',month:'2-digit',year:'numeric'});
-load();
-setInterval(()=>{if(document.visibilityState==='visible')load(true)},12000);
+async function boot(){
+  ensureMarketplaceUi();
+  q('#today').textContent=new Date().toLocaleDateString('he-IL',{weekday:'long',day:'2-digit',month:'2-digit',year:'numeric'});
+  const ready=await initDriverAuth();
+  if(ready)await load(true);
+}
+boot();
+setInterval(()=>{if(document.visibilityState==='visible'&&(!authRequired||authToken))load(true)},12000);
