@@ -1,13 +1,70 @@
 /* MARKETPLACE_V1_DISPATCH_UI */
 const API=window.TAXI4_API_BASE||location.origin;
 const q=s=>document.querySelector(s),qa=s=>[...document.querySelectorAll(s)];
-let state=null;
+let state=null,authRequired=false,authToken=sessionStorage.getItem('taxi4_dispatch_token')||'';
 
 const esc=v=>String(v??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
 const pay=m=>m==='bit'?'Bit':'наличные';
 const statusRu=s=>({awaiting_dispatch:'Новый legacy',pool:'Свободен',assigned:'Взят водителем',driver_enroute:'Водитель в пути',completed:'Завершён',cancelled:'Отменён'})[s]||s;
 const fmt=d=>new Date(d).toLocaleString('ru-RU',{weekday:'short',day:'2-digit',month:'2-digit',year:'2-digit',hour:'2-digit',minute:'2-digit'});
 const money=n=>Number(n||0).toLocaleString('ru-RU',{maximumFractionDigits:2});
+
+function authFetch(url,opts={}){
+  const headers={...(opts.headers||{})};
+  if(authToken)headers.authorization='Bearer '+authToken;
+  return fetch(url,{...opts,headers});
+}
+function ensureDispatchAuthUi(){
+  if(!q('#dispatchAuthOverlay')){
+    const wrap=document.createElement('div');
+    wrap.id='dispatchAuthOverlay';
+    wrap.className='auth-overlay hidden';
+    wrap.innerHTML=`<form id="dispatchAuthForm" class="auth-card">
+      <h2>Вход в диспетчерскую</h2>
+      <p>Введите PIN диспетчера VanClick Taxi 1–4.</p>
+      <input name="pin" type="password" inputmode="numeric" autocomplete="current-password" placeholder="PIN диспетчера" required>
+      <button>Войти</button>
+      <div id="dispatchAuthStatus"></div>
+    </form>`;
+    document.body.appendChild(wrap);
+    q('#dispatchAuthForm').onsubmit=async e=>{
+      e.preventDefault();
+      const b=Object.fromEntries(new FormData(e.target));
+      q('#dispatchAuthStatus').textContent='';
+      try{
+        const r=await fetch(API+'/api/auth/dispatch/login',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(b)});
+        const j=await r.json();
+        if(!r.ok)throw Error(j.error);
+        authToken=j.token;
+        sessionStorage.setItem('taxi4_dispatch_token',authToken);
+        q('#dispatchAuthOverlay').classList.add('hidden');
+        q('#dispatchLogout')?.classList.remove('hidden');
+        await load(true);
+      }catch(err){q('#dispatchAuthStatus').textContent=err.message==='INVALID_CREDENTIALS'?'Неверный PIN':err.message;}
+    };
+  }
+}
+function showDispatchLogin(message=''){
+  ensureDispatchAuthUi();
+  authToken='';
+  sessionStorage.removeItem('taxi4_dispatch_token');
+  q('#dispatchAuthStatus').textContent=message;
+  q('#dispatchAuthOverlay').classList.remove('hidden');
+}
+async function dispatchLogout(){
+  try{if(authToken)await authFetch(API+'/api/auth/logout',{method:'POST'});}catch{}
+  authToken='';sessionStorage.removeItem('taxi4_dispatch_token');showDispatchLogin();
+}
+async function initDispatchAuth(){
+  ensureDispatchAuthUi();
+  const r=await fetch(API+'/api/auth/status',{cache:'no-store'});
+  const j=await r.json();
+  authRequired=!!j.required;
+  if(!authRequired){q('#dispatchLogout')?.classList.add('hidden');return true;}
+  q('#dispatchLogout')?.classList.remove('hidden');
+  if(!authToken){showDispatchLogin();return false;}
+  return true;
+}
 
 function ensureMarketplaceUi(){
   if(!q('#marketplaceDevBadge')){
@@ -16,6 +73,20 @@ function ensureMarketplaceUi(){
     badge.className='marketplace-dev-badge';
     badge.textContent='VanClick Taxi 1–4 · изолированная тестовая среда';
     q('.shell')?.prepend(badge);
+  }
+  if(!q('#dispatchLogout')){
+    const logout=document.createElement('button');
+    logout.id='dispatchLogout';
+    logout.className='secondary hidden';
+    logout.textContent='Выйти';
+    logout.onclick=dispatchLogout;
+    q('.topbar')?.appendChild(logout);
+  }
+  const driverForm=q('#addDriver');
+  if(driverForm&&!driverForm.querySelector('[name="accessPin"]')){
+    const pin=document.createElement('input');
+    pin.name='accessPin';pin.type='password';pin.inputMode='numeric';pin.pattern='\\d{4,12}';pin.placeholder='PIN водителя (4–12 цифр)';pin.required=true;
+    driverForm.querySelector('button')?.before(pin);
   }
   if(!q('#attentionPanel')){
     const panel=document.createElement('section');
@@ -27,11 +98,13 @@ function ensureMarketplaceUi(){
 }
 
 async function post(path,body={}){
-  const r=await fetch(API+path,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body)}),j=await r.json();
+  const r=await authFetch(API+path,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body)}),j=await r.json();
+  if(r.status===401&&authRequired){showDispatchLogin('Нужно войти снова');throw Error('UNAUTHORIZED');}
   if(!r.ok)throw Error(j.error);return j;
 }
 async function message(id,kind){
-  const r=await fetch(`${API}/api/dispatch/orders/${id}/message/${kind}`),j=await r.json();
+  const r=await authFetch(`${API}/api/dispatch/orders/${id}/message/${kind}`),j=await r.json();
+  if(r.status===401&&authRequired){showDispatchLogin('Нужно войти снова');return;}
   if(!r.ok)return alert(j.error);
   const phone=String(j.phone||'').replace(/\D/g,'').replace(/^0/,'972');
   window.open(`https://wa.me/${phone}?text=${encodeURIComponent(j.message)}`,'_blank');
@@ -118,14 +191,16 @@ function render(){
 
   q('#topups').innerHTML=(state.topups||[]).filter(t=>t.status==='pending').map(t=>`<div class="topup"><b>${esc(t.driverId)}</b> · ${money(t.amount)} ₪ · ${pay(t.method)} <button onclick="approve('${t.id}')">Подтвердить</button><button class="danger" onclick="rejectT('${t.id}')">Отклонить</button></div>`).join('')||'<p class="muted">Нет ожидающих пополнений</p>';
 
-  q('#drivers').innerHTML=(state.drivers||[]).map(d=>`<div class="driver-row"><b>${esc(d.name)}</b> · ${esc(d.phone)} · ${esc(d.vehiclePlate||'—')} · баланс ${money(d.wallet)} ₪ · завершено ${Number(d.completedTrips||0)} · ${d.verified?'проверен':'НЕ проверен'} · ${d.active?'активен':'выключен'} ${!d.verified?`<button onclick="verifyDriver('${d.id}')">Проверить + включить</button>`:`<button onclick="toggleDriver('${d.id}',${d.active?'false':'true'})">${d.active?'Выключить':'Включить'}</button>`}</div>`).join('');
+  q('#drivers').innerHTML=(state.drivers||[]).map(d=>`<div class="driver-row"><b>${esc(d.name)}</b> · ${esc(d.phone)} · ${esc(d.vehiclePlate||'—')} · баланс ${money(d.wallet)} ₪ · завершено ${Number(d.completedTrips||0)} · ${d.verified?'проверен':'НЕ проверен'} · ${d.active?'активен':'выключен'} ${!d.verified?`<button onclick="verifyDriver('${d.id}')">Проверить + включить</button>`:`<button onclick="toggleDriver('${d.id}',${d.active?'false':'true'})">${d.active?'Выключить':'Включить'}</button>`} <button class="secondary" onclick="resetDriverPin('${d.id}')">Сменить PIN</button></div>`).join('');
 
   q('#log').innerHTML=(state.events||[]).slice(0,150).map(e=>`<div class="logrow"><b>${esc(e.type)}</b> · ${esc(e.orderId||'—')}<br><span class="muted">${fmt(e.at)} · ${esc(e.actor||'system')}</span></div>`).join('')||'<p class="muted">Журнал пуст</p>';
 }
 
 async function load(silent=false){
+  if(authRequired&&!authToken){showDispatchLogin();return;}
   try{
-    const r=await fetch(API+'/api/dispatch/state',{cache:'no-store'}),j=await r.json();
+    const r=await authFetch(API+'/api/dispatch/state',{cache:'no-store'}),j=await r.json();
+    if(r.status===401&&authRequired){showDispatchLogin('Нужно войти снова');return;}
     if(!r.ok)throw Error(j.error);
     state=j;render();
   }catch(e){if(!silent)alert(e.message);}
@@ -157,6 +232,7 @@ window.rejectT=async id=>{await post(`/api/dispatch/topups/${id}/reject`,{reject
 window.message=message;
 window.verifyDriver=async id=>{await post(`/api/dispatch/drivers/${id}/verification`,{verified:true,active:true});load(true)};
 window.toggleDriver=async(id,active)=>{await post(`/api/dispatch/drivers/${id}/verification`,{active});load(true)};
+window.resetDriverPin=async id=>{const pin=prompt('Новый PIN водителя (4–12 цифр)')||'';if(!/^\\d{4,12}$/.test(pin))return alert('PIN должен содержать 4–12 цифр');try{await post(`/api/dispatch/drivers/${id}/pin`,{pin});alert('PIN обновлён')}catch(e){alert(e.message)}};
 
 q('#filter').onchange=renderOrders;
 q('#refresh').onclick=()=>load();
@@ -170,6 +246,10 @@ qa('.tabs button').forEach(b=>b.onclick=()=>{
   qa('.pane').forEach(x=>x.classList.toggle('active',x.id===b.dataset.tab));
 });
 
-ensureMarketplaceUi();
-load();
-setInterval(()=>{if(document.visibilityState==='visible')load(true)},10000);
+async function boot(){
+  ensureMarketplaceUi();
+  const ready=await initDispatchAuth();
+  if(ready)await load(true);
+}
+boot();
+setInterval(()=>{if(document.visibilityState==='visible'&&(!authRequired||authToken))load(true)},10000);
