@@ -37,8 +37,20 @@ assert.equal(shabbat.fare, 200, 'Shabbat +15%, rounded up to 5');
 
 const overlap = pricing.quoteAirportRoute('ראשון לציון','נתב״ג','2026-10-10T15:00');
 assert.equal(overlap.fare, 205, 'peak + Shabbat additive 20%, rounded up to 5');
-assert.equal(overlap.commission, 20, 'commission recalculated from final fare');
-assert.equal(overlap.driverNet, 185, 'driver net from final fare');
+assert.equal(overlap.commission, 20, 'commission recalculated from transport fare');
+assert.equal(overlap.driverNet, 185, 'driver net from transport fare');
+
+const cashPayment = pricing.quoteAirportRoute('ראשון לציון','נתב״ג','2026-10-05T11:00','cash');
+assert.equal(cashPayment.transportFare,170,'cash transport fare');
+assert.equal(cashPayment.paymentSurcharge,0,'cash has no payment surcharge');
+assert.equal(cashPayment.fare,170,'cash final fare');
+
+const bitPayment = pricing.quoteAirportRoute('ראשון לציון','נתב״ג','2026-10-05T11:00','bit');
+assert.equal(bitPayment.transportFare,170,'Bit transport fare');
+assert.equal(bitPayment.paymentSurcharge,10,'Bit adds 10 NIS');
+assert.equal(bitPayment.fare,180,'Bit final fare');
+assert.equal(bitPayment.commission,10,'Bit surcharge does not change commission band');
+assert.equal(bitPayment.driverNet,170,'Bit surcharge remains with driver after platform commission');
 
 console.log('TAXI4_POLICY_TEST_OK', JSON.stringify({
   commissionCases:commissionCases.length,
@@ -50,5 +62,8 @@ console.log('TAXI4_POLICY_TEST_OK', JSON.stringify({
   eveningEdge:eveningEdge.fare,
   eveningAfter:eveningAfter.fare,
   shabbat:shabbat.fare,
-  overlap:overlap.fare
+  overlap:overlap.fare,
+  cashPayment:cashPayment.fare,
+  bitPayment:bitPayment.fare,
+  bitFee:bitPayment.paymentSurcharge
 }));
