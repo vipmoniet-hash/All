@@ -97,15 +97,18 @@ const safeTargets=new Map();
 for(const r of matched){
   const neighbor=neighborMedian(r);
   const marketReference=Math.max(Number(r.benchmark||0),Number(neighbor||0));
-  const marketFloor=marketFloorFare(marketReference);
+  const capMarketFloor=marketFloorFare(marketReference);
+  const raiseMarketFloor=marketFloorFare(r.benchmark);
   const kmFloor=driverFloorFare(r.km);
   safeTargets.set(r.name,{
     benchmark:r.benchmark,
     neighborMedian:neighbor,
     marketReference,
-    marketFloorFare:marketFloor,
+    capMarketFloorFare:capMarketFloor,
+    raiseMarketFloorFare:raiseMarketFloor,
     driverFloorFare:kmFloor,
-    safeTargetFare:Math.max(marketFloor,kmFloor)
+    safeTargetFare:Math.max(capMarketFloor,kmFloor),
+    requiredFloorFare:Math.max(raiseMarketFloor,kmFloor)
   });
 }
 
@@ -129,9 +132,9 @@ for(const r of rows){
         reduced.push({nameHe:v.nameHe,from:next,to:target.safeTargetFare,marketReference:target.marketReference,roadKm:r.km});
         next=target.safeTargetFare;
         controlledReductions++;
-      }else if(next<target.safeTargetFare){
-        raised.push({nameHe:v.nameHe,from:next,to:target.safeTargetFare,marketReference:target.marketReference,roadKm:r.km});
-        next=target.safeTargetFare;
+      }else if(next<target.requiredFloorFare){
+        raised.push({nameHe:v.nameHe,from:next,to:target.requiredFloorFare,benchmark:target.benchmark,roadKm:r.km});
+        next=target.requiredFloorFare;
         marketRaises++;
       }
     }else{
@@ -195,7 +198,7 @@ const report={
     ...audit.policy,
     decreases:true,
     controlledReductionGuard:"Matched fares are reduced only when more than 10% above the safe target.",
-    safeTargetGuard:"Safe target = max(road-km driver floor, commission-aware market floor from max(iCab/safe-alias benchmark, robust distance-neighbor median)).",
+    safeTargetGuard:"Reduction cap uses max(driver floor, commission-aware max(iCab/safe-alias benchmark, robust neighbor median)); raises use only driver floor plus direct/safe-alias benchmark.",
     commissionAwareGuard:"Final fare minus platform commission must remain at/above the matched benchmark.",
     safeAliasGuard:"Punctuation/spacing-only unambiguous aliases inherit the same market benchmark.",
     coordinateAliasGuard:"Exact stored coordinate duplicates may inherit the highest safe fare; explicit owner anchors never change."
