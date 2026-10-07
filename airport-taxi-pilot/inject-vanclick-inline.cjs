@@ -53,6 +53,7 @@ if(fs.existsSync(clientJs)){
 // Apply full Taxi 1–4 driver-safe fare audit after unpacking source data.
 require('child_process').execFileSync(process.execPath,[path.join(__dirname,'reprice-taxi4.cjs'),root],{stdio:'inherit'});
 require('child_process').execFileSync(process.execPath,[path.join(__dirname,'patch-taxi4-policy.cjs'),root],{stdio:'inherit'});
+require('child_process').execFileSync(process.execPath,[path.join(__dirname,'patch-marketplace-v1.cjs'),root],{stdio:'inherit'});
 
 // Policy regression gate: blocks deploys if surcharge or commission behavior regresses.
 require('child_process').execFileSync(process.execPath,[path.join(__dirname,'verify-taxi4-policy.mjs'),root],{stdio:'inherit'});
