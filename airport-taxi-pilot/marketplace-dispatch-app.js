@@ -543,5 +543,5 @@ window.addEventListener('message',event=>{
   unifiedParentLogin(event.data.phone,event.data.pin);
 });
 try{
-  if(window.parent&&window.parent!==window)window.parent.postMessage({type:'vanclick-unified-surface-ready',surface:'taxi_1_4'},UNIFIED_PARENT_ORIGIN);
+  if(window.parent&&window.parent!==window)window.parent.postMessage({type:'vanclick-unified-surface-ready',surface:'taxi_1_4',authenticated:Boolean(authToken),role:staffRole||''},UNIFIED_PARENT_ORIGIN);
 }catch{}
