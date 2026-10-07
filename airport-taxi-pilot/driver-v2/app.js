@@ -7,7 +7,7 @@ let deferredInstall=null;
 let toastTimer=null;
 
 const esc=v=>String(v??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
-const pay=m=>m==='bit'?'Bit':'מזומן';
+const pay=m=>m==='bit'?'Bit':'—';
 const fmt=d=>new Date(d).toLocaleString('he-IL',{weekday:'short',day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
 const enc=v=>encodeURIComponent(String(v||''));
 const waze=a=>`https://waze.com/ul?q=${enc(a)}&navigate=yes`;
@@ -142,10 +142,27 @@ window.completeTrip=async id=>{
 };
 q('#topup').onsubmit=async e=>{
   e.preventDefault();
-  const b=Object.fromEntries(new FormData(e.target));b.amount=Number(b.amount);
-  try{await post(`${API}/api/drivers/${driverId}/topups`,b);q('#topupStatus').textContent='הבקשה נשלחה לאישור';e.target.reset();await load();}
-  catch(err){q('#topupStatus').textContent=err.message}
+  const b=Object.fromEntries(new FormData(e.target));
+  b.amount=Number(b.amount);
+  b.method='bit';
+  try{
+    await post(`${API}/api/drivers/${driverId}/topups`,b);
+    q('#topupStatus').textContent='בקשת הטעינה נשלחה. היתרה תעודכן לאחר אימות תשלום ה-Bit.';
+    e.target.reset();
+    await load();
+  }catch(err){
+    q('#topupStatus').textContent=err.message;
+  }
 };
+q('#copyBit')?.addEventListener('click',async()=>{
+  const number='+972545718740';
+  try{
+    await navigator.clipboard.writeText(number);
+    toast('מספר ה-Bit הועתק');
+  }catch{
+    toast(number);
+  }
+});
 function switchTab(id){
   qa('[data-tab]').forEach(x=>x.classList.toggle('active',x.dataset.tab===id));
   qa('.pane').forEach(x=>x.classList.toggle('active',x.id===id));
