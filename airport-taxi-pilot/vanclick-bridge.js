@@ -75,6 +75,8 @@
       area:get('area'),
       tripAt:get('tripAt'),
       passengers:get('passengers')||'1',
+      largeLuggage:get('largeLuggage')||'0',
+      smallLuggage:get('smallLuggage')||'0',
       returnTrip:!!document.getElementById('returnToggle')?.checked,
       returnTripAt:document.querySelector('[name="returnTripAt"]')?.value||'',
       customerName:document.querySelector('[name="customerName"]')?.value||'',
@@ -88,13 +90,25 @@
   function largeTransferUrl(){
     const draft=collectVehicleSwitchDraft();
     try{sessionStorage.setItem(SWITCH_KEY,JSON.stringify(draft));}catch{}
-    const u=new URL(LARGE);
+    let target=LARGE;
+    try{
+      const raw=new URLSearchParams(location.search).get('vc_large');
+      if(raw){
+        const candidate=new URL(raw);
+        if(candidate.protocol==='https:'&&(candidate.hostname==='vanclick.co.il'||candidate.hostname.endsWith('.netlify.app')))target=candidate.href;
+      }
+    }catch{}
+    const u=new URL(target);
     u.searchParams.set('vc_vehicle','large');
     if(draft.direction)u.searchParams.set('vc_direction',draft.direction);
     if(draft.area)u.searchParams.set('vc_area',draft.area);
     if(draft.tripAt)u.searchParams.set('vc_tripAt',draft.tripAt);
     if(draft.passengers)u.searchParams.set('vc_passengers',draft.passengers);
-    u.searchParams.set('vc_return','https://vanclick-taxi4-marketplace-dev.onrender.com/client/?vehicle=small');
+    if(draft.largeLuggage)u.searchParams.set('vc_largeLuggage',draft.largeLuggage);
+    if(draft.smallLuggage)u.searchParams.set('vc_smallLuggage',draft.smallLuggage);
+    const back=new URL(location.href);
+    back.searchParams.set('vehicle','small');
+    u.searchParams.set('vc_return',back.origin+back.pathname);
     return u.toString();
   }
 
@@ -113,6 +127,9 @@
     if(area&&draft.area)area.value=draft.area;
     if(trip&&draft.tripAt)trip.value=draft.tripAt;
     if(p&&draft.passengers)p.value=Math.min(4,Number(draft.passengers)||1);
+    const lb=document.getElementById('largeLuggage'),sb=document.getElementById('smallLuggage');
+    if(lb&&draft.largeLuggage!=null)lb.value=draft.largeLuggage;
+    if(sb&&draft.smallLuggage!=null)sb.value=draft.smallLuggage;
     const dir=document.querySelector('.direction[data-direction="'+(draft.direction||'to')+'"]');
     if(dir)dir.click();
   }
@@ -130,7 +147,7 @@
     const passengers=document.getElementById('passengers');
     if(passengers){
       passengers.addEventListener('change',()=>{
-        if(Number(passengers.value)>=5) location.assign(LARGE);
+        if(Number(passengers.value)>=5) location.assign(largeTransferUrl());
       });
     }
 
