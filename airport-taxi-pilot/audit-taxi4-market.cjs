@@ -64,11 +64,14 @@ function neighborMedian(row){
 
 const analysed=matched.map(r=>{
   const n=neighborMedian(r);
+  const marketReference=Math.max(Number(r.benchmark||0),Number(n?.median||0))||null;
   return {...r,
     vsBenchmarkPct:pct(r.fare,r.benchmark),
     neighborMedian:n?.median??null,
     vsNeighborPct:n?.median?pct(r.fare,n.median):null,
     benchmarkVsNeighborPct:n?.median?pct(r.benchmark,n.median):null,
+    marketReference,
+    vsMarketReferencePct:marketReference?pct(r.fare,marketReference):null,
     neighborN:n?.n??0
   };
 });
@@ -83,9 +86,12 @@ const buckets={
 const suspiciousMatches=analysed
   .filter(r=>Math.abs(r.benchmarkVsNeighborPct??0)>35 && r.neighborN>=8)
   .sort((a,b)=>Math.abs(b.benchmarkVsNeighborPct)-Math.abs(a.benchmarkVsNeighborPct));
-const overpriced=analysed
+const rawSignalDisagreements=analysed
   .filter(r=>r.vsBenchmarkPct>20 || (r.vsNeighborPct??0)>25)
   .sort((a,b)=>Math.max(b.vsBenchmarkPct,b.vsNeighborPct??-999)-Math.max(a.vsBenchmarkPct,a.vsNeighborPct??-999));
+const overpriced=analysed
+  .filter(r=>(r.vsMarketReferencePct??0)>25)
+  .sort((a,b)=>(b.vsMarketReferencePct??-999)-(a.vsMarketReferencePct??-999));
 const underpriced=analysed
   .filter(r=>r.vsBenchmarkPct<0 || (r.vsNeighborPct??0)<-10)
   .sort((a,b)=>Math.min(a.vsBenchmarkPct,a.vsNeighborPct??999)-Math.min(b.vsBenchmarkPct,b.vsNeighborPct??999));
@@ -107,12 +113,14 @@ const out={
   safeAliasBenchmarks:Object.keys(safeAliases).length,
   buckets,
   suspiciousMatchCount:suspiciousMatches.length,
+  rawSignalDisagreementCount:rawSignalDisagreements.length,
   overpricedCount:overpriced.length,
   underpricedCount:underpriced.length,
   unmatchedHighCount:unmatchedHigh.length,
   unmatchedLowCount:unmatchedLow.length,
   badRoadKmCount:badRoad.length,
   topSuspiciousMatches:suspiciousMatches.slice(0,40),
+  topRawSignalDisagreements:rawSignalDisagreements.slice(0,40),
   topOverpriced:overpriced.slice(0,40),
   topUnderpriced:underpriced.slice(0,30),
   topUnmatchedHigh:unmatchedHigh.slice(0,30),
