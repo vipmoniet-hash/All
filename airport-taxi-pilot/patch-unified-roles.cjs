@@ -56,7 +56,13 @@ patchFile('src/service.js',({replaceOnce})=>{
     "    assignedDriverId:o.assignedDriverId??null,shadowOnly:Boolean(o.shadowOnly)",
     "  })).sort((a,b)=>new Date(a.tripAt)-new Date(b.tripAt));",
     "  const largeCounts={};for(const o of largeOrders)largeCounts[o.status]=(largeCounts[o.status]||0)+1;",
-    "  return {...small,largeOrders,largeCounts,unifiedOrders};",
+    "  const customerMap=new Map();",
+    "  const canonicalPhone=value=>{const digits=String(value||'').replace(/\\D/g,'');return digits.startsWith('972')&&digits.length>=11?'0'+digits.slice(3):digits;};",
+    "  for(const o of [...db.orders,...largeOrders]){const key=canonicalPhone(o.customerPhone);if(!key)continue;let p=customerMap.get(key);if(!p){p={customerKey:key,customerName:o.customerName||'',customerPhone:o.customerPhone||'',totalTrips:0,completedTrips:0,serviceTypes:[],firstTripAt:o.tripAt||null,lastTripAt:o.tripAt||null,orderIds:[]};customerMap.set(key,p);}p.totalTrips++;if(o.status==='completed')p.completedTrips++;if(!p.serviceTypes.includes(o.serviceType||'taxi_1_4'))p.serviceTypes.push(o.serviceType||'taxi_1_4');p.orderIds.push(o.id);if(o.tripAt&&(!p.firstTripAt||new Date(o.tripAt)<new Date(p.firstTripAt)))p.firstTripAt=o.tripAt;if(o.tripAt&&(!p.lastTripAt||new Date(o.tripAt)>=new Date(p.lastTripAt))){p.lastTripAt=o.tripAt;p.customerName=o.customerName||p.customerName;p.customerPhone=o.customerPhone||p.customerPhone;}}",
+    "  const customerProfiles=[...customerMap.values()].sort((a,b)=>new Date(b.lastTripAt||0)-new Date(a.lastTripAt||0));",
+    "  const serviceByOrder=new Map([...db.orders,...largeOrders].map(o=>[o.id,o.serviceType||'taxi_1_4']));",
+    "  const unifiedJournal=(db.events||[]).slice(-1000).map(e=>({...e,serviceType:serviceByOrder.get(e.orderId)||'system'})).reverse();",
+    "  return {...small,largeOrders,largeCounts,unifiedOrders,customerProfiles,unifiedJournal};",
     "}",
     ""
   ].join('\n');
