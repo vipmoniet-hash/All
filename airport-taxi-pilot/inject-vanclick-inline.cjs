@@ -75,3 +75,6 @@ require('child_process').execFileSync(process.execPath,[path.join(__dirname,'ver
 
 // High-volume marketplace UI regression gate.
 require('child_process').execFileSync(process.execPath,[path.join(__dirname,'verify-marketplace-ui.cjs'),root],{stdio:'inherit'});
+
+// Full isolated API workflow gate.
+require('child_process').execFileSync(process.execPath,[path.join(__dirname,'verify-marketplace-http.mjs'),root],{stdio:'inherit'});
