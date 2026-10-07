@@ -83,7 +83,7 @@ function renderOrders(){
         <div class="detail">Багаж<b>${o.largeLuggage||0} больших · ${o.smallLuggage||0} малых</b></div>
         <div class="detail">Цена<b>${money(o.fare??o.quotedFare)} ₪</b></div>
         <div class="detail">Комиссия<b>${money(o.commission??o.quotedCommission)} ₪</b></div>
-        <div class="detail">Водителю<b>${money((o.fare??o.quotedFare)-(o.commission??o.quotedCommission||0))} ₪</b></div>
+        <div class="detail">Водителю<b>${money((o.fare??o.quotedFare)-(o.commission??o.quotedCommission??0))} ₪</b></div>
         <div class="detail">Оплата<b>${pay(o.ridePaymentMethod)}</b></div>
         ${o.flightNumber?`<div class="detail">Рейс<b>✈ ${esc(o.flightNumber)} ${o.terminal?'· T'+esc(o.terminal):''}</b></div>`:''}
       </div>
