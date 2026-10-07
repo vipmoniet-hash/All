@@ -15,3 +15,5 @@
   .queue-card{padding:12px}.queue-actions{grid-template-columns:1fr 1fr}.queue-actions .fare-input{width:100%;min-height:46px}
   .danger-link{width:100%;min-height:46px}.compact-btn{min-height:44px}
 }
+
+.readiness-banner{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;border-radius:14px;padding:12px 14px;margin:2px 0 12px;border:1px solid #d8e1e3;background:#fff;font-size:13px}.readiness-banner strong{font-size:14px}.readiness-banner span{color:#5d7075;text-align:end}.readiness-banner.ready{background:#eef8f1;border-color:#b8d9c2}.readiness-banner.not-ready{background:#fff7df;border-color:#ead7a4}@media(max-width:760px){.readiness-banner{flex-direction:column}.readiness-banner span{text-align:start;line-height:1.45}}
