@@ -1,197 +1,304 @@
-/* VanClick 4-seat product branch — CRO + design system
-   Same customer-facing business language as VanClick, separate technical platform. */
+/* VanClick Taxi 1–4: exact customer-facing design system aligned to live vanclick.co.il */
 :root{
-  --vc-bg:#f6f7f5;--vc-bg2:#fbfcfb;--vc-surface:#fff;--vc-ink:#142028;--vc-muted:#5b6870;
-  --vc-green:#0b6b50;--vc-green2:#07513c;--vc-green-soft:#e8f4ef;--vc-success:#176b3a;
-  --vc-gold:#8c6a31;--vc-gold2:#b58a43;--vc-gold-light:#e3c378;--vc-gold-soft:#fff8e8;
-  --vc-line:#dce1e5;--vc-line2:#cbd2d8;--vc-shadow:0 18px 54px rgba(23,33,42,.085);
-  --vc-shadow-soft:0 8px 26px rgba(23,33,42,.055);--vc-r-xl:24px;--vc-r-lg:18px;--vc-r-md:13px;
+  --vc-blue:#1769e0;
+  --vc-blue-dark:#0e55bd;
+  --vc-blue-soft:#eaf3ff;
+  --vc-gold:#d6b06a;
+  --vc-gold-deep:#a77d3d;
+  --vc-gold-light:#efd08b;
+  --vc-amber:#b98222;
+  --vc-success:#128a50;
+  --vc-danger:#c2414b;
+  --vc-bg:#f6f8fb;
+  --vc-surface:#ffffff;
+  --vc-surface-2:#f0f4f8;
+  --vc-ink:#101828;
+  --vc-muted:#667085;
+  --vc-line:#dce4ed;
+  --vc-line-strong:#c8d3df;
+  --vc-warm:#f1f4f2;
+  --vc-warm-line:#e2ddd4;
+  --vc-charcoal:#1d1c1a;
+  --vc-card-line:#d3cdc1;
+  --vc-shadow:0 18px 50px rgba(20,45,77,.10);
+  --vc-shadow-soft:0 8px 24px rgba(20,45,77,.07);
+  --font-base:Arial,"Noto Sans Hebrew","Helvetica Neue",sans-serif;
+  --font-ui:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Noto Sans Hebrew",Arial,sans-serif;
   color-scheme:light!important;
 }
 *{box-sizing:border-box}
 html{background:var(--vc-bg)!important;color-scheme:light!important;scroll-behavior:smooth}
 body{
-  margin:0!important;color:var(--vc-ink)!important;
-  font-family:system-ui,-apple-system,"Segoe UI",Arial,sans-serif!important;
-  background:radial-gradient(circle at 50% -18%,rgba(184,137,63,.065),transparent 33rem),
-             linear-gradient(180deg,var(--vc-bg2) 0%,var(--vc-bg) 55%,#f1efe9 100%)!important;
-  -webkit-font-smoothing:antialiased;
+  margin:0!important;background:var(--vc-bg)!important;color:var(--vc-ink)!important;
+  font:500 16px/1.5 var(--font-base)!important;overflow-x:hidden!important;-webkit-font-smoothing:antialiased
 }
-body::before{content:"";position:fixed;inset:0 0 auto;height:3px;z-index:10001;background:linear-gradient(90deg,var(--vc-green) 0 72%,var(--vc-gold-light) 72% 100%)}
-a{color:var(--vc-green2)}
-button,input,select,textarea{font:inherit}
-:focus-visible{outline:3px solid var(--vc-gold2)!important;outline-offset:3px!important}
+body::before{display:none!important}
+a{color:var(--vc-blue)}
+button,input,select,textarea{font-family:var(--font-ui)!important}
+:focus-visible{outline:3px solid rgba(23,105,224,.35)!important;outline-offset:2px!important}
 
-/* Header — same VanClick brand grammar */
-.vc-site-header{position:sticky!important;top:0!important;z-index:9999!important;height:auto!important;background:rgba(255,255,255,.96)!important;border-bottom:1px solid rgba(23,33,42,.08)!important;box-shadow:0 7px 24px rgba(23,33,42,.055)!important;backdrop-filter:blur(16px)!important}
-.vc-header-inner{max-width:1180px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;gap:12px}
-.vc-brand{display:flex;align-items:center;gap:9px;text-decoration:none;color:var(--vc-ink)!important}
-.vc-brand-mark{width:34px;height:34px;flex:0 0 34px;display:grid;place-items:center;border-radius:10px;background:linear-gradient(145deg,#202a33,#111920);color:var(--vc-gold-light);border:1px solid rgba(23,33,42,.12);box-shadow:0 5px 15px rgba(23,33,42,.13);font-weight:900}
-.vc-brand-copy{display:grid;line-height:1.08}.vc-brand-copy strong{font-size:16px;font-weight:900;letter-spacing:.01em}.vc-brand-copy small{margin-top:4px;color:var(--vc-muted);font-size:11.5px;font-weight:650}
-.vc-header-spacer{flex:1}.vc-header-nav{display:flex;align-items:center;gap:6px}.vc-header-nav a{min-height:38px;padding:7px 10px;display:inline-flex;align-items:center;border-radius:11px;text-decoration:none;color:#46525e!important;font-size:13px;font-weight:760}
-.vc-header-nav a:hover{background:#f2f3f2;color:var(--vc-ink)!important}.vc-header-large{color:var(--vc-green2)!important;background:var(--vc-green-soft)!important;border:1px solid #b9d9cd!important}
-
-/* Hide only legacy marketing hero; booking itself is moved into the new CRO shell */
-.vc-original-hero{display:none!important}
-
-/* Primary conversion surface */
-.vc-cro-hero{padding:34px 0 24px!important;background:transparent!important}
-.vc-cro-container{max-width:1180px;margin:0 auto;padding:0 16px}
-.vc-cro-grid{display:grid;grid-template-columns:minmax(0,1.06fr) minmax(390px,.94fr);gap:18px;align-items:stretch}
-.vc-cro-copy{position:relative;overflow:hidden;padding:30px;background:#fff;border:1px solid var(--vc-line);border-radius:26px;box-shadow:var(--vc-shadow)}
-.vc-eyebrow{display:inline-flex;align-items:center;min-height:30px;margin:0 0 13px;padding:6px 11px;color:#6f531f;background:var(--vc-gold-soft);border:1px solid #ead29d;border-radius:999px;font-size:12px;font-weight:850;letter-spacing:.01em}
-.vc-cro-copy h1{max-width:690px;margin:0 0 13px;color:var(--vc-ink)!important;font-size:clamp(38px,4.3vw,56px)!important;font-weight:850!important;line-height:1.02!important;letter-spacing:-.046em!important;text-wrap:balance}
-.vc-cro-lede{max-width:690px;margin:0 0 17px;color:#4b5864!important;font-size:16.5px!important;line-height:1.64!important}
-.vc-promise{display:grid;gap:3px;margin:0 0 14px;padding:13px 15px;background:#fff;border:1px solid #dfe4e8;border-inline-start:4px solid var(--vc-green);border-radius:14px;box-shadow:0 7px 22px rgba(23,32,42,.045)}
-.vc-promise strong{font-size:17px;color:var(--vc-ink)}.vc-promise span{font-size:13.5px;color:#596673;line-height:1.45}
-.vc-proof-row{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;padding:7px;background:#f6f7f7;border:1px solid #e6e9ec;border-radius:16px}
-.vc-proof-row span{min-height:43px;padding:8px;display:flex;align-items:center;justify-content:center;text-align:center;background:#fff;border-radius:11px;color:#34414d;font-size:12px;font-weight:780}
-.vc-size-switch{margin-top:14px;padding:5px;display:grid;grid-template-columns:1fr 1fr;gap:5px;background:#f0f2f3;border:1px solid var(--vc-line);border-radius:15px}
-.vc-size-current,.vc-size-large{min-height:48px;padding:8px 10px;display:flex;align-items:center;justify-content:center;gap:6px;border-radius:11px;text-decoration:none;font-size:13px;font-weight:850}
-.vc-size-current{background:linear-gradient(135deg,#e8f4ef,#cfe8de);color:#18362d!important;border:1px solid #b9d9cd}
-.vc-size-large{color:#52606c!important;border:1px solid transparent}.vc-size-large:hover{background:#fff;color:var(--vc-ink)!important;border-color:#dce1e5}
-.vc-booking-slot{min-width:0}
-.vc-booking-slot>*{height:100%}
-.vc-booking-slot form,.vc-booking-slot .booking-card,.vc-booking-slot .calculator,.vc-booking-slot .quote-card,.vc-booking-slot [class*="booking"],.vc-booking-slot [class*="quote"],.vc-booking-slot [class*="calculator"]{
-  background:#fff!important;border:1px solid var(--vc-line)!important;border-radius:26px!important;box-shadow:var(--vc-shadow)!important
+/* Header = VanClick */
+.vc-site-header{
+  position:sticky!important;top:0!important;z-index:9999!important;background:rgba(255,255,255,.96)!important;
+  color:var(--vc-ink)!important;border:0!important;border-bottom:1px solid rgba(20,32,40,.08)!important;
+  box-shadow:0 6px 24px rgba(18,32,39,.05)!important;backdrop-filter:blur(14px)
 }
-.vc-booking-label{margin:0 0 8px;color:#6f531f;font-size:11px;font-weight:900;letter-spacing:.08em}
-.vc-booking-title{margin:0 0 4px;color:var(--vc-ink);font-size:22px;font-weight:850}
-.vc-booking-hint{margin:0 0 14px;color:#596673;font-size:13.5px;line-height:1.5}
-
-/* Existing funnel normalization */
-main input,main select,main textarea{min-height:50px!important;width:100%!important;color:var(--vc-ink)!important;background:#fff!important;border:1px solid #d7dde2!important;border-radius:12px!important;box-shadow:0 1px 0 rgba(23,32,42,.015)!important;color-scheme:light!important}
-main input::placeholder,main textarea::placeholder{color:#7b8792!important}
-main input:focus,main select:focus,main textarea:focus{border-color:var(--vc-gold2)!important;box-shadow:0 0 0 3px rgba(181,138,67,.10)!important;outline:none!important}
-main label{color:#34414d!important;font-size:13.5px!important;font-weight:740!important}
-main button,main .btn,main [role="button"]{border-radius:13px!important;font-family:inherit!important;font-weight:850!important}
-main button[type="submit"],main .btn-primary,main .primary-cta,main [class*="primary"][role="button"]{background:var(--vc-green)!important;color:#fff!important;border:1px solid var(--vc-green)!important;box-shadow:0 7px 18px rgba(23,107,58,.14)!important}
-main button[type="submit"]:hover,main .btn-primary:hover,main .primary-cta:hover{background:var(--vc-green2)!important}
-main .tabs,main .segmented,main [class*="switch"],main [class*="tabs"]{background:#f0f2f3!important;border:1px solid var(--vc-line)!important;border-radius:15px!important}
-main .tabs .active,main .segmented .active,main [class*="switch"] .active,main [class*="tabs"] .active{background:linear-gradient(135deg,#e8f4ef,#cfe8de)!important;color:#18362d!important;border-color:#b9d9cd!important;box-shadow:0 3px 10px rgba(11,107,80,.10)!important}
-main [class*="price"]{border-radius:15px!important}main [class*="price"] strong,main [class*="price"] .value,.vc-price-accent{color:#75551f!important}
-main .card,main [class*="card"],main .panel,main [class*="panel"],main .box,main [class*="box"]{border-color:var(--vc-line)!important}
-.vc-booking-slot>div{border-radius:26px!important}
-
-/* CRO supporting content */
-.vc-cro-band{padding:18px 0}
-.vc-cro-band-inner{max-width:1080px;margin:0 auto;padding:18px 22px;display:flex;align-items:center;justify-content:space-between;gap:20px;background:#fff;border:1px solid #e6dfd1;border-radius:18px;box-shadow:0 10px 28px rgba(23,32,42,.05)}
-.vc-cro-band-copy{display:grid;gap:4px}.vc-cro-band-copy strong{font-size:20px;color:var(--vc-ink)}.vc-cro-band-copy span{color:#596673;font-size:13.5px;line-height:1.5}
-.vc-cro-band a{min-height:46px;padding:10px 15px;display:inline-flex;align-items:center;justify-content:center;border-radius:12px;text-decoration:none;background:var(--vc-green-soft);color:var(--vc-green2)!important;border:1px solid #b9d9cd;font-weight:850;white-space:nowrap}
-.vc-section{padding:38px 0}.vc-section-head{max-width:760px;margin:0 auto 20px;text-align:center}.vc-section-kicker{display:inline-block;margin-bottom:7px;color:#6f531f;font-size:11px;font-weight:900;letter-spacing:.1em}.vc-section h2{margin:0 0 8px;color:var(--vc-ink);font-size:30px;line-height:1.1}.vc-section-head p{margin:0;color:#596673;line-height:1.6}
-.vc-trust-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;max-width:1080px;margin:0 auto}
-.vc-trust-card{padding:19px;display:grid;grid-template-columns:40px minmax(0,1fr);column-gap:12px;row-gap:4px;align-items:start;background:#fff;border:1px solid var(--vc-line);border-radius:18px;box-shadow:var(--vc-shadow-soft)}
-.vc-trust-icon{width:38px;height:38px;display:grid;place-items:center;color:#6f531f;background:var(--vc-gold-soft);border:1px solid #ead29d;border-radius:11px;font-weight:900}
-.vc-trust-card strong{margin:1px 0 0;color:var(--vc-ink);font-size:17px}.vc-trust-card p{grid-column:2;margin:0;color:#586571;font-size:13.8px;line-height:1.52}
-.vc-steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;max-width:980px;margin:0 auto}.vc-step{position:relative;padding:21px;background:#fff;border:1px solid var(--vc-line);border-radius:18px;box-shadow:var(--vc-shadow-soft)}.vc-step-num{width:34px;height:34px;margin-bottom:12px;display:grid;place-items:center;border-radius:10px;background:var(--vc-green-soft);color:var(--vc-green2);font-weight:900}.vc-step strong{display:block;margin-bottom:6px;font-size:17px;color:var(--vc-ink)}.vc-step p{margin:0;color:#586571;font-size:13.7px;line-height:1.55}
-.vc-review-panel{max-width:940px;margin:0 auto;padding:24px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:18px;align-items:center;background:#fff;border:1px solid var(--vc-line);border-radius:22px;box-shadow:var(--vc-shadow-soft)}.vc-review-panel strong{display:block;margin-bottom:5px;font-size:20px}.vc-review-panel p{margin:0;color:#596673;font-size:14px;line-height:1.55}.vc-review-panel a{min-height:46px;padding:10px 16px;display:inline-flex;align-items:center;justify-content:center;border-radius:12px;text-decoration:none;background:#f2f4f5;border:1px solid #dfe4e8;color:var(--vc-ink)!important;font-weight:800}
-.vc-large-card{max-width:1080px;margin:0 auto;padding:24px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:20px;align-items:center;background:linear-gradient(145deg,#fff,#fbfaf5);border:1px solid #e6dfd1;border-radius:22px;box-shadow:var(--vc-shadow-soft)}.vc-large-card h3{margin:0 0 6px;font-size:24px}.vc-large-card p{margin:0;color:#596673;line-height:1.55}.vc-large-card a{min-height:48px;padding:11px 17px;display:inline-flex;align-items:center;justify-content:center;border-radius:13px;text-decoration:none;background:linear-gradient(135deg,#efd18a,#d7ae60);color:#1a222b!important;border:1px solid #c99c4c;font-weight:850}
-
-.vc-cro-footer{padding:34px 16px 96px;background:#efeee9;border-top:1px solid rgba(23,32,42,.08);color:#4e5a66}.vc-cro-footer-inner{max-width:1080px;margin:0 auto;display:flex;justify-content:space-between;gap:18px;align-items:flex-start}.vc-cro-footer strong{color:var(--vc-ink)}.vc-cro-footer small{display:block;margin-top:6px;max-width:640px;line-height:1.55}.vc-cro-footer a{font-weight:800;color:var(--vc-green2)!important}
-.vc-mobile-sticky{display:none}
-.vc-route-warning{margin:10px 0;padding:10px 12px;border-radius:12px;background:var(--vc-green-soft);border:1px solid #b9d9cd;color:#18493b;font-size:13px;font-weight:750}
-
-@media(max-width:980px){.vc-cro-grid{grid-template-columns:1fr}.vc-booking-slot{max-width:760px;width:100%;margin:0 auto}.vc-header-nav a:not(.vc-header-large){display:none}}
-@media(max-width:760px){
-  body{padding-bottom:72px!important}.vc-header-inner{min-height:58px;padding:8px 12px}.vc-brand-mark{width:31px;height:31px;flex-basis:31px}.vc-brand-copy strong{font-size:14px}.vc-brand-copy small{font-size:10.5px}.vc-header-large{min-height:34px!important;padding:6px 9px!important;font-size:11px!important}
-  .vc-cro-hero{padding:12px 0 10px!important}.vc-cro-container{padding:0 12px}.vc-cro-grid{gap:10px}.vc-cro-copy{padding:18px 17px;border-radius:20px;box-shadow:0 10px 28px rgba(23,32,42,.06)}.vc-eyebrow{margin-bottom:9px;padding:5px 9px;font-size:10.8px}.vc-cro-copy h1{font-size:29px!important;line-height:1.06!important;letter-spacing:-.034em!important}.vc-cro-lede{font-size:15px!important;line-height:1.5!important;margin-bottom:11px}.vc-promise{padding:11px 12px;margin-bottom:10px}.vc-promise strong{font-size:15.5px}.vc-promise span{font-size:12.7px}.vc-proof-row{grid-template-columns:1fr 1fr;gap:5px;padding:5px;border-radius:14px}.vc-proof-row span{min-height:38px;padding:7px 5px;font-size:12.3px;border-radius:10px}.vc-size-switch{margin-top:10px}.vc-size-current,.vc-size-large{min-height:44px;font-size:12.5px}
-  .vc-booking-slot form,.vc-booking-slot .booking-card,.vc-booking-slot .calculator,.vc-booking-slot .quote-card,.vc-booking-slot [class*="booking"],.vc-booking-slot [class*="quote"],.vc-booking-slot [class*="calculator"],.vc-booking-slot>div{border-radius:20px!important;box-shadow:0 9px 26px rgba(23,32,42,.055)!important}
-  main input,main select,main textarea{font-size:16px!important;min-height:50px!important}
-  .vc-cro-band{padding:8px 12px}.vc-cro-band-inner{padding:14px 15px;display:grid;gap:12px;border-radius:16px}.vc-cro-band-copy strong{font-size:17px}.vc-cro-band a{width:100%}
-  .vc-section{padding:28px 12px}.vc-section h2{font-size:26px}.vc-section-head{margin-bottom:15px}.vc-trust-grid,.vc-steps{grid-template-columns:1fr;gap:8px}.vc-trust-card{padding:14px;border-radius:15px}.vc-trust-card strong{font-size:16px}.vc-trust-card p{font-size:13.2px}.vc-step{padding:16px;border-radius:15px}.vc-review-panel,.vc-large-card{grid-template-columns:1fr;padding:17px;border-radius:18px}.vc-review-panel a,.vc-large-card a{width:100%}
-  .vc-cro-footer{padding:28px 13px 90px}.vc-cro-footer-inner{display:grid}
-  .vc-mobile-sticky{position:fixed;display:block;z-index:10000;left:0;right:0;bottom:0;padding:7px 9px calc(7px + env(safe-area-inset-bottom));background:rgba(255,255,255,.95);border-top:1px solid rgba(23,32,42,.07);box-shadow:0 -8px 26px rgba(23,32,42,.075);backdrop-filter:blur(14px)}
-  .vc-mobile-sticky button{width:min(100%,560px);margin:0 auto;display:block;min-height:48px;border:1px solid var(--vc-green)!important;border-radius:15px!important;background:var(--vc-green)!important;color:#fff!important;font-weight:850!important}
+.vc-header-inner{max-width:1100px;margin:0 auto;min-height:70px;padding:0 16px;display:flex;align-items:center;gap:16px}
+.vc-brand{display:flex;align-items:center;gap:10px;text-decoration:none!important;color:var(--vc-ink)!important}
+.vc-brand-mark{
+  width:38px;height:38px;display:grid;place-items:center;flex:0 0 38px;border-radius:10px;
+  background:var(--vc-charcoal)!important;color:#fff!important;border:1px solid var(--vc-charcoal)!important;
+  box-shadow:0 5px 15px rgba(23,105,224,.20)!important;font:950 16px/1 var(--font-ui)!important
 }
-@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
-
-/* v3: direct normalization of the live calculator and booking steps */
-.vc-existing-order{
-  min-height:38px;padding:7px 10px;border:0;background:transparent;color:#46525e;border-radius:11px;font-weight:760;cursor:pointer
+.vc-brand-copy{display:grid;line-height:1.07}.vc-brand-copy strong{font:900 17px/1.08 var(--font-ui)!important;color:var(--vc-ink)}
+.vc-brand-copy small{margin-top:4px;color:var(--vc-muted)!important;font:700 11.5px/1.1 var(--font-ui)!important}
+.vc-header-spacer{flex:1}
+.vc-header-nav{display:flex;align-items:center;gap:6px}
+.vc-header-nav a,.vc-existing-order{
+  min-height:40px;padding:0 11px;display:inline-flex;align-items:center;justify-content:center;border-radius:10px;
+  border:0;background:transparent;color:#344054!important;text-decoration:none!important;font:800 13px/1 var(--font-ui)!important;cursor:pointer
 }
-.vc-existing-order:hover{background:#f2f3f2;color:var(--vc-ink)}
-.vc-booking-slot{background:transparent!important;border:0!important;box-shadow:none!important}
-.vc-booking-label{margin-bottom:5px}
-.vc-booking-title{font-size:24px}
-.vc-booking-hint{margin-bottom:12px}
+.vc-header-nav a:hover,.vc-existing-order:hover{background:#f3f6fa!important;color:var(--vc-ink)!important}
+.vc-header-large{border:1px solid #cfe0f8!important;background:#fff!important;color:var(--vc-blue)!important}
+.vc-header-phone{color:var(--vc-ink)!important;font-weight:900!important}
+
+/* Hero */
+.vc-cro-hero{padding:48px 0 54px!important;background:var(--vc-bg)!important}
+.vc-cro-container{max-width:1100px;margin:0 auto;padding:0 16px}
+.vc-cro-grid{display:grid;grid-template-columns:minmax(0,.92fr) minmax(420px,1.08fr);gap:26px;align-items:start}
+.vc-cro-copy{
+  padding:8px 0 0!important;background:transparent!important;border:0!important;box-shadow:none!important
+}
+.vc-eyebrow{
+  display:inline-flex;align-items:center;min-height:31px;margin:0 0 14px;padding:7px 9px;
+  background:rgba(255,255,255,.82)!important;color:var(--vc-blue)!important;border:1px solid #cfe0f8!important;
+  border-radius:999px!important;font:950 11px/1 var(--font-base)!important;letter-spacing:.05em
+}
+.vc-cro-copy h1{
+  max-width:650px;margin:0 0 16px;color:var(--vc-ink)!important;font:950 clamp(38px,5vw,64px)/.99 var(--font-base)!important;
+  letter-spacing:-.042em!important;text-wrap:balance
+}
+.vc-cro-lede{
+  max-width:620px;margin:0 0 18px;color:#475467!important;font:500 17px/1.68 var(--font-base)!important
+}
+.vc-proof-row{display:flex;flex-wrap:wrap;gap:7px;margin:0 0 14px;padding:0!important;background:transparent!important;border:0!important}
+.vc-proof-row span{
+  min-height:auto!important;padding:6px 9px!important;background:rgba(255,255,255,.8)!important;color:#475467!important;
+  border:1px solid #d8e2ee!important;border-radius:999px!important;font:780 11.5px/1.2 var(--font-base)!important
+}
+.vc-size-switch{
+  margin-top:14px;padding:0!important;display:flex;flex-wrap:wrap;gap:8px;background:transparent!important;border:0!important
+}
+.vc-size-current,.vc-size-large{
+  min-height:42px;padding:0 12px;display:inline-flex;align-items:center;justify-content:center;border-radius:11px!important;
+  font:850 13px/1.2 var(--font-ui)!important;text-decoration:none!important
+}
+.vc-size-current{background:var(--vc-blue-soft)!important;color:var(--vc-blue-dark)!important;border:1px solid #cfe0f8!important}
+.vc-size-large{background:#fff!important;color:#344054!important;border:1px solid var(--vc-line)!important;box-shadow:none!important}
+.vc-size-large:hover{border-color:#b9c8d8!important;color:var(--vc-ink)!important}
+
+/* Calculator panel = live VanClick card */
+.vc-booking-slot{
+  min-width:0;padding:0!important;background:#fff!important;border:1px solid #d9e2ec!important;border-radius:20px!important;
+  box-shadow:var(--vc-shadow)!important;overflow:visible
+}
+.vc-booking-label,.vc-booking-title,.vc-booking-hint{display:none!important}
 #quoteCard.vc-quote-card{
-  display:block!important;margin:0!important;padding:18px!important;background:#fff!important;
-  border:1px solid var(--vc-line)!important;border-radius:20px!important;box-shadow:none!important
+  display:block!important;margin:0!important;padding:25px!important;background:#fff!important;color:#1a1a1a!important;
+  border:1px solid var(--vc-card-line)!important;border-radius:24px!important;box-shadow:0 18px 48px rgba(24,22,19,.10)!important
 }
-#quoteCard .quote-head{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:12px!important;margin:0 0 13px!important}
+#quoteCard .quote-head{
+  display:flex!important;align-items:center!important;justify-content:space-between!important;gap:10px!important;
+  margin:0 0 14px!important;padding:0 0 15px!important;border-bottom:1px solid #e6e1d8!important
+}
 #quoteCard .quote-head>div{display:flex;align-items:center;gap:10px}
-#quoteCard .quote-head small{display:block;color:#7a8791!important;font-size:12px!important}
-#quoteCard .quote-head h2{margin:2px 0 0!important;color:var(--vc-ink)!important;font-size:20px!important;line-height:1.15!important}
-#quoteCard .step-dot{width:36px!important;height:36px!important;display:grid!important;place-items:center!important;border-radius:11px!important;background:linear-gradient(145deg,#17333d,#0c222b)!important;color:var(--vc-gold-light)!important;font-weight:900!important}
-#quoteCard .secure-note{padding:6px 9px!important;border-radius:999px!important;background:#f3f5f4!important;color:#6c7780!important;border:1px solid #e2e6e4!important;font-size:11.5px!important;font-weight:800!important}
+#quoteCard .quote-head small{display:block;color:var(--vc-muted)!important;font:700 12px/1.2 var(--font-ui)!important}
+#quoteCard .quote-head h2{margin:2px 0 0!important;color:#1a1a1a!important;font:850 20px/1.15 var(--font-ui)!important}
+#quoteCard .step-dot{
+  width:34px!important;height:34px!important;display:grid!important;place-items:center!important;border-radius:10px!important;
+  background:var(--charcoal,var(--vc-charcoal))!important;color:#fff!important;font-weight:900!important
+}
+#quoteCard .secure-note{
+  padding:4px 8px!important;background:#f1eadc!important;color:#6b5427!important;border:1px solid #ddcfb1!important;
+  border-radius:999px!important;font:700 13px/1 var(--font-ui)!important
+}
 #quoteCard .direction-switch{
-  display:grid!important;grid-template-columns:1fr 1fr!important;gap:4px!important;margin:0 0 14px!important;padding:4px!important;
-  background:#f0f2f3!important;border:1px solid var(--vc-line)!important;border-radius:14px!important
+  display:grid!important;grid-template-columns:1fr 1fr!important;gap:8px!important;margin:0 0 14px!important;padding:4px!important;
+  background:#f1eee8!important;border:1px solid #e2ddd4!important;border-radius:13px!important
 }
-#quoteCard .direction{min-height:46px!important;border:1px solid transparent!important;border-radius:10px!important;background:transparent!important;color:#65717b!important;box-shadow:none!important;font-weight:850!important}
-#quoteCard .direction.active{background:#0f3742!important;color:#fff!important;border-color:#0f3742!important;box-shadow:0 6px 15px rgba(15,55,66,.13)!important}
-#quoteCard .quote-form{display:grid!important;gap:11px!important;margin:0!important}
-#quoteCard .field{display:grid!important;gap:6px!important;margin:0!important;color:#34414d!important}
-#quoteCard .field>span{font-size:13px!important;font-weight:800!important}
+#quoteCard .direction{
+  min-height:48px!important;padding:11px!important;border:0!important;border-radius:10px!important;background:transparent!important;
+  color:#667085!important;box-shadow:none!important;font:800 14px/1.2 var(--font-ui)!important
+}
+#quoteCard .direction.active{
+  background:var(--vc-charcoal)!important;color:#fff!important;border-color:#fff!important;box-shadow:none!important
+}
+#quoteCard .quote-form{display:grid!important;gap:12px!important;margin:0!important;padding:0!important;background:transparent!important;border:0!important;box-shadow:none!important}
+#quoteCard .field{display:grid!important;gap:5px!important;margin:0!important;color:#475467!important}
+#quoteCard .field>span{color:#667085!important;font:700 14px/1.2 var(--font-ui)!important}
 #quoteCard .input-shell{position:relative!important}
-#quoteCard .field-icon{position:absolute!important;inset-inline-end:13px!important;top:50%!important;transform:translateY(-50%)!important;color:var(--vc-green)!important;z-index:2!important}
+#quoteCard .field-icon{position:absolute!important;inset-inline-end:13px!important;top:50%!important;transform:translateY(-50%)!important;color:var(--vc-blue)!important;z-index:2!important}
+#quoteCard input,#quoteCard select{
+  width:100%!important;min-height:48px!important;padding:13px 14px!important;background:#fff!important;color:#1d1b18!important;
+  border:1px solid #d1ccc2!important;border-radius:11px!important;box-shadow:none!important;font:600 16px/1.2 var(--font-ui)!important;color-scheme:light!important
+}
 #quoteCard .input-shell input{padding-inline-end:38px!important}
+#quoteCard input:focus,#quoteCard select:focus{outline:none!important;border-color:var(--vc-blue)!important;box-shadow:0 0 0 3px rgba(23,105,224,.10)!important}
 #quoteCard .two-cols{display:grid!important;grid-template-columns:1fr 1fr!important;gap:10px!important}
-#quoteBtn.vc-main-cta,#submitBtn.vc-main-cta{
-  width:100%!important;min-height:52px!important;margin-top:2px!important;display:flex!important;align-items:center!important;justify-content:center!important;gap:10px!important;
-  background:var(--vc-green)!important;color:#fff!important;border:1px solid var(--vc-green)!important;border-radius:13px!important;box-shadow:0 8px 20px rgba(11,107,80,.14)!important;font-size:17px!important
+#quoteBtn.vc-main-cta{
+  width:100%!important;min-height:52px!important;margin:2px 0 0!important;padding:13px 16px!important;display:flex!important;
+  align-items:center!important;justify-content:center!important;gap:9px!important;background:var(--vc-charcoal)!important;color:#fff!important;
+  border:1px solid var(--vc-charcoal)!important;border-radius:11px!important;box-shadow:none!important;font:900 16px/1.25 var(--font-ui)!important
 }
+#quoteBtn.vc-main-cta:hover{background:#111!important}
 #largeTaxiBtn.vc-secondary-cta{
-  width:100%!important;min-height:44px!important;background:#fff!important;color:var(--vc-green2)!important;border:1px solid #cbded6!important;border-radius:12px!important;box-shadow:none!important;font-size:13px!important
+  width:100%!important;min-height:44px!important;padding:10px 12px!important;background:#fff!important;color:var(--vc-blue)!important;
+  border:1px solid #cfe0f8!important;border-radius:11px!important;box-shadow:none!important;font:800 13px/1.25 var(--font-ui)!important
 }
-#quoteCard .quote-result{margin-top:12px!important}
-.vc-details-slot{max-width:1080px;margin:14px auto 0}
+#quoteCard .quote-result{
+  margin-top:12px!important;padding:16px!important;background:#faf6ee!important;color:#1a1a1a!important;
+  border:1px solid #decda9!important;border-radius:14px!important;box-shadow:none!important
+}
+#quoteCard .quote-result:empty{display:none!important}
+
+/* Booking step */
+.vc-details-slot{max-width:1100px;margin:22px auto 0}
 #bookingCard.vc-booking-card{
-  margin:0!important;padding:20px!important;background:#fff!important;border:1px solid var(--vc-line)!important;border-radius:22px!important;box-shadow:var(--vc-shadow)!important
+  margin:0!important;padding:25px!important;background:#fff!important;color:#1a1a1a!important;border:1px solid var(--vc-card-line)!important;
+  border-radius:24px!important;box-shadow:0 18px 48px rgba(24,22,19,.10)!important
 }
 #bookingCard.hidden{display:none!important}
-#bookingCard .booking-title{display:flex!important;align-items:center!important;gap:11px!important;margin-bottom:15px!important}
-#bookingCard .booking-title h2{margin:2px 0 0!important;font-size:22px!important;color:var(--vc-ink)!important}
-#bookingCard .booking-title small{color:#7a8791!important}
-#bookingCard .mini-fare{margin-inline-start:auto;color:#75551f!important;font-weight:900!important}
-#bookingCard .booking-layout{display:grid!important;grid-template-columns:minmax(0,1.25fr) minmax(260px,.75fr)!important;gap:14px!important;align-items:start!important}
+#bookingCard .booking-title{display:flex!important;align-items:center!important;gap:11px!important;margin:0 0 16px!important;padding-bottom:14px!important;border-bottom:1px solid #e6e1d8!important}
+#bookingCard .booking-title h2{margin:2px 0 0!important;color:#1a1a1a!important;font:850 20px/1.15 var(--font-ui)!important}
+#bookingCard .booking-title small{color:var(--vc-muted)!important;font-size:12px!important}
+#bookingCard .mini-fare{margin-inline-start:auto;color:#6b5427!important;font:900 20px/1 var(--font-ui)!important}
+#bookingCard .booking-layout{display:grid!important;grid-template-columns:minmax(0,1.25fr) minmax(280px,.75fr)!important;gap:16px!important;align-items:start!important}
 #bookingCard .details-card{display:grid!important;gap:12px!important;margin:0!important;padding:0!important;background:transparent!important;border:0!important;box-shadow:none!important}
-#bookingCard .form-section{padding:15px!important;background:#fbfcfb!important;border:1px solid #e2e6e4!important;border-radius:15px!important}
-#bookingCard .section-label{display:flex!important;align-items:center!important;gap:8px!important;margin-bottom:11px!important}
-#bookingCard .section-label>span{width:28px!important;height:28px!important;display:grid!important;place-items:center!important;border-radius:9px!important;background:var(--vc-green-soft)!important;color:var(--vc-green2)!important;font-weight:900!important}
-#bookingCard .section-label b{font-size:15px!important;color:var(--vc-ink)!important}
-#bookingCard .section-label small{margin-inline-start:auto;color:#78838c!important;font-size:11.5px!important}
+#bookingCard .form-section{
+  padding:16px!important;background:#fff!important;border:1px solid #e2ddd4!important;border-radius:14px!important;box-shadow:none!important
+}
+#bookingCard .section-label{display:flex!important;align-items:center!important;gap:8px!important;margin-bottom:12px!important}
+#bookingCard .section-label>span{
+  width:28px!important;height:28px!important;display:grid!important;place-items:center!important;border-radius:9px!important;
+  background:var(--vc-charcoal)!important;color:#fff!important;font-weight:900!important
+}
+#bookingCard .section-label b{color:#1a1a1a!important;font:850 15px/1.2 var(--font-ui)!important}
+#bookingCard .section-label small{margin-inline-start:auto;color:var(--vc-muted)!important;font-size:11.5px!important}
 #bookingCard .two-cols{display:grid!important;grid-template-columns:1fr 1fr!important;gap:10px!important}
-#bookingCard .field{display:grid!important;gap:6px!important;margin:0 0 10px!important}
+#bookingCard .field{display:grid!important;gap:5px!important;margin:0 0 10px!important;color:#475467!important}
 #bookingCard .field:last-child{margin-bottom:0!important}
-#bookingCard .field>span{color:#34414d!important;font-size:13px!important;font-weight:780!important}
+#bookingCard .field>span{color:#667085!important;font:700 14px/1.2 var(--font-ui)!important}
+#bookingCard input,#bookingCard select,#bookingCard textarea{
+  width:100%!important;min-height:48px!important;padding:13px 14px!important;background:#fff!important;color:#1d1b18!important;
+  border:1px solid #d1ccc2!important;border-radius:11px!important;box-shadow:none!important;font:600 16px/1.2 var(--font-ui)!important;color-scheme:light!important
+}
+#bookingCard textarea{min-height:82px!important}
+#bookingCard input:focus,#bookingCard select:focus,#bookingCard textarea:focus{
+  outline:none!important;border-color:var(--vc-blue)!important;box-shadow:0 0 0 3px rgba(23,105,224,.10)!important
+}
 #bookingCard .payment-grid{display:grid!important;grid-template-columns:1fr 1fr!important;gap:8px!important}
-#bookingCard .payment-option{display:flex!important;align-items:center!important;gap:9px!important;padding:12px!important;background:#fff!important;border:1px solid #dbe1df!important;border-radius:12px!important}
-#bookingCard .payment-option small{display:block;color:#78838c!important}
-#bookingCard .summary-card{position:sticky!important;top:82px!important;padding:17px!important;background:#fffaf0!important;border:1px solid #dfc27f!important;border-radius:16px!important;box-shadow:none!important}
-#bookingCard .summary-card small{color:#7c6a45!important}#bookingCard .summary-route{margin:8px 0 13px;color:#34414d!important;font-weight:800!important}
-#bookingCard .summary-fare{display:flex!important;align-items:end!important;justify-content:space-between!important;gap:12px!important;padding-top:12px!important;border-top:1px solid #ead7ae!important}
-#bookingCard .summary-fare strong{font-size:28px!important;color:#75551f!important}
-#bookingCard .summary-card ul{margin:13px 0 0!important;padding:0!important;list-style:none!important;display:grid!important;gap:7px!important;color:#56626c!important;font-size:12.5px!important}
-#bookingCard details.extras{border:1px solid #e1e5e3!important;border-radius:13px!important;background:#fff!important;overflow:hidden!important}
-#bookingCard details.extras summary{padding:12px 14px!important;cursor:pointer!important;font-weight:800!important;color:#34414d!important}
+#bookingCard .payment-option{
+  display:flex!important;align-items:center!important;gap:9px!important;padding:12px!important;background:#fff!important;
+  border:1px solid #dce4ed!important;border-radius:11px!important;color:#344054!important
+}
+#bookingCard .payment-option input{width:auto!important;min-height:auto!important;accent-color:var(--vc-charcoal)!important}
+#bookingCard .payment-option small{display:block;color:var(--vc-muted)!important}
+#submitBtn.vc-main-cta{
+  width:100%!important;min-height:52px!important;padding:14px!important;display:flex!important;align-items:center!important;justify-content:center!important;
+  gap:9px!important;background:var(--vc-charcoal)!important;color:#fff!important;border:1px solid var(--vc-charcoal)!important;
+  border-radius:11px!important;box-shadow:none!important;font:900 16px/1.2 var(--font-ui)!important
+}
+#bookingCard .summary-card{
+  position:sticky!important;top:88px!important;padding:16px!important;background:#faf6ee!important;color:#1a1a1a!important;
+  border:1px solid #decda9!important;border-radius:14px!important;box-shadow:none!important
+}
+#bookingCard .summary-card small{color:#6b5427!important;font-weight:800!important}
+#bookingCard .summary-route{margin:8px 0 13px;color:#344054!important;font-weight:800!important}
+#bookingCard .summary-fare{display:flex!important;align-items:end!important;justify-content:space-between!important;gap:12px!important;padding-top:12px!important;border-top:1px solid #decda9!important}
+#bookingCard .summary-fare strong{font-size:30px!important;color:#1a1a1a!important}
+#bookingCard .summary-card ul{margin:13px 0 0!important;padding:0!important;list-style:none!important;display:grid!important;gap:7px!important;color:#667085!important;font-size:12.5px!important}
+#bookingCard details.extras{border:1px solid #dce4ed!important;border-radius:11px!important;background:#fff!important;overflow:hidden!important}
+#bookingCard details.extras summary{padding:12px 14px!important;color:#344054!important;font-weight:800!important;cursor:pointer!important}
 #bookingCard .extras-body{padding:0 14px 14px!important}
-#tracker{max-width:920px!important;margin:24px auto!important;padding:20px!important;background:#fff!important;border:1px solid var(--vc-line)!important;border-radius:20px!important;box-shadow:var(--vc-shadow-soft)!important}
+#bookingCard .fineprint{color:var(--vc-muted)!important;font-size:12px!important;line-height:1.5!important}
+
+/* Supporting sections */
+.vc-support{background:var(--vc-warm)!important;border-top:1px solid var(--vc-warm-line)!important}
+.vc-section{padding:48px 16px!important;background:transparent!important}
+.vc-section-head{max-width:760px;margin:0 auto 22px;text-align:center}
+.vc-section-kicker{display:inline-block;margin-bottom:8px;color:var(--vc-blue)!important;font:900 11px/1.1 var(--font-ui)!important;letter-spacing:.06em}
+.vc-section h2{margin:0 0 8px;color:var(--vc-ink)!important;font:900 28px/1.12 var(--font-base)!important}
+.vc-section-head p{margin:0;color:var(--vc-muted)!important;line-height:1.6}
+.vc-steps,.vc-trust-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;max-width:1000px;margin:0 auto}
+.vc-step,.vc-trust-card{
+  padding:20px;background:#fff!important;border:1px solid var(--vc-line)!important;border-radius:18px!important;box-shadow:var(--vc-shadow-soft)!important
+}
+.vc-step-num,.vc-trust-icon{
+  width:36px;height:36px;display:grid;place-items:center;margin-bottom:12px;border-radius:10px;background:var(--vc-charcoal)!important;color:#fff!important;font-weight:900!important
+}
+.vc-step strong,.vc-trust-card strong{display:block;margin-bottom:5px;color:var(--vc-ink)!important;font-size:17px!important}
+.vc-step p,.vc-trust-card p{margin:0;color:var(--vc-muted)!important;font-size:13.8px!important;line-height:1.55!important}
+.vc-review-panel,.vc-large-card{
+  max-width:940px;margin:0 auto;padding:22px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:18px;align-items:center;
+  background:#fff!important;border:1px solid var(--vc-line)!important;border-radius:18px!important;box-shadow:var(--vc-shadow-soft)!important
+}
+.vc-review-panel strong,.vc-large-card h3{margin:0 0 5px;color:var(--vc-ink)!important;font-size:20px!important}
+.vc-review-panel p,.vc-large-card p{margin:0;color:var(--vc-muted)!important;line-height:1.55!important}
+.vc-review-panel a,.vc-large-card a{
+  min-height:46px;padding:0 15px;display:inline-flex;align-items:center;justify-content:center;border-radius:11px!important;text-decoration:none!important;
+  background:var(--vc-charcoal)!important;color:#fff!important;border:1px solid var(--vc-charcoal)!important;font:850 13px/1.2 var(--font-ui)!important
+}
+
+/* Tracker */
+#tracker{
+  max-width:920px!important;margin:24px auto!important;padding:20px!important;background:#fff!important;color:var(--vc-ink)!important;
+  border:1px solid var(--vc-line)!important;border-radius:20px!important;box-shadow:var(--vc-shadow-soft)!important
+}
 #tracker.hidden{display:none!important}
-.proof-strip,.how-it-works,.large-transfer{display:none!important}
-.vc-support{display:block!important}
+.proof-strip,.how-it-works,.large-transfer,.vc-original-hero{display:none!important}
+
+/* Mobile sticky CTA */
+.vc-mobile-sticky{display:none}
+@media(max-width:900px){
+  .vc-header-nav a:not(.vc-header-large),.vc-existing-order{display:none!important}
+  .vc-cro-grid{grid-template-columns:1fr!important;gap:18px!important}
+  .vc-cro-copy{max-width:760px}
+}
 @media(max-width:760px){
-  .vc-cro-grid{display:flex!important;flex-direction:column!important}
-  .vc-cro-copy{padding:17px 15px!important}
-  .vc-cro-copy h1{font-size:28px!important}
-  .vc-cro-lede{margin-bottom:10px!important}
-  .vc-booking-slot{width:100%!important;margin:0!important}
-  #quoteCard.vc-quote-card{padding:14px!important;border-radius:17px!important}
-  #quoteCard .two-cols{grid-template-columns:1fr 1fr!important}
-  #bookingCard.vc-booking-card{padding:13px!important;border-radius:18px!important}
+  body{padding-bottom:72px!important}
+  .vc-header-inner{min-height:62px;padding:0 12px}
+  .vc-brand-mark{width:34px;height:34px;flex-basis:34px}
+  .vc-brand-copy strong{font-size:15px!important}.vc-brand-copy small{font-size:10.5px!important}
+  .vc-header-large{min-height:38px!important;padding:0 9px!important;font-size:11px!important}
+  .vc-cro-hero{padding:22px 0 28px!important}
+  .vc-cro-container{padding:0 12px}
+  .vc-cro-copy{padding:0!important}
+  .vc-eyebrow{font-size:10.5px!important;margin-bottom:11px}
+  .vc-cro-copy h1{font-size:36px!important;line-height:1.01!important;margin-bottom:12px!important}
+  .vc-cro-lede{font-size:15px!important;line-height:1.55!important;margin-bottom:14px!important}
+  .vc-proof-row{gap:5px}.vc-proof-row span{font-size:11px!important}
+  .vc-size-switch{display:grid;grid-template-columns:1fr 1fr;gap:6px}.vc-size-current,.vc-size-large{min-height:44px;font-size:12px!important;text-align:center}
+  .vc-booking-slot{border-radius:18px!important}
+  #quoteCard.vc-quote-card{padding:16px!important;border-radius:18px!important;box-shadow:0 10px 28px rgba(24,22,19,.08)!important}
+  #quoteCard .two-cols{grid-template-columns:1fr!important}
+  #quoteCard .quote-head h2{font-size:19px!important}
+  #bookingCard.vc-booking-card{padding:16px!important;border-radius:18px!important;box-shadow:0 10px 28px rgba(24,22,19,.08)!important}
   #bookingCard .booking-layout{grid-template-columns:1fr!important}
   #bookingCard .two-cols{grid-template-columns:1fr!important}
   #bookingCard .summary-card{position:static!important}
-  .vc-details-slot{margin-top:10px}
-  .vc-existing-order{display:none!important}
+  .vc-details-slot{margin-top:12px}
+  .vc-section{padding:34px 12px!important}.vc-section h2{font-size:25px!important}
+  .vc-steps,.vc-trust-grid{grid-template-columns:1fr!important;gap:9px!important}
+  .vc-step,.vc-trust-card{padding:15px!important;border-radius:15px!important}
+  .vc-review-panel,.vc-large-card{grid-template-columns:1fr!important;padding:17px!important;border-radius:16px!important}
+  .vc-review-panel a,.vc-large-card a{width:100%}
+  .vc-mobile-sticky{
+    position:fixed;display:block;z-index:10000;left:0;right:0;bottom:0;padding:7px 9px calc(7px + env(safe-area-inset-bottom));
+    background:rgba(255,255,255,.96);border-top:1px solid rgba(20,32,40,.08);box-shadow:0 -8px 24px rgba(20,45,77,.08);backdrop-filter:blur(14px)
+  }
+  .vc-mobile-sticky button{
+    width:min(100%,560px);margin:0 auto;display:block;min-height:50px;border:1px solid var(--vc-charcoal)!important;
+    border-radius:11px!important;background:var(--vc-charcoal)!important;color:#fff!important;font:900 16px/1.2 var(--font-ui)!important
+  }
 }
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
