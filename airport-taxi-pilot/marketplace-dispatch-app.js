@@ -1,7 +1,7 @@
 /* MARKETPLACE_V1_DISPATCH_UI */
 const API=window.TAXI4_API_BASE||location.origin;
 const q=s=>document.querySelector(s),qa=s=>[...document.querySelectorAll(s)];
-let state=null,authRequired=false,authToken=sessionStorage.getItem('taxi4_dispatch_token')||'',dispatchLang=localStorage.getItem('taxi4_dispatch_lang')||'ru';
+let state=null,authRequired=false,authToken=sessionStorage.getItem('taxi4_dispatch_token')||'',staffRole=sessionStorage.getItem('taxi4_staff_role')||'',dispatchLang=localStorage.getItem('taxi4_dispatch_lang')||'ru';
 
 const esc=v=>String(v??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
 const pay=m=>m==='bit'?'Bit':'наличные';
@@ -215,7 +215,10 @@ function ensureDispatchAuthUi(){
         const j=await r.json();
         if(!r.ok)throw Error(j.error);
         authToken=j.token;
+        staffRole=j.role||'';
         sessionStorage.setItem('taxi4_dispatch_token',authToken);
+        sessionStorage.setItem('taxi4_staff_role',staffRole);
+        if(staffRole==='dispatcher_5_6'){location.replace('/unified/dispatch/');return;}
         q('#dispatchAuthOverlay').classList.add('hidden');
         q('#dispatchLogout')?.classList.remove('hidden');
         await load(true);
@@ -225,14 +228,15 @@ function ensureDispatchAuthUi(){
 }
 function showDispatchLogin(message=''){
   ensureDispatchAuthUi();
-  authToken='';
+  authToken='';staffRole='';
   sessionStorage.removeItem('taxi4_dispatch_token');
+  sessionStorage.removeItem('taxi4_staff_role');
   q('#dispatchAuthStatus').textContent=dispatchLang==='he'?translateTextValue(message):message;
   q('#dispatchAuthOverlay').classList.remove('hidden');
 }
 async function dispatchLogout(){
   try{if(authToken)await authFetch(API+'/api/auth/logout',{method:'POST'});}catch{}
-  authToken='';sessionStorage.removeItem('taxi4_dispatch_token');showDispatchLogin();
+  authToken='';staffRole='';sessionStorage.removeItem('taxi4_dispatch_token');sessionStorage.removeItem('taxi4_staff_role');showDispatchLogin();
 }
 async function initDispatchAuth(){
   ensureDispatchAuthUi();
@@ -242,6 +246,7 @@ async function initDispatchAuth(){
   if(!authRequired){q('#dispatchLogout')?.classList.add('hidden');return true;}
   q('#dispatchLogout')?.classList.remove('hidden');
   if(!authToken){showDispatchLogin();return false;}
+  if(staffRole==='dispatcher_5_6'){location.replace('/unified/dispatch/');return false;}
   return true;
 }
 
