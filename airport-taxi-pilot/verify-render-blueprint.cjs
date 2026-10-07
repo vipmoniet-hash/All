@@ -16,7 +16,11 @@ for(const key of ['MARKETPLACE_AUTH_REQUIRED','UNIFIED_REQUIRE_AUTH','UNIFIED_RE
   assert(re.test(src),key+' must fail closed');
 }
 assert(!/postgres(?:ql)?:\/\//i.test(src),'connection string must never be committed');
-assert(!/MARKETPLACE_(?:ADMIN|DISPATCH_1_4|DISPATCH_5_6)_PIN/.test(src),'staff PIN plaintext env keys must not be committed');
+for(const key of ['MARKETPLACE_ADMIN_PIN','MARKETPLACE_DISPATCH_1_4_PIN','MARKETPLACE_DISPATCH_5_6_PIN']){
+  const re=new RegExp('key:\\s*'+key+'[\\s\\S]*?sync:\\s*false');
+  assert(re.test(src),key+' must be declared dashboard-only with sync:false');
+}
+assert(!/key:\s*MARKETPLACE_(?:ADMIN|DISPATCH_1_4|DISPATCH_5_6)_PIN[\s\S]{0,120}?value:/m.test(src),'staff PIN values must never be committed');
 console.log('RENDER_BLUEPRINT_CONTRACT_OK',JSON.stringify({
   privatePostgres:true,
   databaseUrlReference:true,
