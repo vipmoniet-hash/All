@@ -19,7 +19,7 @@ addDriver:'Добавить',driverName:'Имя водителя',driverPhone:'�
 badPin:'Неверный PIN',forbidden:'Нет доступа к этой линии',notConfigured:'Доступ персонала ещё не настроен в Render',
 roleAdmin:'ADMIN · обе линии',roleSmall:'DISPATCHER · 1–4',roleLarge:'DISPATCHER · 5–6',
 copied:'Скопировано',copyEmpty:'Нет новых или свободных поездок для отправки',
-ready:'Staging готов к cutover',notReady:'Staging пока не готов к cutover',reasonPostgres:'PostgreSQL не подключён',reasonAdmin:'Не задан Admin PIN',reasonSmall:'Не задан PIN диспетчера 1–4',reasonLarge:'Не задан PIN диспетчера 5–6',statusAwaiting:'Новый',statusPool:'В пуле',statusAssigned:'Назначен',statusEnroute:'Водитель в пути',statusCompleted:'Завершён',statusCancelled:'Отменён',statusConfirmed:'Подтверждён'
+ready:'Staging готов к cutover',notReady:'Staging пока не готов к cutover',reasonPostgres:'PostgreSQL не подключён',reasonAdmin:'Не задан Admin PIN',statusAwaiting:'Новый',statusPool:'В пуле',statusAssigned:'Назначен',statusEnroute:'Водитель в пути',statusCompleted:'Завершён',statusCancelled:'Отменён',statusConfirmed:'Подтверждён'
 },
 he:{
 title:'מרכז ניהול מאוחד',lead:'Admin מנהל את שני הקווים ממסך אחד. כל סדרן רואה רק את קו העבודה שלו.',
@@ -40,7 +40,7 @@ addDriver:'הוסף',driverName:'שם נהג',driverPhone:'טלפון',vehiclePl
 badPin:'PIN שגוי',forbidden:'אין גישה לקו הזה',notConfigured:'גישת הצוות עדיין לא הוגדרה ב-Render',
 roleAdmin:'ADMIN · שני הקווים',roleSmall:'סדרן · 1–4',roleLarge:'סדרן · 5–6',
 copied:'הועתק',copyEmpty:'אין נסיעות חדשות או פנויות לשליחה',
-ready:'Staging מוכן ל-cutover',notReady:'Staging עדיין לא מוכן ל-cutover',reasonPostgres:'PostgreSQL לא מחובר',reasonAdmin:'Admin PIN לא הוגדר',reasonSmall:'PIN סדרן 1–4 לא הוגדר',reasonLarge:'PIN סדרן 5–6 לא הוגדר',statusAwaiting:'חדש',statusPool:'במאגר',statusAssigned:'שויך',statusEnroute:'הנהג בדרך',statusCompleted:'הושלם',statusCancelled:'בוטל',statusConfirmed:'אושר'
+ready:'Staging מוכן ל-cutover',notReady:'Staging עדיין לא מוכן ל-cutover',reasonPostgres:'PostgreSQL לא מחובר',reasonAdmin:'Admin PIN לא הוגדר',statusAwaiting:'חדש',statusPool:'במאגר',statusAssigned:'שויך',statusEnroute:'הנהג בדרך',statusCompleted:'הושלם',statusCancelled:'בוטל',statusConfirmed:'אושר'
 }};
 let lang=localStorage.getItem('vcUnifiedLang')||'ru';
 let token=sessionStorage.getItem('taxi4_dispatch_token')||'';
@@ -85,7 +85,7 @@ function renderReadiness(){
   const ready=readiness.readyForUnifiedCutover===true;
   box.classList.toggle('ready',ready);
   box.classList.toggle('not-ready',!ready);
-  const map={postgres:'reasonPostgres',admin_pin:'reasonAdmin',dispatcher_1_4_pin:'reasonSmall',dispatcher_5_6_pin:'reasonLarge'};
+  const map={postgres:'reasonPostgres',admin_pin:'reasonAdmin'};
   const reasons=(readiness.readinessReasons||[]).map(x=>t(map[x]||x));
   box.innerHTML='<strong>'+esc(ready?t('ready'):t('notReady'))+'</strong>'+(reasons.length?'<span>'+esc(reasons.join(' · '))+'</span>':'');
 }
