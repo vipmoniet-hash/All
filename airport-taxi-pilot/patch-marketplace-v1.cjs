@@ -277,6 +277,12 @@ export async function registerDriver(input){return transact(db=>{`,
 
 patchFile('server.js',({replaceOnce})=>{
   replaceOnce(
+    "driverConfirmEnRoute, driverCompleteOrder, adminCancelOrder, registerDriver,",
+    "driverConfirmEnRoute, driverCompleteOrder, driverReportIssue, adminResolveIssue, adminCancelOrder, registerDriver,",
+    'driver issue workflow imports'
+  );
+
+  replaceOnce(
     "ORDER_ALREADY_TAKEN:409,INSUFFICIENT_WALLET_BALANCE:402,LATE_CANCEL_REQUIRES_DISPATCH:409,",
     "ORDER_ALREADY_TAKEN:409,INSUFFICIENT_WALLET_BALANCE:402,DRIVER_SCHEDULE_CONFLICT:409,DRIVER_MUST_BE_ENROUTE:409,ORDER_ISSUE_NOT_OPEN:409,LATE_CANCEL_REQUIRES_DISPATCH:409,",
     'marketplace HTTP statuses'
