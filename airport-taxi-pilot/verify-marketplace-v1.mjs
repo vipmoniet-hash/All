@@ -54,6 +54,9 @@ assert.equal(state.pool.length,0,'driver must not see ride before staff publicat
 let staff=await service.listAdminState();
 assert.ok(staff.orders.some(o=>o.id===booking.orders[0].id&&o.status==='awaiting_dispatch'),'staff sees private incoming ride');
 await service.publishOrder(booking.orders[0].id,170);
+let afterPublishDb=await persistence.readDb();
+assert.equal(afterPublishDb.drivers.find(x=>x.id==='drv-test-001').wallet,500,'staff publication never charges a driver wallet');
+assert.equal(afterPublishDb.ledger.filter(x=>x.type==='commission_debit').length,0,'staff/admin management creates no commission debit');
 state = await service.listDriverState('drv-test-001');
 assert.equal(state.pool.length,1,'driver sees ride only after staff publishes it');
 assert.equal(state.pool[0].id,booking.orders[0].id,'published ride id matches created ride');
