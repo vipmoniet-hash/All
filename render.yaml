@@ -26,11 +26,11 @@ services:
         value: "1"
       - key: MARKETPLACE_ALLOW_RESET_DEMO
         value: "0"
-      - key: MARKETPLACE_ADMIN_PIN
+      - key: MARKETPLACE_ADMIN_PIN_HASH
         sync: false
-      - key: MARKETPLACE_DISPATCH_1_4_PIN
+      - key: MARKETPLACE_DISPATCH_1_4_PIN_HASH
         sync: false
-      - key: MARKETPLACE_DISPATCH_5_6_PIN
+      - key: MARKETPLACE_DISPATCH_5_6_PIN_HASH
         sync: false
       - key: TAXI4_AUTH_LOGIN_LIMIT_PER_IP
         value: "8"
@@ -39,7 +39,7 @@ services:
 
 databases:
   - name: vanclick-unified-staging-db
-    plan: free
+    plan: basic-256mb
     region: frankfurt
     postgresMajorVersion: "18"
     databaseName: vanclick_unified_staging_db
