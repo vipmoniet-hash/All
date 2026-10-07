@@ -1,7 +1,7 @@
 {
-  "version": "2026-10-07-balanced-driver-market-v2",
+  "version": "2026-10-07-balanced-driver-market-v3",
   "policy": {
-    "matched": "Safe target = max(driver km floor, commission-aware floor from max(iCab daytime/safe-alias benchmark, robust distance-neighbor median)); reduce only when current fare is >10% above target",
+    "matched": "Raises use the driver km floor plus direct iCab/safe-alias benchmark. Robust neighbor median is used only to prevent unjustified reductions; reduce only when current fare is >10% above the resulting safe cap.",
     "unmatched": "max(existing, ceil((80 + 4*roadKm)/10)*10)",
     "direction": "same fixed fare city ↔ Ben Gurion",
     "decreases": true,
@@ -11,7 +11,7 @@
       "הרצליה": 250,
       "נתניה": 320
     },
-    "note": "Customer pays driver directly; platform commission is paid separately from driver wallet. Controlled reductions remove clear overpricing while the driver-net and kilometer floors remain protected."
+    "note": "Customer pays driver directly; platform commission is paid separately from driver wallet. Neighbor medians never raise a fare by themselves; they only protect against false low benchmarks when evaluating reductions."
   },
   "stats": {
     "locations": 1354,
