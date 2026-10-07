@@ -51,7 +51,10 @@ if(fs.existsSync(clientJs)){
 }
 
 // Apply full Taxi 1–4 driver-safe fare audit after unpacking source data.
-require('child_process').execFileSync(process.execPath,[path.join(__dirname,'reprice-taxi4.cjs'),root],{stdio:'inherit'});\n\n// Policy regression gate: intentionally fails until the surcharge/commission patch is applied.\nrequire('child_process').execFileSync(process.execPath,[path.join(__dirname,'verify-taxi4-policy.mjs'),root],{stdio:'inherit'});
+require('child_process').execFileSync(process.execPath,[path.join(__dirname,'reprice-taxi4.cjs'),root],{stdio:'inherit'});
+
+// Policy regression gate: intentionally fails until the surcharge/commission patch is applied.
+require('child_process').execFileSync(process.execPath,[path.join(__dirname,'verify-taxi4-policy.mjs'),root],{stdio:'inherit'});
 
 /* TAXI4_SERVER_INSPECT temporary build-time source inspection */
 {
