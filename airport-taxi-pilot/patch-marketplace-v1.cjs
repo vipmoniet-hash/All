@@ -305,8 +305,14 @@ patchFile('server.js',({replaceOnce})=>{
 
   replaceOnce(
     "ORDER_ALREADY_TAKEN:409,INSUFFICIENT_WALLET_BALANCE:402,LATE_CANCEL_REQUIRES_DISPATCH:409,",
-    "ORDER_ALREADY_TAKEN:409,INSUFFICIENT_WALLET_BALANCE:402,DRIVER_SCHEDULE_CONFLICT:409,DRIVER_MUST_BE_ENROUTE:409,ORDER_ISSUE_NOT_OPEN:409,UNAUTHORIZED:401,INVALID_CREDENTIALS:401,DRIVER_NOT_ACTIVE:403,DRIVER_PIN_NOT_CONFIGURED:409,PIN_MUST_BE_4_TO_12_DIGITS:400,STAFF_PIN_NOT_CONFIGURED:503,LATE_CANCEL_REQUIRES_DISPATCH:409,",
+    "ORDER_ALREADY_TAKEN:409,INSUFFICIENT_WALLET_BALANCE:402,DRIVER_SCHEDULE_CONFLICT:409,DRIVER_MUST_BE_ENROUTE:409,ORDER_ISSUE_NOT_OPEN:409,UNAUTHORIZED:401,INVALID_CREDENTIALS:401,DRIVER_NOT_ACTIVE:403,DRIVER_PIN_NOT_CONFIGURED:409,PIN_MUST_BE_4_TO_12_DIGITS:400,STAFF_PIN_NOT_CONFIGURED:503,CHILD_RESTRAINTS_REQUIRE_LARGE_VEHICLE:400,LATE_CANCEL_REQUIRES_DISPATCH:409,",
     'marketplace HTTP statuses'
+  );
+
+  replaceOnce(
+    "if(req.method==='POST'&&url.pathname==='/api/client/bookings'){const b=await body(req);const route=routeDecisionWithHandoff(b);if(route.target==='vanclick')return json(res,409,{error:'VANCLICK_HANDOFF_REQUIRED',...route});return json(res,201,await createClientBooking(b))}",
+    "if(req.method==='POST'&&url.pathname==='/api/client/bookings'){const b=await body(req);const childExtras=Number(b.childSeatCount||b.childSeats||0)>0||Number(b.boosterCount||b.boosters||0)>0||(['seat','booster'].includes(String(b.childSeat||'').toLowerCase()));if(childExtras)throw new Error('CHILD_RESTRAINTS_REQUIRE_LARGE_VEHICLE');const route=routeDecisionWithHandoff(b);if(route.target==='vanclick')return json(res,409,{error:'VANCLICK_HANDOFF_REQUIRED',...route});return json(res,201,await createClientBooking({...b,childSeats:0}))}",
+    'child restraints require Large 5-6'
   );
 
   replaceOnce(
@@ -359,6 +365,7 @@ for(const rel of [path.join('apps','driver','public','app.css'),path.join('apps'
   if(!client.includes(old) && !client.includes(next)) throw new Error('MARKETPLACE_V1_PATCH_MISS: client confirmation copy');
   client=client.replace(old,next);
   client=client.replace("pool:'אושרה · מחפשים נהג'","pool:'מחפשים נהג'");
+  client += "\n;(()=>{for(const id of ['childSeats','childSeatCount','boosterCount','boosters']){const el=document.getElementById(id);if(!el)continue;try{el.value='0'}catch{}const wrap=el.closest('label,.field,.form-row,.grid-item');if(wrap)wrap.hidden=true;else el.hidden=true}})();\n";
   fs.writeFileSync(file,client);
 }
 
