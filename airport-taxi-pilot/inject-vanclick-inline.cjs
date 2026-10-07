@@ -81,3 +81,6 @@ require('child_process').execFileSync(process.execPath,[path.join(__dirname,'ver
 
 // Concurrent marketplace claim race gate.
 require('child_process').execFileSync(process.execPath,[path.join(__dirname,'verify-marketplace-race.mjs'),root],{stdio:'inherit'});
+
+// Role-isolated marketplace authentication gate.
+require('child_process').execFileSync(process.execPath,[path.join(__dirname,'verify-marketplace-auth.mjs'),root],{stdio:'inherit'});
