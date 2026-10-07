@@ -1,6 +1,7 @@
 const fs=require('fs');
 const path=require('path');
 const os=require('os');
+const {pathToFileURL}=require('url');
 const {spawnSync}=require('child_process');
 const assert=require('assert/strict');
 
@@ -10,22 +11,62 @@ const nodeModules=path.join(root,'node_modules','pg');
 fs.mkdirSync(nodeModules,{recursive:true});
 fs.writeFileSync(path.join(nodeModules,'package.json'),JSON.stringify({name:'pg',version:'0.0.0-test',type:'module',exports:'./index.js'}));
 
-const fakePg="import fs from 'node:fs';\\nlet payload=null;\\nfunction log(q){if(process.env.PG_FAKE_LOG)fs.appendFileSync(process.env.PG_FAKE_LOG,String(q).replace(/\\\\s+/g,' ').trim()+'\\\\n');}\\nexport class Pool{\\n  constructor(){}\\n  async connect(){\\n    let tx=null,inTx=false;\\n    return {\\n      async query(sql,params=[]){\\n        const q=String(sql);log(q);\\n        if(/^BEGIN/i.test(q.trim())){inTx=true;tx=payload==null?null:structuredClone(payload);return{rows:[]};}\\n        if(/^COMMIT/i.test(q.trim())){payload=structuredClone(tx);inTx=false;return{rows:[]};}\\n        if(/^ROLLBACK/i.test(q.trim())){tx=payload==null?null:structuredClone(payload);inTx=false;return{rows:[]};}\\n        if(/CREATE TABLE IF NOT EXISTS vanclick_state/i.test(q))return{rows:[]};\\n        if(/INSERT INTO vanclick_state/i.test(q)&&/DO NOTHING/i.test(q)){if((inTx?tx:payload)==null){const v=JSON.parse(params[1]);if(inTx)tx=v;else payload=v;}return{rows:[]};}\\n        if(/SELECT payload FROM vanclick_state/i.test(q)){const v=inTx?tx:payload;return{rows:v==null?[]:[{payload:structuredClone(v)}]};}\\n        if(/UPDATE vanclick_state SET payload/i.test(q)){tx=JSON.parse(params[0]);if(!inTx)payload=structuredClone(tx);return{rows:[],rowCount:1};}\\n        if(/INSERT INTO vanclick_state/i.test(q)&&/DO UPDATE/i.test(q)){const v=JSON.parse(params[1]);if(inTx)tx=v;else payload=v;return{rows:[]};}\\n        throw new Error('UNEXPECTED_SQL '+q);\\n      },\\n      release(){}\\n    };\\n  }\\n}";
+const fakePg=[
+  "import fs from 'node:fs';",
+  "let payload=null;",
+  "function log(q){if(process.env.PG_FAKE_LOG)fs.appendFileSync(process.env.PG_FAKE_LOG,String(q).replace(/\\s+/g,' ').trim()+'\\n');}",
+  "export class Pool{",
+  "  constructor(){}",
+  "  async connect(){",
+  "    let tx=null,inTx=false;",
+  "    return {",
+  "      async query(sql,params=[]){",
+  "        const q=String(sql);log(q);",
+  "        if(/^BEGIN/i.test(q.trim())){inTx=true;tx=payload==null?null:structuredClone(payload);return{rows:[]};}",
+  "        if(/^COMMIT/i.test(q.trim())){payload=structuredClone(tx);inTx=false;return{rows:[]};}",
+  "        if(/^ROLLBACK/i.test(q.trim())){tx=payload==null?null:structuredClone(payload);inTx=false;return{rows:[]};}",
+  "        if(/CREATE TABLE IF NOT EXISTS vanclick_state/i.test(q))return{rows:[]};",
+  "        if(/INSERT INTO vanclick_state/i.test(q)&&/DO NOTHING/i.test(q)){if((inTx?tx:payload)==null){const v=JSON.parse(params[1]);if(inTx)tx=v;else payload=v;}return{rows:[]};}",
+  "        if(/SELECT payload FROM vanclick_state/i.test(q)){const v=inTx?tx:payload;return{rows:v==null?[]:[{payload:structuredClone(v)}]};}",
+  "        if(/UPDATE vanclick_state SET payload/i.test(q)){tx=JSON.parse(params[0]);if(!inTx)payload=structuredClone(tx);return{rows:[],rowCount:1};}",
+  "        if(/INSERT INTO vanclick_state/i.test(q)&&/DO UPDATE/i.test(q)){const v=JSON.parse(params[1]);if(inTx)tx=v;else payload=v;return{rows:[]};}",
+  "        throw new Error('UNEXPECTED_SQL '+q);",
+  "      },",
+  "      release(){}",
+  "    };",
+  "  }",
+  "}"
+].join('\n');
 fs.writeFileSync(path.join(nodeModules,'index.js'),fakePg);
+
 const logFile=path.join(temp,'pg.log');
 const childScript=path.join(temp,'run.mjs');
-const childCode="import {readDb,resetDb,transact} from __PERSISTENCE__;\\nconst base={drivers:[],orders:[{id:'pg-1'}],largeOrders:[],topups:[],ledger:[],events:[],sessions:[]};\\nawait resetDb(base);\\nawait transact(db=>{db.orders.push({id:'pg-2'});return true});\\nconst db=await readDb();\\nconsole.log(JSON.stringify({orders:db.orders.map(x=>x.id),largeOrders:db.largeOrders.length}));".replace('__PERSISTENCE__',JSON.stringify(path.join(root,'src','persistence.js')));
+const persistenceUrl=pathToFileURL(path.join(root,'src','persistence.js')).href;
+const childCode=[
+  "import {readDb,resetDb,transact} from "+JSON.stringify(persistenceUrl)+";",
+  "const base={drivers:[],orders:[{id:'pg-1'}],largeOrders:[],topups:[],ledger:[],events:[],sessions:[]};",
+  "await resetDb(base);",
+  "await transact(db=>{db.orders.push({id:'pg-2'});return true});",
+  "const db=await readDb();",
+  "console.log(JSON.stringify({orders:db.orders.map(x=>x.id),largeOrders:db.largeOrders.length}));"
+].join('\n');
 fs.writeFileSync(childScript,childCode);
+
 const dataDir=path.join(temp,'json-data');
-const run=spawnSync(process.execPath,[childScript],{encoding:'utf8',env:{...process.env,DATABASE_URL:'postgres://fake/vanclick',TAXI4_DATA_DIR:dataDir,PG_FAKE_LOG:logFile}});
+const run=spawnSync(process.execPath,[childScript],{
+  encoding:'utf8',
+  env:{...process.env,DATABASE_URL:'postgres://fake/vanclick',TAXI4_DATA_DIR:dataDir,PG_FAKE_LOG:logFile}
+});
 if(run.status!==0)throw new Error(run.stderr||run.stdout||'postgres runtime child failed');
-const line=run.stdout.trim().split(/\\r?\\n/).filter(Boolean).pop();
+
+const line=run.stdout.trim().split(/\r?\n/).filter(Boolean).pop();
 const out=JSON.parse(line);
 assert.deepEqual(out.orders,['pg-1','pg-2'],'DATABASE_URL path must preserve persistence API over Postgres');
 assert.equal(fs.existsSync(path.join(dataDir,'db.json')),false,'Postgres backend must not write JSON db file');
 const sql=fs.readFileSync(logFile,'utf8');
 assert.match(sql,/FOR UPDATE/i,'runtime Postgres path must use row locking');
 assert.match(sql,/COMMIT/i,'runtime Postgres path must commit transaction');
+
 fs.rmSync(path.join(root,'node_modules','pg'),{recursive:true,force:true});
 fs.rmSync(temp,{recursive:true,force:true});
 console.log('POSTGRES_RUNTIME_SWITCH_OK',JSON.stringify({databaseUrlSwitch:true,jsonBypassed:true,rowLock:true}));
