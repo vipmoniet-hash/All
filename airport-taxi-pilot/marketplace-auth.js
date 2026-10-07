@@ -14,6 +14,20 @@ function safeEqualText(a,b){
   const bh=crypto.createHash('sha256').update(String(b||'')).digest();
   return crypto.timingSafeEqual(ah,bh);
 }
+function staffHashConfigured(name){return Boolean(String(process.env[name]||'').trim());}
+function verifyStaffHash(pin,encoded){
+  const raw=String(encoded||'').trim();
+  if(!raw)return false;
+  const i=raw.indexOf(':');
+  if(i<=0||i===raw.length-1)return false;
+  const salt=raw.slice(0,i), expected=raw.slice(i+1);
+  return safeEqualText(pinHash(pin,salt),expected);
+}
+function verifyStaffCredential(pin,plainName,hashName){
+  const plain=String(process.env[plainName]||'');
+  if(plain&&safeEqualText(pin,plain))return true;
+  return verifyStaffHash(pin,process.env[hashName]);
+}
 function validatePin(pin){
   const p=String(pin||'').trim();
   if(!/^\d{4,12}$/.test(p))throw new Error('PIN_MUST_BE_4_TO_12_DIGITS');
@@ -32,9 +46,9 @@ export function marketplaceAuthRequired(){
 export function staffAuthStats(){
   return {
     required:marketplaceAuthRequired(),
-    adminConfigured:Boolean(process.env.MARKETPLACE_ADMIN_PIN),
-    dispatcher1to4Configured:Boolean(process.env.MARKETPLACE_DISPATCH_1_4_PIN||process.env.MARKETPLACE_DISPATCH_PIN),
-    dispatcher5to6Configured:Boolean(process.env.MARKETPLACE_DISPATCH_5_6_PIN),
+    adminConfigured:Boolean(process.env.MARKETPLACE_ADMIN_PIN)||staffHashConfigured('MARKETPLACE_ADMIN_PIN_HASH'),
+    dispatcher1to4Configured:Boolean(process.env.MARKETPLACE_DISPATCH_1_4_PIN||process.env.MARKETPLACE_DISPATCH_PIN)||staffHashConfigured('MARKETPLACE_DISPATCH_1_4_PIN_HASH'),
+    dispatcher5to6Configured:Boolean(process.env.MARKETPLACE_DISPATCH_5_6_PIN)||staffHashConfigured('MARKETPLACE_DISPATCH_5_6_PIN_HASH'),
     secretSource:'render_environment_only'
   };
 }
@@ -70,15 +84,15 @@ export async function driverLogin(driverId,pin,now=new Date()){
 }
 
 export async function dispatchLogin(pin,now=new Date()){
-  const adminPin=String(process.env.MARKETPLACE_ADMIN_PIN||'');
-  const smallPin=String(process.env.MARKETPLACE_DISPATCH_1_4_PIN||process.env.MARKETPLACE_DISPATCH_PIN||'');
-  const largePin=String(process.env.MARKETPLACE_DISPATCH_5_6_PIN||'');
-  if(!adminPin&&!smallPin&&!largePin)throw new Error('STAFF_PIN_NOT_CONFIGURED');
+  const adminConfigured=Boolean(process.env.MARKETPLACE_ADMIN_PIN)||staffHashConfigured('MARKETPLACE_ADMIN_PIN_HASH');
+  const smallConfigured=Boolean(process.env.MARKETPLACE_DISPATCH_1_4_PIN||process.env.MARKETPLACE_DISPATCH_PIN)||staffHashConfigured('MARKETPLACE_DISPATCH_1_4_PIN_HASH');
+  const largeConfigured=Boolean(process.env.MARKETPLACE_DISPATCH_5_6_PIN)||staffHashConfigured('MARKETPLACE_DISPATCH_5_6_PIN_HASH');
+  if(!adminConfigured&&!smallConfigured&&!largeConfigured)throw new Error('STAFF_PIN_NOT_CONFIGURED');
   const supplied=String(pin||'');
   const role=
-    adminPin&&safeEqualText(supplied,adminPin)?'admin':
-    smallPin&&safeEqualText(supplied,smallPin)?'dispatcher_1_4':
-    largePin&&safeEqualText(supplied,largePin)?'dispatcher_5_6':
+    verifyStaffCredential(supplied,'MARKETPLACE_ADMIN_PIN','MARKETPLACE_ADMIN_PIN_HASH')?'admin':
+    (verifyStaffCredential(supplied,'MARKETPLACE_DISPATCH_1_4_PIN','MARKETPLACE_DISPATCH_1_4_PIN_HASH')||(process.env.MARKETPLACE_DISPATCH_PIN&&safeEqualText(supplied,process.env.MARKETPLACE_DISPATCH_PIN)))?'dispatcher_1_4':
+    verifyStaffCredential(supplied,'MARKETPLACE_DISPATCH_5_6_PIN','MARKETPLACE_DISPATCH_5_6_PIN_HASH')?'dispatcher_5_6':
     null;
   if(!role)throw new Error('INVALID_CREDENTIALS');
   return transact(db=>{
