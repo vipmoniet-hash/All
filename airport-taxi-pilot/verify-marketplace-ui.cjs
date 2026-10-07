@@ -28,6 +28,9 @@ assert.ok(dispatch.includes('dispatchLang'),'dispatch UI must persist selected R
 assert.ok(dispatch.includes('setDispatchLang'),'dispatch UI must expose language switch');
 assert.ok(dispatch.includes("document.documentElement.dir"),'dispatch UI must switch RTL/LTR direction');
 assert.ok(dispatch.includes("עברית"),'dispatch UI must expose Hebrew language choice');
+for(const pair of [["Заказы","הזמנות"],["Пополнения","טעינות"],["Водители","נהגים"],["Журнал","יומן"]]){
+  assert.ok(dispatch.includes(`['${pair[0]}','${pair[1]}']`),`dispatch UI must contain Hebrew tab translation for ${pair[0]}`);
+}
 assert.ok(dispatch.includes("Русский"),'dispatch UI must expose Russian language choice');
 
 assert.ok(client.includes('נמצאת בבדיקת המוקד'),'client confirmation must describe staff review before publication');
