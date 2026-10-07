@@ -109,3 +109,6 @@ require('child_process').execFileSync(process.execPath,[path.join(__dirname,'ver
 
 // Role-aware unified Control Center UI gate.
 require('child_process').execFileSync(process.execPath,[path.join(__dirname,'verify-unified-control-ui.cjs'),root],{stdio:'inherit'});
+
+// Render Blueprint must keep private Postgres wiring and fail-closed security.
+require('child_process').execFileSync(process.execPath,[path.join(__dirname,'verify-render-blueprint.cjs'),path.join(__dirname,'..','render.yaml')],{stdio:'inherit'});
