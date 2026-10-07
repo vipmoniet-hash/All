@@ -18,7 +18,7 @@ const aliases=aliasAudit.aliases||{};
 function commission(fare){
   const n=Number(fare||0);
   if(n<100) return 5;
-  return Math.max(10,Math.floor(n/100)*10);
+  return 10+Math.floor((n-100)/100)*5;
 }
 function ceil10(n){return Math.ceil(Number(n||0)/10)*10;}
 function coordKey(v){
@@ -109,6 +109,10 @@ for(const group of coordGroups.values()){
   }
 }
 
+for(const v of locations){
+  v.commission=commission(v.fare);
+  v.driverNet=Number(v.fare)-v.commission;
+}
 const changed=changedNames.size;
 fs.writeFileSync(pricingPath,JSON.stringify(pricing,null,2)+'\n');
 const report={
