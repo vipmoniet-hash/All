@@ -99,3 +99,6 @@ require('child_process').execFileSync(process.execPath,[path.join(__dirname,'ver
 
 // DATABASE_URL runtime persistence switch gate.
 require('child_process').execFileSync(process.execPath,[path.join(__dirname,'verify-postgres-runtime.cjs'),root],{stdio:'inherit'});
+
+// Server-enforced admin / dispatcher scope isolation gate.
+require('child_process').execFileSync(process.execPath,[path.join(__dirname,'verify-unified-roles.mjs'),root],{stdio:'inherit'});
