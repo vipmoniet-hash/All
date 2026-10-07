@@ -5,7 +5,7 @@ let state=null,authRequired=false,authToken=sessionStorage.getItem('taxi4_dispat
 
 const esc=v=>String(v??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
 const pay=m=>m==='bit'?'Bit':'наличные';
-const statusRu=s=>({awaiting_dispatch:'Новый legacy',pool:'Свободен',assigned:'Взят водителем',driver_enroute:'Водитель в пути',completed:'Завершён',cancelled:'Отменён'})[s]||s;
+const statusRu=s=>({awaiting_dispatch:'Новый',pool:'Свободен',assigned:'Взят водителем',driver_enroute:'Водитель в пути',completed:'Завершён',cancelled:'Отменён'})[s]||s;
 const fmt=d=>new Date(d).toLocaleString('ru-RU',{weekday:'short',day:'2-digit',month:'2-digit',year:'2-digit',hour:'2-digit',minute:'2-digit'});
 const money=n=>Number(n||0).toLocaleString('ru-RU',{maximumFractionDigits:2});
 
@@ -21,8 +21,8 @@ function ensureDispatchAuthUi(){
     wrap.className='auth-overlay hidden';
     wrap.innerHTML=`<form id="dispatchAuthForm" class="auth-card">
       <h2>Вход в диспетчерскую</h2>
-      <p>Введите PIN диспетчера VanClick Taxi 1–4.</p>
-      <input name="pin" type="password" inputmode="numeric" autocomplete="current-password" placeholder="PIN диспетчера" required>
+      <p>Введите PIN администратора или диспетчера VanClick Taxi 1–4.</p>
+      <input name="pin" type="password" inputmode="numeric" autocomplete="current-password" placeholder="PIN администратора / диспетчера" required>
       <button>Войти</button>
       <div id="dispatchAuthStatus"></div>
     </form>`;
@@ -162,7 +162,7 @@ function renderOrders(){
       </div>
       <div class="private"><b>${esc(o.customerName)} · ${esc(o.customerPhone)}</b><br>Подача: ${esc(o.exactPickup)}<br>Назначение: ${esc(o.exactDropoff)}${o.notes?`<br>Комментарий: ${esc(o.notes)}`:''}${o.assignedDriverId?`<br>Водитель: ${esc(o.assignedDriverId)}`:''}</div>
       <div class="order-actions">
-        ${o.status==='awaiting_dispatch'?`<input id="fare-${o.id}" type="number" min="1" value="${o.quotedFare}"><button onclick="publishOrder('${o.id}')">Legacy: в пул</button>`:''}
+        ${o.status==='awaiting_dispatch'?`<input id="fare-${o.id}" type="number" min="1" value="${o.quotedFare}"><button onclick="publishOrder('${o.id}')">Отправить в общий пул</button>`:''}
         ${o.status==='pool'?`<button onclick="message('${o.id}','approved')">WhatsApp: заказ получен</button>`:''}
         ${['assigned','driver_enroute'].includes(o.status)?`
           <button class="secondary" onclick="releaseOrder('${o.id}',true)">Снять + вернуть комиссию</button>
@@ -179,8 +179,9 @@ function renderOrders(){
 function render(){
   const c=state.counts||{},f=state.finance||{};
   q('#metrics').innerHTML=[
+    ['Новые',c.awaiting_dispatch||0],
     ['Требуют внимания',state.attentionCount||0],
-    ['Свободные',c.pool||0],
+    ['В общем пуле',c.pool||0],
     ['В работе',(c.assigned||0)+(c.driver_enroute||0)],
     ['Завершены',c.completed||0],
     ['Чистая комиссия',money(f.netCommissionCollected)+' ₪']
