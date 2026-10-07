@@ -33,6 +33,10 @@ assert.ok(html.includes('id="unifiedJournal"'),'admin control center must render
 
 assert.ok(html.includes('id="staffAuthOverlay"'),'control center must provide a staff login surface');
 assert.ok(html.includes('noindex,nofollow'),'control center must remain noindex');
+assert.ok(ui.includes("Asia/Jerusalem"),'unified control dates must use Israel timezone');
+assert.ok(ui.includes("weekday:'short'"),'unified control dates must include weekday');
+assert.ok(ui.includes("lang==='he'?'he-IL':'ru-RU'"),'unified weekday locale must follow UI language');
+assert.ok(ui.includes("year:'numeric'"),'unified control dates must show full year');
 
 console.log('UNIFIED_CONTROL_UI_OK',JSON.stringify({
   roleLogin:true,
