@@ -90,7 +90,8 @@ export function id(prefix) { return \`\${prefix}_\${crypto.randomBytes(6).toStri
 patchFile('server.js',({replaceOnce})=>{
   replaceOnce(
     "await ensureDb();",
-    "await ensureDb();\\nconsole.log('PERSISTENCE_BACKEND',JSON.stringify(persistenceStats()));",
+    `await ensureDb();
+console.log('PERSISTENCE_BACKEND',JSON.stringify(persistenceStats()));`,
     'startup persistence backend telemetry'
   );
 });
