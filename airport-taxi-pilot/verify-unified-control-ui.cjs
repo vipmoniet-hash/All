@@ -43,6 +43,8 @@ for(const needle of ['Заказы','Пополнения','Водители','�
   assert.ok(ui.includes(needle),'unified Admin bilingual navigation missing '+needle);
 }
 
+assert.ok(html.includes('id="readinessBanner"'),'control center must expose deployment readiness banner');
+for(const needle of ['readyForUnifiedCutover','readinessReasons','renderReadiness','/health']) assert.ok(ui.includes(needle),'unified readiness UI missing '+needle);
 assert.ok(html.includes('id="staffAuthOverlay"'),'control center must provide a staff login surface');
 assert.ok(html.includes('noindex,nofollow'),'control center must remain noindex');
 assert.ok(ui.includes("Asia/Jerusalem"),'unified control dates must use Israel timezone');
