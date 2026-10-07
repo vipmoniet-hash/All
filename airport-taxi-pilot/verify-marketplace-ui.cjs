@@ -23,6 +23,9 @@ assert.ok(dispatch.includes('netCommissionCollected'),'dispatch UI must expose n
 assert.ok(dispatch.includes('/issue/resolve'),'dispatch UI must resolve driver issues');
 assert.ok(dispatch.includes('refundCommission:false'),'dispatch UI must support release without automatic commission refund');
 assert.ok(dispatch.includes('/api/auth/dispatch/login'),'dispatch UI must support protected dispatcher login');
+assert.ok(dispatch.includes('taxi4_staff_role'),'small dispatch UI must remember the authenticated staff role');
+assert.ok(dispatch.includes("dispatcher_5_6"),'small dispatch UI must recognize the Large 5-6 dispatcher role');
+assert.ok(dispatch.includes('/unified/dispatch/'),'Large 5-6 dispatcher must be redirected away from Taxi 1-4 dispatch');
 assert.ok(dispatch.includes('/drivers/${id}/pin'),'dispatch UI must support driver PIN rotation');
 assert.ok(dispatch.includes('dispatchLang'),'dispatch UI must persist selected Russian/Hebrew language');
 assert.ok(dispatch.includes('setDispatchLang'),'dispatch UI must expose language switch');
