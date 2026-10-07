@@ -58,3 +58,15 @@
 .group-export-bar>span{font-size:12px;font-weight:800;color:#50676d}.group-export-bar>div{display:flex;gap:7px;flex-wrap:wrap}
 .group-export-bar button{min-height:38px}.group-copy,.group-share{white-space:nowrap}
 @media(max-width:720px){.group-export-bar{align-items:stretch;flex-direction:column}.group-export-bar>div{display:grid;grid-template-columns:1fr 1fr}.group-export-bar button{min-height:44px}.compact-order .group-copy,.compact-order .group-share{grid-column:auto}}
+
+.dispatch-language-switch{display:inline-flex;gap:3px;margin-inline-start:auto;padding:3px;border:1px solid #d4e0e2;border-radius:12px;background:#fff}
+.dispatch-language-switch button{border:0;background:transparent;border-radius:9px;padding:7px 10px;font-size:12px;font-weight:800;cursor:pointer}
+.dispatch-language-switch button.active{background:#173a46;color:#fff}
+html[dir="rtl"] .order-head,html[dir="rtl"] .attention-head,html[dir="rtl"] .attention-item{text-align:right}
+html[dir="rtl"] .order-expand{inset-inline-end:auto;inset-inline-start:10px}
+html[dir="rtl"] .compact-order .order-head{padding-inline-end:0;padding-inline-start:42px}
+html[dir="rtl"] .private,html[dir="rtl"] .details,html[dir="rtl"] .driver-row,html[dir="rtl"] .logrow{text-align:right}
+@media(max-width:720px){
+  .dispatch-language-switch{margin-inline-start:4px}
+  .dispatch-language-switch button{padding:7px 8px}
+}
