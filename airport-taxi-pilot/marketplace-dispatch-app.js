@@ -6,7 +6,7 @@ let state=null,authRequired=false,authToken=sessionStorage.getItem('taxi4_dispat
 const esc=v=>String(v??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
 const pay=m=>m==='bit'?'Bit':'наличные';
 const statusRu=s=>({awaiting_dispatch:dispatchLang==='he'?'חדש':'Новый',pool:dispatchLang==='he'?'פנוי':'Свободен',assigned:dispatchLang==='he'?'נלקח על ידי נהג':'Взят водителем',driver_enroute:dispatchLang==='he'?'הנהג בדרך':'Водитель в пути',completed:dispatchLang==='he'?'הושלם':'Завершён',cancelled:dispatchLang==='he'?'בוטל':'Отменён'})[s]||s;
-const fmt=d=>new Date(d).toLocaleString('ru-RU',{weekday:'short',day:'2-digit',month:'2-digit',year:'2-digit',hour:'2-digit',minute:'2-digit'});
+const fmt=d=>{const x=new Date(d),locale=dispatchLang==='he'?'he-IL':'ru-RU',tz='Asia/Jerusalem';const date=new Intl.DateTimeFormat('en-GB',{day:'2-digit',month:'2-digit',year:'numeric',timeZone:tz}).format(x);const weekday=new Intl.DateTimeFormat(locale,{weekday:'short',timeZone:tz}).format(x);const time=new Intl.DateTimeFormat('en-GB',{hour:'2-digit',minute:'2-digit',hour12:false,timeZone:tz}).format(x);return date+' ('+weekday+') '+time;};
 const money=n=>Number(n||0).toLocaleString('ru-RU',{maximumFractionDigits:2});
 
 const HE_REPLACEMENTS=[
