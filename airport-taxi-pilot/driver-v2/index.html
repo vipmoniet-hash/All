@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#ffffff">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="VanClick Driver">
+  <link rel="manifest" href="/driver/manifest.webmanifest">
+  <link rel="icon" href="/driver/icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/driver/app.css">
+  <title>VanClick Driver</title>
+</head>
+<body>
+<header class="appbar">
+  <div class="appbar-inner">
+    <div class="brand">
+      <div class="brand-mark">V</div>
+      <div class="brand-copy"><b>VanClick Driver</b><small><span class="online-dot"></span> מחובר למערכת</small></div>
+    </div>
+    <div class="head-actions">
+      <button id="installBtn" class="install-btn hidden" type="button">התקן</button>
+      <button id="refresh" class="iconbtn" type="button" aria-label="רענון">↻</button>
+      <div class="wallet-chip"><span>יתרה</span><b><span id="wallet">—</span> ₪</b></div>
+      <select id="driver" class="driver-switch" aria-label="נהג בדיקה">
+        <option value="drv-001">נהג 1</option>
+        <option value="drv-002">נהג 2</option>
+      </select>
+    </div>
+  </div>
+</header>
+
+<main class="shell">
+  <section class="daybar">
+    <div><small>היום</small><b id="today">—</b></div>
+    <div class="availability"><span></span> זמין לקבלת נסיעות</div>
+  </section>
+
+  <section id="installBanner" class="install-banner hidden">
+    <div><b>VanClick Driver כאפליקציה</b><small>אפשר להתקין במסך הבית ולעבוד בלי לחפש קישור.</small></div>
+    <button id="installBannerBtn" type="button">התקן עכשיו</button>
+  </section>
+
+  <nav class="tabs desktop-tabs" aria-label="ניווט">
+    <button data-tab="pool" class="active">נסיעות <span id="poolCount"></span></button>
+    <button data-tab="mine">שלי <span id="mineCount"></span></button>
+    <button data-tab="walletPane">ארנק</button>
+    <button data-tab="history">היסטוריה</button>
+  </nav>
+
+  <section id="pool" class="pane active"><div class="skeleton-card"></div></section>
+  <section id="mine" class="pane"><div class="empty">אין נסיעות פעילות</div></section>
+
+  <section id="walletPane" class="pane">
+    <div class="panel wallet-panel">
+      <div class="panel-head"><div><small>ארנק נהג</small><h2>טעינת יתרה</h2></div><div class="wallet-balance"><span id="walletBig">—</span> ₪</div></div>
+      <p>העמלה על נסיעה משולמת מהארנק לפני חשיפת פרטי הלקוח. טעינה ב-Bit או במזומן נכנסת לשימוש לאחר אישור הדיספצ׳ר.</p>
+      <form id="topup" class="topup">
+        <label><span>סכום</span><input name="amount" type="number" min="1" inputmode="numeric" placeholder="לדוגמה 200" required></label>
+        <label><span>אמצעי טעינה</span><select name="method"><option value="bit">Bit</option><option value="cash">מזומן</option></select></label>
+        <button type="submit">שלח לאישור</button>
+      </form>
+      <div id="topupStatus" class="form-status"></div>
+      <div id="topupHistory" class="topup-history"></div>
+    </div>
+  </section>
+
+  <section id="history" class="pane"><div class="empty">אין היסטוריה</div></section>
+</main>
+
+<nav class="bottom-nav" aria-label="ניווט תחתון">
+  <button data-tab="pool" class="active"><span>⌁</span><b>נסיעות</b><em id="poolCountBottom"></em></button>
+  <button data-tab="mine"><span>✓</span><b>שלי</b><em id="mineCountBottom"></em></button>
+  <button data-tab="walletPane"><span>₪</span><b>ארנק</b></button>
+  <button data-tab="history"><span>↺</span><b>היסטוריה</b></button>
+</nav>
+
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+<script src="/driver/config.js"></script>
+<script src="/driver/app.js"></script>
+</body>
+</html>
