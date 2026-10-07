@@ -8,6 +8,7 @@ assert(/name:\s*vanclick-taxi4-marketplace-scale/.test(src),'web service name');
 assert(/healthCheckPath:\s*\/health/.test(src),'health check must be /health');
 assert(/key:\s*DATABASE_URL[\s\S]*?fromDatabase:[\s\S]*?name:\s*vanclick-unified-staging-db[\s\S]*?property:\s*connectionString/.test(src),'DATABASE_URL must come from private Render Postgres');
 assert(/name:\s*vanclick-unified-staging-db/.test(src),'database resource name');
+assert(/name:\s*vanclick-unified-staging-db[\s\S]*?plan:\s*basic-256mb/.test(src),'database must use persistent basic-256mb plan');
 assert(/postgresMajorVersion:\s*["']18["']/.test(src),'Postgres 18');
 assert(/databaseName:\s*vanclick_unified_staging_db/.test(src),'database name');
 assert(/ipAllowList:\s*\[\]/.test(src),'database must reject public inbound connections');
@@ -32,10 +33,24 @@ function envBlock(key){
   }
   return block.join('\n');
 }
-for(const key of ['MARKETPLACE_ADMIN_PIN','MARKETPLACE_DISPATCH_1_4_PIN','MARKETPLACE_DISPATCH_5_6_PIN']){
+for(const key of ['MARKETPLACE_ADMIN_PIN_HASH','MARKETPLACE_DISPATCH_1_4_PIN_HASH','MARKETPLACE_DISPATCH_5_6_PIN_HASH']){
   const block=envBlock(key);
   assert(/sync:\s*false/.test(block),key+' must be declared dashboard-only with sync:false');
   assert(!/\bvalue\s*:/.test(block),key+' must not contain a committed value');
+}
+for(const key of ['MARKETPLACE_ADMIN_PIN','MARKETPLACE_DISPATCH_1_4_PIN','MARKETPLACE_DISPATCH_5_6_PIN']){
+  assert(!new RegExp('^- key:\\s*'+key+'\\s*
+console.log('RENDER_BLUEPRINT_CONTRACT_OK',JSON.stringify({
+  privatePostgres:true,
+  databaseUrlReference:true,
+  healthCheck:true,
+  authFailClosed:true,
+  postgresFailClosed:true,
+  noCommittedSecrets:true,
+  persistentPostgres:true,
+  hashedStaffSecrets:true
+}));
+,'m').test(src),key+' plaintext slot must not exist in Blueprint');
 }
 console.log('RENDER_BLUEPRINT_CONTRACT_OK',JSON.stringify({
   privatePostgres:true,
