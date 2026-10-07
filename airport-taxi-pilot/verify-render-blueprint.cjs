@@ -16,11 +16,27 @@ for(const key of ['MARKETPLACE_AUTH_REQUIRED','UNIFIED_REQUIRE_AUTH','UNIFIED_RE
   assert(re.test(src),key+' must fail closed');
 }
 assert(!/postgres(?:ql)?:\/\//i.test(src),'connection string must never be committed');
-for(const key of ['MARKETPLACE_ADMIN_PIN','MARKETPLACE_DISPATCH_1_4_PIN','MARKETPLACE_DISPATCH_5_6_PIN']){
-  const re=new RegExp('key:\\s*'+key+'[\\s\\S]*?sync:\\s*false');
-  assert(re.test(src),key+' must be declared dashboard-only with sync:false');
+function envBlock(key){
+  const lines=src.split(/\r?\n/);
+  const start=lines.findIndex(line=>line.includes('- key: '+key));
+  assert(start>=0,key+' must be declared');
+  const indent=(lines[start].match(/^\s*/)||[''])[0].length;
+  const block=[lines[start]];
+  for(let i=start+1;i<lines.length;i++){
+    const line=lines[i];
+    const trimmed=line.trim();
+    const lineIndent=(line.match(/^\s*/)||[''])[0].length;
+    if(trimmed.startsWith('- key:')&&lineIndent===indent)break;
+    if(trimmed&&lineIndent<indent)break;
+    block.push(line);
+  }
+  return block.join('\n');
 }
-assert(!/key:\s*MARKETPLACE_(?:ADMIN|DISPATCH_1_4|DISPATCH_5_6)_PIN[\s\S]{0,120}?value:/m.test(src),'staff PIN values must never be committed');
+for(const key of ['MARKETPLACE_ADMIN_PIN','MARKETPLACE_DISPATCH_1_4_PIN','MARKETPLACE_DISPATCH_5_6_PIN']){
+  const block=envBlock(key);
+  assert(/sync:\s*false/.test(block),key+' must be declared dashboard-only with sync:false');
+  assert(!/\bvalue\s*:/.test(block),key+' must not contain a committed value');
+}
 console.log('RENDER_BLUEPRINT_CONTRACT_OK',JSON.stringify({
   privatePostgres:true,
   databaseUrlReference:true,
