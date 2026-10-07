@@ -104,3 +104,94 @@ main .card,main [class*="card"],main .panel,main [class*="panel"],main .box,main
   .vc-mobile-sticky button{width:min(100%,560px);margin:0 auto;display:block;min-height:48px;border:1px solid var(--vc-green)!important;border-radius:15px!important;background:var(--vc-green)!important;color:#fff!important;font-weight:850!important}
 }
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+
+/* v3: direct normalization of the live calculator and booking steps */
+.vc-existing-order{
+  min-height:38px;padding:7px 10px;border:0;background:transparent;color:#46525e;border-radius:11px;font-weight:760;cursor:pointer
+}
+.vc-existing-order:hover{background:#f2f3f2;color:var(--vc-ink)}
+.vc-booking-slot{background:transparent!important;border:0!important;box-shadow:none!important}
+.vc-booking-label{margin-bottom:5px}
+.vc-booking-title{font-size:24px}
+.vc-booking-hint{margin-bottom:12px}
+#quoteCard.vc-quote-card{
+  display:block!important;margin:0!important;padding:18px!important;background:#fff!important;
+  border:1px solid var(--vc-line)!important;border-radius:20px!important;box-shadow:none!important
+}
+#quoteCard .quote-head{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:12px!important;margin:0 0 13px!important}
+#quoteCard .quote-head>div{display:flex;align-items:center;gap:10px}
+#quoteCard .quote-head small{display:block;color:#7a8791!important;font-size:12px!important}
+#quoteCard .quote-head h2{margin:2px 0 0!important;color:var(--vc-ink)!important;font-size:20px!important;line-height:1.15!important}
+#quoteCard .step-dot{width:36px!important;height:36px!important;display:grid!important;place-items:center!important;border-radius:11px!important;background:linear-gradient(145deg,#17333d,#0c222b)!important;color:var(--vc-gold-light)!important;font-weight:900!important}
+#quoteCard .secure-note{padding:6px 9px!important;border-radius:999px!important;background:#f3f5f4!important;color:#6c7780!important;border:1px solid #e2e6e4!important;font-size:11.5px!important;font-weight:800!important}
+#quoteCard .direction-switch{
+  display:grid!important;grid-template-columns:1fr 1fr!important;gap:4px!important;margin:0 0 14px!important;padding:4px!important;
+  background:#f0f2f3!important;border:1px solid var(--vc-line)!important;border-radius:14px!important
+}
+#quoteCard .direction{min-height:46px!important;border:1px solid transparent!important;border-radius:10px!important;background:transparent!important;color:#65717b!important;box-shadow:none!important;font-weight:850!important}
+#quoteCard .direction.active{background:#0f3742!important;color:#fff!important;border-color:#0f3742!important;box-shadow:0 6px 15px rgba(15,55,66,.13)!important}
+#quoteCard .quote-form{display:grid!important;gap:11px!important;margin:0!important}
+#quoteCard .field{display:grid!important;gap:6px!important;margin:0!important;color:#34414d!important}
+#quoteCard .field>span{font-size:13px!important;font-weight:800!important}
+#quoteCard .input-shell{position:relative!important}
+#quoteCard .field-icon{position:absolute!important;inset-inline-end:13px!important;top:50%!important;transform:translateY(-50%)!important;color:var(--vc-green)!important;z-index:2!important}
+#quoteCard .input-shell input{padding-inline-end:38px!important}
+#quoteCard .two-cols{display:grid!important;grid-template-columns:1fr 1fr!important;gap:10px!important}
+#quoteBtn.vc-main-cta,#submitBtn.vc-main-cta{
+  width:100%!important;min-height:52px!important;margin-top:2px!important;display:flex!important;align-items:center!important;justify-content:center!important;gap:10px!important;
+  background:var(--vc-green)!important;color:#fff!important;border:1px solid var(--vc-green)!important;border-radius:13px!important;box-shadow:0 8px 20px rgba(11,107,80,.14)!important;font-size:17px!important
+}
+#largeTaxiBtn.vc-secondary-cta{
+  width:100%!important;min-height:44px!important;background:#fff!important;color:var(--vc-green2)!important;border:1px solid #cbded6!important;border-radius:12px!important;box-shadow:none!important;font-size:13px!important
+}
+#quoteCard .quote-result{margin-top:12px!important}
+.vc-details-slot{max-width:1080px;margin:14px auto 0}
+#bookingCard.vc-booking-card{
+  margin:0!important;padding:20px!important;background:#fff!important;border:1px solid var(--vc-line)!important;border-radius:22px!important;box-shadow:var(--vc-shadow)!important
+}
+#bookingCard.hidden{display:none!important}
+#bookingCard .booking-title{display:flex!important;align-items:center!important;gap:11px!important;margin-bottom:15px!important}
+#bookingCard .booking-title h2{margin:2px 0 0!important;font-size:22px!important;color:var(--vc-ink)!important}
+#bookingCard .booking-title small{color:#7a8791!important}
+#bookingCard .mini-fare{margin-inline-start:auto;color:#75551f!important;font-weight:900!important}
+#bookingCard .booking-layout{display:grid!important;grid-template-columns:minmax(0,1.25fr) minmax(260px,.75fr)!important;gap:14px!important;align-items:start!important}
+#bookingCard .details-card{display:grid!important;gap:12px!important;margin:0!important;padding:0!important;background:transparent!important;border:0!important;box-shadow:none!important}
+#bookingCard .form-section{padding:15px!important;background:#fbfcfb!important;border:1px solid #e2e6e4!important;border-radius:15px!important}
+#bookingCard .section-label{display:flex!important;align-items:center!important;gap:8px!important;margin-bottom:11px!important}
+#bookingCard .section-label>span{width:28px!important;height:28px!important;display:grid!important;place-items:center!important;border-radius:9px!important;background:var(--vc-green-soft)!important;color:var(--vc-green2)!important;font-weight:900!important}
+#bookingCard .section-label b{font-size:15px!important;color:var(--vc-ink)!important}
+#bookingCard .section-label small{margin-inline-start:auto;color:#78838c!important;font-size:11.5px!important}
+#bookingCard .two-cols{display:grid!important;grid-template-columns:1fr 1fr!important;gap:10px!important}
+#bookingCard .field{display:grid!important;gap:6px!important;margin:0 0 10px!important}
+#bookingCard .field:last-child{margin-bottom:0!important}
+#bookingCard .field>span{color:#34414d!important;font-size:13px!important;font-weight:780!important}
+#bookingCard .payment-grid{display:grid!important;grid-template-columns:1fr 1fr!important;gap:8px!important}
+#bookingCard .payment-option{display:flex!important;align-items:center!important;gap:9px!important;padding:12px!important;background:#fff!important;border:1px solid #dbe1df!important;border-radius:12px!important}
+#bookingCard .payment-option small{display:block;color:#78838c!important}
+#bookingCard .summary-card{position:sticky!important;top:82px!important;padding:17px!important;background:#fffaf0!important;border:1px solid #dfc27f!important;border-radius:16px!important;box-shadow:none!important}
+#bookingCard .summary-card small{color:#7c6a45!important}#bookingCard .summary-route{margin:8px 0 13px;color:#34414d!important;font-weight:800!important}
+#bookingCard .summary-fare{display:flex!important;align-items:end!important;justify-content:space-between!important;gap:12px!important;padding-top:12px!important;border-top:1px solid #ead7ae!important}
+#bookingCard .summary-fare strong{font-size:28px!important;color:#75551f!important}
+#bookingCard .summary-card ul{margin:13px 0 0!important;padding:0!important;list-style:none!important;display:grid!important;gap:7px!important;color:#56626c!important;font-size:12.5px!important}
+#bookingCard details.extras{border:1px solid #e1e5e3!important;border-radius:13px!important;background:#fff!important;overflow:hidden!important}
+#bookingCard details.extras summary{padding:12px 14px!important;cursor:pointer!important;font-weight:800!important;color:#34414d!important}
+#bookingCard .extras-body{padding:0 14px 14px!important}
+#tracker{max-width:920px!important;margin:24px auto!important;padding:20px!important;background:#fff!important;border:1px solid var(--vc-line)!important;border-radius:20px!important;box-shadow:var(--vc-shadow-soft)!important}
+#tracker.hidden{display:none!important}
+.proof-strip,.how-it-works,.large-transfer{display:none!important}
+.vc-support{display:block!important}
+@media(max-width:760px){
+  .vc-cro-grid{display:flex!important;flex-direction:column!important}
+  .vc-cro-copy{padding:17px 15px!important}
+  .vc-cro-copy h1{font-size:28px!important}
+  .vc-cro-lede{margin-bottom:10px!important}
+  .vc-booking-slot{width:100%!important;margin:0!important}
+  #quoteCard.vc-quote-card{padding:14px!important;border-radius:17px!important}
+  #quoteCard .two-cols{grid-template-columns:1fr 1fr!important}
+  #bookingCard.vc-booking-card{padding:13px!important;border-radius:18px!important}
+  #bookingCard .booking-layout{grid-template-columns:1fr!important}
+  #bookingCard .two-cols{grid-template-columns:1fr!important}
+  #bookingCard .summary-card{position:static!important}
+  .vc-details-slot{margin-top:10px}
+  .vc-existing-order{display:none!important}
+}
