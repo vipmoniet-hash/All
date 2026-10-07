@@ -110,6 +110,55 @@ function marketplacePoolView(db, driver, order) {
   );
 
 
+  replaceOnce(
+    /export async function requestDriverTopup\(driverId,amount,method\)\{[\s\S]*?\n\nexport async function buyOrder/,
+    `const DRIVER_TOPUP_VAT_RATE=0.18;
+function driverTopupBreakdown(amount){
+  const credits=positiveAmount(amount,'TOPUP_MUST_BE_POSITIVE');
+  const vatAmount=Number((credits*DRIVER_TOPUP_VAT_RATE).toFixed(2));
+  const totalAmount=Number((credits+vatAmount).toFixed(2));
+  return {credits,netAmount:credits,vatRate:DRIVER_TOPUP_VAT_RATE,vatAmount,totalAmount};
+}
+function normalizeTopupTaxFields(topup){
+  const b=driverTopupBreakdown(topup.credits??topup.amount);
+  topup.amount=b.credits;
+  topup.credits=b.credits;
+  topup.netAmount=b.netAmount;
+  topup.vatRate=b.vatRate;
+  topup.vatAmount=b.vatAmount;
+  topup.totalAmount=b.totalAmount;
+  return b;
+}
+export async function requestDriverTopup(driverId,amount,method){return transact(db=>{
+  const driver=activeDriver(db,driverId);if(!driver)throw new Error('DRIVER_NOT_FOUND');
+  const b=driverTopupBreakdown(amount);
+  const topup={id:id('top'),driverId,amount:b.credits,credits:b.credits,netAmount:b.netAmount,vatRate:b.vatRate,vatAmount:b.vatAmount,totalAmount:b.totalAmount,method:normalizePaymentMethod(method),status:'pending',requestedAt:new Date().toISOString(),approvedAt:null,approvedBy:null};
+  db.topups.push(topup);
+  db.ledger.push({id:id('led'),at:topup.requestedAt,driverId,orderId:null,type:'wallet_topup_requested',amount:b.credits,credits:b.credits,netAmount:b.netAmount,vatRate:b.vatRate,vatAmount:b.vatAmount,totalAmount:b.totalAmount,method:topup.method,topupId:topup.id});
+  return topup;
+});}
+export async function approveDriverTopup(topupId,approvedBy='dispatcher'){return transact(db=>{
+  const topup=db.topups.find(t=>t.id===topupId);if(!topup)throw new Error('TOPUP_NOT_FOUND');if(topup.status!=='pending')throw new Error('TOPUP_NOT_PENDING');
+  const driver=activeDriver(db,topup.driverId);if(!driver)throw new Error('DRIVER_NOT_FOUND');
+  const b=normalizeTopupTaxFields(topup);
+  driver.wallet=Number((Number(driver.wallet)+b.credits).toFixed(2));
+  topup.status='approved';topup.approvedAt=new Date().toISOString();topup.approvedBy=clean(approvedBy,100)||'dispatcher';
+  db.ledger.push({id:id('led'),at:topup.approvedAt,driverId:driver.id,orderId:null,type:'wallet_topup_approved',amount:b.credits,credits:b.credits,netAmount:b.netAmount,vatRate:b.vatRate,vatAmount:b.vatAmount,totalAmount:b.totalAmount,method:topup.method,topupId:topup.id,approvedBy:topup.approvedBy});
+  return{...topup,wallet:driver.wallet};
+});}
+export async function rejectDriverTopup(topupId,rejectedBy='dispatcher'){return transact(db=>{
+  const topup=db.topups.find(t=>t.id===topupId);if(!topup)throw new Error('TOPUP_NOT_FOUND');if(topup.status!=='pending')throw new Error('TOPUP_NOT_PENDING');
+  const b=normalizeTopupTaxFields(topup);
+  topup.status='rejected';topup.approvedAt=new Date().toISOString();topup.approvedBy=clean(rejectedBy,100)||'dispatcher';
+  db.ledger.push({id:id('led'),at:topup.approvedAt,driverId:topup.driverId,orderId:null,type:'wallet_topup_rejected',amount:b.credits,credits:b.credits,netAmount:b.netAmount,vatRate:b.vatRate,vatAmount:b.vatAmount,totalAmount:b.totalAmount,method:topup.method,topupId:topup.id});
+  return topup;
+});}
+
+export async function buyOrder`,
+    '18% VAT on driver credit top-ups'
+  );
+
+
 
   replaceOnce(
     /export async function listAdminState\(\) \{[\s\S]*?\n\}/,
@@ -341,6 +390,20 @@ patchFile('server.js',({replaceOnce})=>{
 });
 
 
+patchFile('apps/driver/public/index.html',({replaceOnce})=>{
+  replaceOnce(
+    '<div class="wallet"><span>יתרה</span><b><span id="wallet">—</span> ₪</b></div>',
+    '<div class="wallet"><span>יתרת קרדיטים</span><b><span id="wallet">—</span> קרדיטים</b></div>',
+    'driver wallet credits label'
+  );
+  replaceOnce(
+    '<section id="walletPane" class="pane"><div class="panel"><h2>טעינת יתרה</h2><p>Bit או מזומן. היתרה נכנסת לשימוש רק אחרי אישור הדיספצ׳ר.</p><form id="topup" class="topup"><input name="amount" type="number" min="1" placeholder="סכום" required><select name="method"><option value="bit">Bit</option><option value="cash">מזומן</option></select><button>שלח לאישור</button></form><div id="topupStatus"></div><div id="topupHistory"></div></div></section>',
+    '<section id="walletPane" class="pane"><div class="panel"><h2>רכישת קרדיטים</h2><p>1 קרדיט = 1 ₪ לפני מע״מ. לתשלום מתווסף מע״מ 18%; הקרדיטים נכנסים לשימוש רק אחרי אישור הדיספצ׳ר.</p><form id="topup" class="topup"><input name="amount" type="number" min="1" step="1" placeholder="מספר קרדיטים" required><select name="method"><option value="bit">Bit</option><option value="cash">מזומן</option></select><button>שלח לאישור</button></form><div id="topupCalc">לדוגמה: 100 קרדיטים = 100 ₪ + מע״מ 18% = 118 ₪ לתשלום</div><div id="topupStatus"></div><div id="topupHistory"></div></div></section>',
+    'driver credit top-up VAT disclosure'
+  );
+});
+
+
 const authModule=fs.readFileSync(path.join(__dirname,'marketplace-auth.js'),'utf8');
 fs.writeFileSync(path.join(root,'src','auth.js'),authModule);
 const driverUi=fs.readFileSync(path.join(__dirname,'marketplace-driver-app.js'),'utf8');
@@ -379,6 +442,7 @@ console.log('MARKETPLACE_V1_PATCH_APPLIED', JSON.stringify({
   completionStateGuard:true,
   commissionMetrics:true,
   driverCancellationMetrics:true,
+  creditTopupVat18:true,
   roleBasedAuth:true,
   highVolumeDriverUi:true,
   exceptionFirstDispatchUi:true
