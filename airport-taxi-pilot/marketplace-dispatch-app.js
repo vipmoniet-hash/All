@@ -1,13 +1,144 @@
 /* MARKETPLACE_V1_DISPATCH_UI */
 const API=window.TAXI4_API_BASE||location.origin;
 const q=s=>document.querySelector(s),qa=s=>[...document.querySelectorAll(s)];
-let state=null,authRequired=false,authToken=sessionStorage.getItem('taxi4_dispatch_token')||'';
+let state=null,authRequired=false,authToken=sessionStorage.getItem('taxi4_dispatch_token')||'',dispatchLang=localStorage.getItem('taxi4_dispatch_lang')||'ru';
 
 const esc=v=>String(v??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
 const pay=m=>m==='bit'?'Bit':'наличные';
-const statusRu=s=>({awaiting_dispatch:'Новый',pool:'Свободен',assigned:'Взят водителем',driver_enroute:'Водитель в пути',completed:'Завершён',cancelled:'Отменён'})[s]||s;
+const statusRu=s=>({awaiting_dispatch:dispatchLang==='he'?'חדש':'Новый',pool:dispatchLang==='he'?'פנוי':'Свободен',assigned:dispatchLang==='he'?'נלקח על ידי נהג':'Взят водителем',driver_enroute:dispatchLang==='he'?'הנהג בדרך':'Водитель в пути',completed:dispatchLang==='he'?'הושלם':'Завершён',cancelled:dispatchLang==='he'?'בוטל':'Отменён'})[s]||s;
 const fmt=d=>new Date(d).toLocaleString('ru-RU',{weekday:'short',day:'2-digit',month:'2-digit',year:'2-digit',hour:'2-digit',minute:'2-digit'});
 const money=n=>Number(n||0).toLocaleString('ru-RU',{maximumFractionDigits:2});
+
+const HE_REPLACEMENTS=[
+  ['VanClick Taxi 1–4 · изолированная тестовая среда','VanClick Taxi 1–4 · סביבת בדיקה מבודדת'],
+  ['Вход в диспетчерскую','כניסה למוקד'],
+  ['Введите PIN администратора или диспетчера VanClick Taxi 1–4.','הזן PIN של מנהל או סדרן VanClick Taxi 1–4.'],
+  ['PIN администратора / диспетчера','PIN מנהל / סדרן'],
+  ['Неверный PIN','PIN שגוי'],
+  ['Нужно войти снова','יש להתחבר מחדש'],
+  ['Выйти','יציאה'],
+  ['Новые','חדשות'],
+  ['Внимание','דורש טיפול'],
+  ['Пул','מאגר'],
+  ['В работе','בטיפול'],
+  ['Требует вмешательства','דורש התערבות'],
+  ['Здесь только исключения — обычные заказы водители забирают сами.','כאן מופיעים רק חריגים — הזמנות רגילות הנהגים לוקחים בעצמם.'],
+  ['Нет ситуаций, требующих вмешательства','אין מצבים הדורשים התערבות'],
+  ['Проблема водителя','בעיה של נהג'],
+  ['Свободный заказ скоро','הזמנה פנויה בקרוב'],
+  ['Просроченный свободный заказ','הזמנה פנויה שעברה את זמן האיסוף'],
+  ['Водитель не подтвердил выезд','הנהג לא אישר יציאה'],
+  ['Открыть заказ','פתח הזמנה'],
+  ['Решено','טופל'],
+  ['Новый','חדש'],
+  ['Свободен','פנוי'],
+  ['Взят водителем','נלקח על ידי נהג'],
+  ['Водитель в пути','הנהג בדרך'],
+  ['Завершён','הושלם'],
+  ['Отменён','בוטל'],
+  ['Пассажиры','נוסעים'],
+  ['Багаж','מטען'],
+  ['больших','גדולות'],
+  ['малых','קטנות'],
+  ['Цена','מחיר'],
+  ['Комиссия','עמלה'],
+  ['Водителю','לנהג'],
+  ['Оплата','תשלום'],
+  ['Рейс','טיסה'],
+  ['Подача:','איסוף:'],
+  ['Назначение:','יעד:'],
+  ['Комментарий:','הערה:'],
+  ['Водитель:','נהג:'],
+  ['Отправить в общий пул','שלח למאגר הנהגים'],
+  ['📋 Для группы','📋 לקבוצה'],
+  ['↗ WhatsApp','↗ WhatsApp'],
+  ['WhatsApp: заказ получен','WhatsApp: ההזמנה התקבלה'],
+  ['Снять + вернуть комиссию','הסר נהג + החזר עמלה'],
+  ['Снять без возврата','הסר ללא החזר'],
+  ['WhatsApp: водитель','WhatsApp: נהג'],
+  ['Закрыть проблему','סגור בעיה'],
+  ['WhatsApp: водитель в пути','WhatsApp: הנהג בדרך'],
+  ['Отменить','בטל'],
+  ['Нет заказов по этому фильтру','אין הזמנות במסנן הזה'],
+  ['Требуют внимания','דורשות טיפול'],
+  ['В общем пуле','במאגר הכללי'],
+  ['Завершены','הושלמו'],
+  ['Чистая комиссия','עמלה נטו'],
+  ['WhatsApp-группы · без данных клиента','קבוצות WhatsApp · ללא פרטי לקוח'],
+  ['Копировать видимые','העתק מוצגות'],
+  ['Поделиться видимыми','שתף מוצגות'],
+  ['Нет ожидающих пополнений','אין טעינות ממתינות'],
+  ['Проверить + включить','אמת + הפעל'],
+  ['Выключить','כבה'],
+  ['Включить','הפעל'],
+  ['Сменить PIN','שנה PIN'],
+  ['Журнал пуст','היומן ריק'],
+  ['Проверить','אמת'],
+  ['Баланс','יתרה'],
+  ['баланс ','יתרה '],
+  ['завершено ','הושלמו '],
+  ['проверен','מאומת'],
+  ['НЕ проверен','לא מאומת'],
+  ['активен','פעיל'],
+  ['выключен','כבוי'],
+  ['Подтвердить','אשר'],
+  ['Отклонить','דחה'],
+  ['наличные','מזומן'],
+  ['мин','דק׳'],
+  ['обратно','חזור'],
+  ['туда','הלוך'],
+  ['Скопировано','הועתק'],
+  ['Скопировано поездок:','מספר נסיעות שהועתקו:'],
+  ['Нет видимых свободных или новых поездок','אין נסיעות חדשות או פנויות מוצגות'],
+  ['Ответьте кодом','השב עם הקוד'],
+  ['если готовы взять поездку.','אם אתה מוכן לקחת את הנסיעה.'],
+  ['пасс.','נוסעים']
+];
+
+function translateTextValue(value){
+  if(dispatchLang!=='he')return value;
+  let out=String(value??'');
+  for(const [ru,he] of HE_REPLACEMENTS)out=out.split(ru).join(he);
+  return out;
+}
+function applyDispatchLanguage(){
+  const he=dispatchLang==='he';
+  document.documentElement.lang=he?'he':'ru';
+  document.documentElement.dir=he?'rtl':'ltr';
+  document.body?.classList.toggle('lang-he',he);
+  document.title=he?'VanClick Taxi 1–4 · מוקד':'VanClick Taxi 1–4 · Диспетчерская';
+  const root=document.body;
+  if(!root)return;
+  const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);
+  const nodes=[];while(walker.nextNode())nodes.push(walker.currentNode);
+  for(const node of nodes){
+    if(node.parentElement?.closest('script,style'))continue;
+    if(he)node.nodeValue=translateTextValue(node.nodeValue);
+  }
+  root.querySelectorAll('input[placeholder],textarea[placeholder]').forEach(el=>{
+    if(!el.dataset.ruPlaceholder)el.dataset.ruPlaceholder=el.getAttribute('placeholder')||'';
+    el.setAttribute('placeholder',he?translateTextValue(el.dataset.ruPlaceholder):el.dataset.ruPlaceholder);
+  });
+  root.querySelectorAll('[data-lang-choice]').forEach(btn=>btn.classList.toggle('active',btn.dataset.langChoice===dispatchLang));
+}
+function setDispatchLang(lang){
+  dispatchLang=lang==='he'?'he':'ru';
+  localStorage.setItem('taxi4_dispatch_lang',dispatchLang);
+  if(state)render();
+  ensureDispatchAuthUi();
+  applyDispatchLanguage();
+}
+function ensureLanguageSwitch(){
+  if(q('#dispatchLanguageSwitch'))return;
+  const wrap=document.createElement('div');
+  wrap.id='dispatchLanguageSwitch';
+  wrap.className='dispatch-language-switch';
+  wrap.innerHTML='<button type="button" data-lang-choice="ru">Русский</button><button type="button" data-lang-choice="he">עברית</button>';
+  wrap.querySelectorAll('button').forEach(btn=>btn.onclick=()=>setDispatchLang(btn.dataset.langChoice));
+  const top=q('.topbar')||q('.shell');
+  top?.appendChild(wrap);
+  applyDispatchLanguage();
+}
 
 function publicOfferCode(o){return 'VC-'+String(o.id||'').slice(-5).toUpperCase();}
 function publicRideText(o){
@@ -80,7 +211,7 @@ function ensureDispatchAuthUi(){
         q('#dispatchAuthOverlay').classList.add('hidden');
         q('#dispatchLogout')?.classList.remove('hidden');
         await load(true);
-      }catch(err){q('#dispatchAuthStatus').textContent=err.message==='INVALID_CREDENTIALS'?'Неверный PIN':err.message;}
+      }catch(err){q('#dispatchAuthStatus').textContent=err.message==='INVALID_CREDENTIALS'?(dispatchLang==='he'?'PIN שגוי':'Неверный PIN'):err.message;applyDispatchLanguage();}
     };
   }
 }
@@ -88,7 +219,7 @@ function showDispatchLogin(message=''){
   ensureDispatchAuthUi();
   authToken='';
   sessionStorage.removeItem('taxi4_dispatch_token');
-  q('#dispatchAuthStatus').textContent=message;
+  q('#dispatchAuthStatus').textContent=dispatchLang==='he'?translateTextValue(message):message;
   q('#dispatchAuthOverlay').classList.remove('hidden');
 }
 async function dispatchLogout(){
@@ -161,10 +292,10 @@ async function message(id,kind){
 
 function attentionLabel(a){
   return ({
-    open_issue:'Проблема водителя',
-    unclaimed_soon:'Свободный заказ скоро',
-    unclaimed_overdue:'Просроченный свободный заказ',
-    driver_not_enroute:'Водитель не подтвердил выезд'
+    open_issue:dispatchLang==='he'?'בעיה של נהג':'Проблема водителя',
+    unclaimed_soon:dispatchLang==='he'?'הזמנה פנויה בקרוב':'Свободный заказ скоро',
+    unclaimed_overdue:dispatchLang==='he'?'הזמנה פנויה שעברה את זמן האיסוף':'Просроченный свободный заказ',
+    driver_not_enroute:dispatchLang==='he'?'הנהג לא אישר יציאה':'Водитель не подтвердил выезд'
   })[a.kind]||a.kind;
 }
 
@@ -267,6 +398,7 @@ function render(){
 
   renderAttention();
   renderOrders();
+  applyDispatchLanguage();
   if(q('#quickNew'))q('#quickNew').textContent=c.awaiting_dispatch||0;
   if(q('#quickAttention'))q('#quickAttention').textContent=state.attentionCount||0;
   if(q('#quickPool'))q('#quickPool').textContent=c.pool||0;
@@ -351,6 +483,7 @@ qa('.tabs button').forEach(b=>b.onclick=()=>{
 
 async function boot(){
   ensureMarketplaceUi();
+  ensureLanguageSwitch();
   ensureQuickNav();
   q('#filter').value='awaiting_dispatch';
   const ready=await initDispatchAuth();
