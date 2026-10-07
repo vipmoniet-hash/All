@@ -81,7 +81,7 @@ try{
   assert.equal(large.role,'dispatcher','existing 5-6 dispatcher PIN must resolve to unified dispatcher');
 
   x=await call('/api/dispatch/state',{token:small.token});
-  assert.equal(x.r.status,200,'dispatcher_1_4 can access 1-4 dispatch state');
+  assert.equal(x.r.status,200,'unified dispatcher can access 1-4 dispatch state');
   assert.ok(Array.isArray(x.j.orders)&&x.j.orders.every(o=>(o.serviceType||'taxi_1_4')==='taxi_1_4'),'small state contains only 1-4');
   assert.equal(x.r.status,200,'unified dispatcher can access 1-4 dispatch state');
 
