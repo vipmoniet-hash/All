@@ -9,6 +9,46 @@ const statusRu=s=>({awaiting_dispatch:'Новый',pool:'Свободен',assig
 const fmt=d=>new Date(d).toLocaleString('ru-RU',{weekday:'short',day:'2-digit',month:'2-digit',year:'2-digit',hour:'2-digit',minute:'2-digit'});
 const money=n=>Number(n||0).toLocaleString('ru-RU',{maximumFractionDigits:2});
 
+function publicOfferCode(o){return 'VC-'+String(o.id||'').slice(-5).toUpperCase();}
+function publicRideText(o){
+  const fare=Number(o.fare??o.quotedFare??0);
+  const commission=Number(o.commission??o.quotedCommission??0);
+  const driverNet=Math.max(0,fare-commission);
+  const bags=[Number(o.largeLuggage||0)?'🧳 '+Number(o.largeLuggage||0):'',Number(o.smallLuggage||0)?'👜 '+Number(o.smallLuggage||0):''].filter(Boolean).join(' · ')||'без указанного багажа';
+  return [
+    '🚕 VanClick · '+publicOfferCode(o),
+    '📅 '+fmt(o.tripAt),
+    '📍 '+String(o.fromArea||'')+' → '+String(o.toArea||''),
+    '👥 '+Number(o.passengers||1)+' пасс. · '+bags,
+    '💰 Водителю: '+money(driverNet)+' ₪',
+    '💳 '+pay(o.ridePaymentMethod),
+    'Ответьте кодом '+publicOfferCode(o)+' если готовы взять поездку.'
+  ].join('\n');
+}
+async function copyText(text){
+  try{await navigator.clipboard.writeText(text);return true;}
+  catch{
+    const ta=document.createElement('textarea');
+    ta.value=text;ta.setAttribute('readonly','');ta.style.position='fixed';ta.style.opacity='0';
+    document.body.appendChild(ta);ta.select();const ok=document.execCommand('copy');ta.remove();return ok;
+  }
+}
+async function shareText(text){
+  if(navigator.share){
+    try{await navigator.share({text});return true;}catch(err){if(err?.name==='AbortError')return false;}
+  }
+  window.open('https://wa.me/?text='+encodeURIComponent(text),'_blank');
+  return true;
+}
+function visibleGroupOrders(){
+  const filter=q('#filter')?.value||'all';
+  return (state?.orders||[])
+    .filter(o=>['awaiting_dispatch','pool'].includes(o.status))
+    .filter(o=>filter==='all'||o.status===filter)
+    .sort((a,b)=>new Date(a.tripAt)-new Date(b.tripAt))
+    .slice(0,25);
+}
+
 function authFetch(url,opts={}){
   const headers={...(opts.headers||{})};
   if(authToken)headers.authorization='Bearer '+authToken;
@@ -94,6 +134,15 @@ function ensureMarketplaceUi(){
     panel.className='attention-panel';
     const toolbar=q('#ordersPane .toolbar');
     toolbar?.after(panel);
+  }
+  if(!q('#groupExportBar')){
+    const bar=document.createElement('div');
+    bar.id='groupExportBar';
+    bar.className='group-export-bar';
+    bar.innerHTML='<span>WhatsApp-группы · без данных клиента</span><div><button class="secondary" id="copyVisibleGroup">Копировать видимые</button><button id="shareVisibleGroup">Поделиться видимыми</button></div>';
+    q('#attentionPanel')?.after(bar);
+    q('#copyVisibleGroup').onclick=exportVisibleForGroup;
+    q('#shareVisibleGroup').onclick=shareVisibleForGroup;
   }
 }
 
@@ -241,6 +290,25 @@ async function load(silent=false){
 }
 
 window.toggleOrderDetails=id=>q('#order-'+CSS.escape(id))?.classList.toggle('expanded');
+window.copyRideForGroup=async id=>{
+  const o=(state?.orders||[]).find(x=>x.id===id);if(!o)return;
+  const ok=await copyText(publicRideText(o));
+  const btn=q('#order-'+CSS.escape(id)+' .group-copy');
+  if(btn&&ok){const old=btn.textContent;btn.textContent='✓ Скопировано';setTimeout(()=>btn.textContent=old,1300);}
+};
+window.shareRideForGroup=async id=>{
+  const o=(state?.orders||[]).find(x=>x.id===id);if(!o)return;
+  await shareText(publicRideText(o));
+};
+window.exportVisibleForGroup=async()=>{
+  const xs=visibleGroupOrders();if(!xs.length)return alert('Нет видимых свободных или новых поездок');
+  const text=xs.map(publicRideText).join('\n\n──────────\n\n');
+  const ok=await copyText(text);if(ok)alert('Скопировано поездок: '+xs.length);
+};
+window.shareVisibleForGroup=async()=>{
+  const xs=visibleGroupOrders();if(!xs.length)return alert('Нет видимых свободных или новых поездок');
+  await shareText(xs.map(publicRideText).join('\n\n──────────\n\n'));
+};
 window.publishOrder=async id=>{try{await post(`/api/dispatch/orders/${id}/publish`,{fare:Number(q(`#fare-${id}`).value)});await load(true)}catch(e){alert(e.message)}};
 window.releaseOrder=async(id,refundCommission)=>{
   if(!confirm(refundCommission?'Снять водителя и вернуть ему комиссию?':'Снять водителя без возврата комиссии?'))return;
