@@ -5,6 +5,7 @@ const here=__dirname;
 const server=fs.readFileSync(path.join(root,'server.js'),'utf8');
 const auth=fs.readFileSync(path.join(root,'src','auth.js'),'utf8');
 const control=fs.readFileSync(path.join(root,'apps','unified','public','dispatch','dispatch.js'),'utf8');
+const smallDispatch=fs.readFileSync(path.join(root,'apps','dispatch','public','app.js'),'utf8');
 
 const assert=(ok,msg)=>{if(!ok)throw new Error('UNIFIED_SECURITY_SURFACE: '+msg);};
 
@@ -30,6 +31,10 @@ assert(auth.includes("tokenHash(token)"),'stored sessions must hash bearer token
 assert(control.includes("sessionStorage.getItem('taxi4_dispatch_token')"),'staff token must be session-scoped');
 assert(!control.includes("localStorage.getItem('taxi4_dispatch_token')"),'staff token must not persist in localStorage');
 assert(!/[?&](?:token|auth|pin)=/i.test(control),'staff credentials must not be put in URLs');
+assert(smallDispatch.includes("vanclick-unified-login"),'Taxi 1-4 dispatch must accept unified parent login messages');
+assert(smallDispatch.includes("https://vanclick.co.il"),'Taxi 1-4 parent login bridge must pin the production parent origin');
+assert(smallDispatch.includes("vanclick-unified-auth-result"),'Taxi 1-4 dispatch must report auth result to the unified parent');
+assert(!/[?&](?:token|auth|pin)=/i.test(smallDispatch),'Taxi 1-4 unified login must not put credentials in URLs');
 
 console.log('UNIFIED_SECURITY_SURFACE_OK',JSON.stringify({
   authDefaultClosed:true,
@@ -39,5 +44,6 @@ console.log('UNIFIED_SECURITY_SURFACE_OK',JSON.stringify({
   noFallbackCredentials:true,
   hashedSessions:true,
   sessionScopedStaffToken:true,
-  noCredentialUrls:true
+  noCredentialUrls:true,
+  unifiedParentLoginBridge:true
 }));
