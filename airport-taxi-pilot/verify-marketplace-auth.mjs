@@ -10,7 +10,7 @@ await fs.rm(dataDir,{recursive:true,force:true});
 
 const child=spawn(process.execPath,['server.js'],{
   cwd:root,
-  env:{...process.env,PORT:String(port),TAXI4_DATA_DIR:dataDir,MARKETPLACE_AUTH_REQUIRED:'1',MARKETPLACE_ADMIN_PIN:'864200',MARKETPLACE_DISPATCH_PIN:'753100'},
+  env:{...process.env,PORT:String(port),TAXI4_DATA_DIR:dataDir,MARKETPLACE_AUTH_REQUIRED:'1',MARKETPLACE_ADMIN_PIN:'864200',MARKETPLACE_DISPATCH_1_4_PIN:'753100',MARKETPLACE_DISPATCH_5_6_PIN:'642900',MARKETPLACE_DISPATCH_PIN:''},
   stdio:['ignore','pipe','pipe']
 });
 let output='';
@@ -50,10 +50,10 @@ try{
 
   x=await call('/api/auth/dispatch/login',{method:'POST',body:{pin:'753100'}});
   assert.equal(x.r.status,200,'dispatcher can log in');
-  assert.equal(x.j.role,'dispatch','dispatcher PIN receives dispatch role');
+  assert.equal(x.j.role,'dispatcher_1_4','dispatcher PIN receives dispatcher_1_4 role');
   const dispatchToken=x.j.token;
   x=await call('/api/dispatch/state',{token:dispatchToken});
-  assert.equal(x.r.status,200,'dispatcher role can manage dispatch state');
+  assert.equal(x.r.status,200,'dispatcher_1_4 role can manage small dispatch state');
 
   x=await call('/api/dispatch/drivers/drv-001/pin',{method:'POST',token:adminToken,body:{pin:'4321'}});
   assert.equal(x.r.status,200,'dispatcher can configure driver PIN');
