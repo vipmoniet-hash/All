@@ -30,6 +30,18 @@ for(const needle of [
 for(const needle of ['Клиенты','Журнал','לקוחות','יומן']) assert.ok(ui.includes(needle),'unified control UI missing bilingual admin label '+needle);
 assert.ok(html.includes('id="customerProfiles"'),'admin control center must render shared customer profiles');
 assert.ok(html.includes('id="unifiedJournal"'),'admin control center must render unified journal');
+for(const id of ['adminTabs','ordersPane','topupsPane','driversPane','customersPane','journalPane','smallQueue','topupQueue','driverQueue']){
+  assert.ok(html.includes('id="'+id+'"'),'unified admin control center missing '+id);
+}
+for(const needle of [
+  'renderSmallOrders','smallPublish','smallRelease','smallCancel',
+  'renderTopups','topupApprove','topupReject',
+  'renderDrivers','driverVerify','driverToggle','driverResetPin',
+  'vcUnifiedAdminTab'
+]) assert.ok(ui.includes(needle),'unified Admin workflow missing '+needle);
+for(const needle of ['Заказы','Пополнения','Водители','Клиенты','Журнал','הזמנות','טעינות','נהגים','לקוחות','יומן']){
+  assert.ok(ui.includes(needle),'unified Admin bilingual navigation missing '+needle);
+}
 
 assert.ok(html.includes('id="staffAuthOverlay"'),'control center must provide a staff login surface');
 assert.ok(html.includes('noindex,nofollow'),'control center must remain noindex');
