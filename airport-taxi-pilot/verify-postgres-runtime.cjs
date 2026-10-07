@@ -18,6 +18,12 @@ assert.match(serverSource,/UNIFIED_REQUIRE_POSTGRES/,'runtime must support a fai
 }
 const temp=fs.mkdtempSync(path.join(os.tmpdir(),'vc-pg-runtime-'));
 const nodeModules=path.join(root,'node_modules','pg');
+const realPgBackup=path.join(root,'node_modules','.pg-real-backup');
+const hadRealPg=fs.existsSync(nodeModules);
+if(hadRealPg){
+  fs.rmSync(realPgBackup,{recursive:true,force:true});
+  fs.renameSync(nodeModules,realPgBackup);
+}
 fs.mkdirSync(nodeModules,{recursive:true});
 fs.writeFileSync(path.join(nodeModules,'package.json'),JSON.stringify({name:'pg',version:'0.0.0-test',type:'module',exports:'./index.js'}));
 
@@ -77,6 +83,8 @@ const sql=fs.readFileSync(logFile,'utf8');
 assert.match(sql,/FOR UPDATE/i,'runtime Postgres path must use row locking');
 assert.match(sql,/COMMIT/i,'runtime Postgres path must commit transaction');
 
-fs.rmSync(path.join(root,'node_modules','pg'),{recursive:true,force:true});
+fs.rmSync(nodeModules,{recursive:true,force:true});
+if(hadRealPg)fs.renameSync(realPgBackup,nodeModules);
+else fs.rmSync(realPgBackup,{recursive:true,force:true});
 fs.rmSync(temp,{recursive:true,force:true});
-console.log('POSTGRES_RUNTIME_SWITCH_OK',JSON.stringify({databaseUrlSwitch:true,jsonBypassed:true,rowLock:true}));
+console.log('POSTGRES_RUNTIME_SWITCH_OK',JSON.stringify({databaseUrlSwitch:true,jsonBypassed:true,rowLock:true,realPgPreserved:hadRealPg}));
