@@ -4,7 +4,7 @@ const path=require('path');
 const root=process.argv[2]||'app';
 const css=fs.readFileSync('vanclick-bridge.css','utf8');
 const js=fs.readFileSync('vanclick-bridge.js','utf8');
-const marker='data-vanclick-cro="20261007-v3"';
+const marker='data-vanclick-cro="20261007-v2"';
 
 function walk(dir,out=[]){
   for(const ent of fs.readdirSync(dir,{withFileTypes:true})){
