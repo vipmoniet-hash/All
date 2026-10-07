@@ -295,6 +295,32 @@ patchFile('server.js',({replaceOnce})=>{
   );
 });
 
+
+const driverUi=fs.readFileSync(path.join(__dirname,'marketplace-driver-app.js'),'utf8');
+const dispatchUi=fs.readFileSync(path.join(__dirname,'marketplace-dispatch-app.js'),'utf8');
+const marketplaceCss=fs.readFileSync(path.join(__dirname,'marketplace-ui.css'),'utf8');
+
+fs.writeFileSync(path.join(root,'apps','driver','public','app.js'),driverUi);
+fs.writeFileSync(path.join(root,'apps','dispatch','public','app.js'),dispatchUi);
+
+for(const rel of [path.join('apps','driver','public','app.css'),path.join('apps','dispatch','public','app.css')]){
+  const file=path.join(root,rel);
+  let css=fs.readFileSync(file,'utf8');
+  css=css.replace(/\/\* MARKETPLACE_V1_UI \*\/[\s\S]*$/,'').trimEnd()+'\n'+marketplaceCss+'\n';
+  fs.writeFileSync(file,css);
+}
+
+{
+  const file=path.join(root,'apps','client','public','app.js');
+  let client=fs.readFileSync(file,'utf8');
+  const old='הבקשה עוברת לאישור ושיבוץ נהג.';
+  const next='ההזמנה פורסמה לנהגים מאומתים. ברגע שנהג ייקח אותה, פרטיו יופיעו כאן.';
+  if(!client.includes(old) && !client.includes(next)) throw new Error('MARKETPLACE_V1_PATCH_MISS: client confirmation copy');
+  client=client.replace(old,next);
+  client=client.replace("pool:'אושרה · מחפשים נהג'","pool:'מחפשים נהג'");
+  fs.writeFileSync(file,client);
+}
+
 console.log('MARKETPLACE_V1_PATCH_APPLIED', JSON.stringify({
   directToPool:true,
   fareFinalizedAtBooking:true,
@@ -303,5 +329,7 @@ console.log('MARKETPLACE_V1_PATCH_APPLIED', JSON.stringify({
   scheduleConflictGuard:true,
   exceptionQueue:true,
   completionStateGuard:true,
-  commissionMetrics:true
+  commissionMetrics:true,
+  highVolumeDriverUi:true,
+  exceptionFirstDispatchUi:true
 }));
