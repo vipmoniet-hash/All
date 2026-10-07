@@ -314,3 +314,15 @@ button,input,select,textarea{font-family:var(--font-ui)!important}
 #bookingCard .price-breakdown b{color:#344054;font-size:13px}
 #bookingCard #bitFeeLine{color:#6b5427}
 #bookingCard #bitFeeLine b{color:#8b6423}
+
+#bookingCard .large-luggage-warning{
+  margin-top:8px;padding:11px 12px;display:grid;gap:5px;
+  background:#fff6e8;border:1px solid #efd49e;border-radius:11px;color:#7b5414
+}
+#bookingCard .large-luggage-warning.hidden{display:none!important}
+#bookingCard .large-luggage-warning b{font-size:13px;color:#6f4a0f}
+#bookingCard .large-luggage-warning span{font-size:12px;line-height:1.45}
+#bookingCard .large-luggage-warning button{
+  margin-top:3px;min-height:42px;border:1px solid #cfe0f8;border-radius:10px;
+  background:#fff;color:var(--vc-blue);font-weight:850
+}
