@@ -24,6 +24,11 @@ assert.ok(dispatch.includes('/issue/resolve'),'dispatch UI must resolve driver i
 assert.ok(dispatch.includes('refundCommission:false'),'dispatch UI must support release without automatic commission refund');
 assert.ok(dispatch.includes('/api/auth/dispatch/login'),'dispatch UI must support protected dispatcher login');
 assert.ok(dispatch.includes('/drivers/${id}/pin'),'dispatch UI must support driver PIN rotation');
+assert.ok(dispatch.includes('dispatchLang'),'dispatch UI must persist selected Russian/Hebrew language');
+assert.ok(dispatch.includes('setDispatchLang'),'dispatch UI must expose language switch');
+assert.ok(dispatch.includes("document.documentElement.dir"),'dispatch UI must switch RTL/LTR direction');
+assert.ok(dispatch.includes("עברית"),'dispatch UI must expose Hebrew language choice');
+assert.ok(dispatch.includes("Русский"),'dispatch UI must expose Russian language choice');
 
 assert.ok(client.includes('נמצאת בבדיקת המוקד'),'client confirmation must describe staff review before publication');
 assert.ok(dispatch.includes('Отправить в общий пул'),'dispatch UI must expose explicit staff publication action');
