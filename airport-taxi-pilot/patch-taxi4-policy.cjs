@@ -167,8 +167,8 @@ function normalizeTripAt(value) {
   src=mustReplace(
     src,
     'const quote = quoteAirportRoute(input.fromArea, input.toArea);',
-    'const quote = quoteAirportRoute(input.fromArea, input.toArea, input.tripAt);',
-    'service makeOrder quote time'
+    'const quote = quoteAirportRoute(input.fromArea, input.toArea, input.tripAt, input.paymentMethod);',
+    'service makeOrder quote time and payment method'
   );
   write(rel,src);
 }
