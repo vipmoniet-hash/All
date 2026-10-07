@@ -47,18 +47,24 @@ await persistence.resetDb(seed);
 
 const booking = await service.createClientBooking(request('2026-10-08T11:00'));
 assert.equal(booking.orders.length,1,'single booking creates one ride');
-assert.equal(booking.orders[0].status,'pool','valid Taxi 1-4 booking must enter driver pool immediately');
+assert.equal(booking.orders[0].status,'awaiting_dispatch','new Taxi 1-4 booking must stay private to staff until published');
 
 let state = await service.listDriverState('drv-test-001');
-assert.equal(state.pool.length,1,'driver must immediately see the new ride');
-assert.equal(state.pool[0].id,booking.orders[0].id,'pool ride id matches created ride');
-assert.equal(state.pool[0].fare,170,'pool ride has final fare before claim');
-assert.equal(state.pool[0].commission,10,'pool ride has commission before claim');
-assert.equal(state.pool[0].driverNet,160,'pool ride shows driver net before claim');
+assert.equal(state.pool.length,0,'driver must not see ride before staff publication');
+let staff=await service.listAdminState();
+assert.ok(staff.orders.some(o=>o.id===booking.orders[0].id&&o.status==='awaiting_dispatch'),'staff sees private incoming ride');
+await service.publishOrder(booking.orders[0].id,170);
+state = await service.listDriverState('drv-test-001');
+assert.equal(state.pool.length,1,'driver sees ride only after staff publishes it');
+assert.equal(state.pool[0].id,booking.orders[0].id,'published ride id matches created ride');
+assert.equal(state.pool[0].fare,170,'published ride has final fare');
+assert.equal(state.pool[0].commission,10,'published ride has driver commission');
+assert.equal(state.pool[0].driverNet,160,'published ride shows driver net');
 
-console.log('MARKETPLACE_V1_AUTOPUBLISH_OK', JSON.stringify({
+console.log('MARKETPLACE_V1_STAFF_GATE_OK', JSON.stringify({
   orderId:booking.orders[0].id,
-  status:booking.orders[0].status,
+  initialStatus:booking.orders[0].status,
+  publishedStatus:state.pool[0].status,
   fare:state.pool[0].fare,
   commission:state.pool[0].commission,
   driverNet:state.pool[0].driverNet
@@ -67,6 +73,7 @@ console.log('MARKETPLACE_V1_AUTOPUBLISH_OK', JSON.stringify({
 const second = await service.createClientBooking(request('2026-10-08T11:30','לקוח בדיקה 2'));
 const firstOrderId=booking.orders[0].id;
 const secondOrderId=second.orders[0].id;
+await service.publishOrder(secondOrderId,170);
 
 const claim1 = await service.buyOrder(firstOrderId,'drv-test-001');
 assert.equal(claim1.wallet,490,'first claim debits commission exactly once');
