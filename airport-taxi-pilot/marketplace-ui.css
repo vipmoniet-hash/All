@@ -53,3 +53,8 @@
   .dispatch-quick-nav button b{font-size:16px}.dispatch-quick-nav button.active{background:#173a46;color:#fff}
   .attention-panel{scroll-margin-top:120px}.pane{scroll-margin-top:120px}
 }
+
+.group-export-bar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:-8px 0 14px;padding:10px 12px;border:1px dashed #b8c9cc;border-radius:14px;background:#f8fbfb}
+.group-export-bar>span{font-size:12px;font-weight:800;color:#50676d}.group-export-bar>div{display:flex;gap:7px;flex-wrap:wrap}
+.group-export-bar button{min-height:38px}.group-copy,.group-share{white-space:nowrap}
+@media(max-width:720px){.group-export-bar{align-items:stretch;flex-direction:column}.group-export-bar>div{display:grid;grid-template-columns:1fr 1fr}.group-export-bar button{min-height:44px}.compact-order .group-copy,.compact-order .group-share{grid-column:auto}}
