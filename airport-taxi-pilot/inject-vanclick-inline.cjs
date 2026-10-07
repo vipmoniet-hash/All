@@ -54,6 +54,7 @@ if(fs.existsSync(clientJs)){
 require('child_process').execFileSync(process.execPath,[path.join(__dirname,'reprice-taxi4.cjs'),root],{stdio:'inherit'});
 require('child_process').execFileSync(process.execPath,[path.join(__dirname,'patch-taxi4-policy.cjs'),root],{stdio:'inherit'});
 require('child_process').execFileSync(process.execPath,[path.join(__dirname,'patch-marketplace-v1.cjs'),root],{stdio:'inherit'});
+require('child_process').execFileSync(process.execPath,[path.join(__dirname,'patch-marketplace-resilience.cjs'),root],{stdio:'inherit'});
 require('child_process').execFileSync(process.execPath,['--check',path.join(root,'server.js')],{stdio:'inherit'});
 console.log('MARKETPLACE_SERVER_SYNTAX_OK');
 for(const rel of [
