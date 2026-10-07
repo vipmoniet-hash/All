@@ -12,9 +12,11 @@ const money=n=>Number(n||0).toLocaleString('ru-RU',{maximumFractionDigits:2});
 const HE_REPLACEMENTS=[
   ['VanClick Taxi 1–4 · изолированная тестовая среда','VanClick Taxi 1–4 · סביבת בדיקה מבודדת'],
   ['Вход в диспетчерскую','כניסה למוקד'],
-  ['Введите PIN администратора или диспетчера VanClick Taxi 1–4.','הזן PIN של מנהל או סדרן VanClick Taxi 1–4.'],
+  ['Для администратора: телефон из старого VanClick и тот же PIN. Диспетчер может войти по своему PIN.','למנהל: הטלפון מה-VanClick הישן ואותו PIN. סדרן יכול להיכנס עם ה-PIN שלו.'],
+  ['Телефон администратора (если входите как владелец)','טלפון המנהל (אם נכנסים כבעלים)'],
   ['PIN администратора / диспетчера','PIN מנהל / סדרן'],
-  ['Неверный PIN','PIN שגוי'],
+  ['Неверные данные входа','פרטי התחברות שגויים'],
+  ['Не удалось проверить старый Admin-вход','לא ניתן לאמת כרגע את כניסת המנהל הישנה'],
   ['Нужно войти снова','יש להתחבר מחדש'],
   ['Выйти','יציאה'],
   ['Заказы','הזמנות'],
@@ -200,7 +202,8 @@ function ensureDispatchAuthUi(){
     wrap.className='auth-overlay hidden';
     wrap.innerHTML=`<form id="dispatchAuthForm" class="auth-card">
       <h2>Вход в диспетчерскую</h2>
-      <p>Введите PIN администратора или диспетчера VanClick Taxi 1–4.</p>
+      <p>Для администратора: телефон из старого VanClick и тот же PIN. Диспетчер может войти по своему PIN.</p>
+      <input name="phone" inputmode="tel" autocomplete="username" placeholder="Телефон администратора (если входите как владелец)">
       <input name="pin" type="password" inputmode="numeric" autocomplete="current-password" placeholder="PIN администратора / диспетчера" required>
       <button>Войти</button>
       <div id="dispatchAuthStatus"></div>
@@ -222,7 +225,7 @@ function ensureDispatchAuthUi(){
         q('#dispatchAuthOverlay').classList.add('hidden');
         q('#dispatchLogout')?.classList.remove('hidden');
         await load(true);
-      }catch(err){q('#dispatchAuthStatus').textContent=err.message==='INVALID_CREDENTIALS'?(dispatchLang==='he'?'PIN שגוי':'Неверный PIN'):err.message;applyDispatchLanguage();}
+      }catch(err){q('#dispatchAuthStatus').textContent=err.message==='INVALID_CREDENTIALS'?(dispatchLang==='he'?'פרטי התחברות שגויים':'Неверные данные входа'):err.message==='OWNER_AUTH_UNAVAILABLE'?(dispatchLang==='he'?'לא ניתן לאמת כרגע את כניסת המנהל הישנה':'Не удалось проверить старый Admin-вход'):err.message;applyDispatchLanguage();}
     };
   }
 }
