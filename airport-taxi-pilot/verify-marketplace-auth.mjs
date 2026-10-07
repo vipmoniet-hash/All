@@ -111,14 +111,14 @@ try{
 
   x=await call('/api/auth/dispatch/login',{method:'POST',body:{pin:'753100'},ip:'198.51.100.21'});
   assert.equal(x.r.status,200,'dispatcher can log in');
-  assert.equal(x.j.role,'dispatcher_1_4','dispatcher PIN receives dispatcher_1_4 role');
+  assert.equal(x.j.role,'dispatcher','dispatcher PIN receives unified dispatcher role');
   const dispatchToken=x.j.token;
   x=await call('/api/dispatch/reset-demo',{method:'POST',token:dispatchToken});
   assert.equal(x.r.status,403,'dispatcher cannot reset persistent business state');
   x=await call('/api/dispatch/reset-demo',{method:'POST',token:adminToken});
   assert.equal(x.r.status,403,'demo reset is disabled unless an explicit environment flag enables it');
   x=await call('/api/dispatch/state',{token:dispatchToken});
-  assert.equal(x.r.status,200,'dispatcher_1_4 role can manage small dispatch state');
+  assert.equal(x.r.status,200,'unified dispatcher can manage small dispatch state');
 
   x=await call('/api/dispatch/drivers/drv-001/pin',{method:'POST',token:adminToken,body:{pin:'4321'}});
   assert.equal(x.r.status,200,'dispatcher can configure driver PIN');
