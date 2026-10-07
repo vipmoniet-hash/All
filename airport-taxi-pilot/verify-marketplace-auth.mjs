@@ -1,16 +1,18 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import path from 'node:path';
+import crypto from 'node:crypto';
 import { spawn, spawnSync } from 'node:child_process';
 
 const root=path.resolve(process.argv[2]||'app');
 const port=4201;
 const dataDir=path.join(root,'data','auth-e2e');
+const staffHash=pin=>{const salt='auth-e2e-'+pin;return salt+':'+crypto.scryptSync(String(pin),salt,32).toString('hex');};
 await fs.rm(dataDir,{recursive:true,force:true});
 
 const child=spawn(process.execPath,['server.js'],{
   cwd:root,
-  env:{...process.env,PORT:String(port),TAXI4_DATA_DIR:dataDir,DATABASE_URL:'',MARKETPLACE_AUTH_REQUIRED:'1',UNIFIED_REQUIRE_POSTGRES:'0',UNIFIED_REQUIRE_AUTH:'0',MARKETPLACE_ADMIN_PIN:'864200',MARKETPLACE_DISPATCH_1_4_PIN:'753100',MARKETPLACE_DISPATCH_5_6_PIN:'642900',MARKETPLACE_DISPATCH_PIN:''},
+  env:{...process.env,PORT:String(port),TAXI4_DATA_DIR:dataDir,DATABASE_URL:'',MARKETPLACE_AUTH_REQUIRED:'1',UNIFIED_REQUIRE_POSTGRES:'0',UNIFIED_REQUIRE_AUTH:'0',MARKETPLACE_ADMIN_PIN:'',MARKETPLACE_DISPATCH_1_4_PIN:'',MARKETPLACE_DISPATCH_5_6_PIN:'',MARKETPLACE_DISPATCH_PIN:'',MARKETPLACE_ADMIN_PIN_HASH:staffHash('864200'),MARKETPLACE_DISPATCH_1_4_PIN_HASH:staffHash('753100'),MARKETPLACE_DISPATCH_5_6_PIN_HASH:staffHash('642900')},
   stdio:['ignore','pipe','pipe']
 });
 let output='';
@@ -23,13 +25,15 @@ const base='http://127.0.0.1:'+port;
   delete env.MARKETPLACE_DISPATCH_1_4_PIN;
   delete env.MARKETPLACE_DISPATCH_5_6_PIN;
   delete env.MARKETPLACE_DISPATCH_PIN;
+  delete env.MARKETPLACE_DISPATCH_1_4_PIN_HASH;
+  delete env.MARKETPLACE_DISPATCH_5_6_PIN_HASH;
   const probe=spawnSync(process.execPath,['server.js'],{cwd:root,encoding:'utf8',timeout:1500,env});
   assert.equal(probe.status,1,'UNIFIED_REQUIRE_AUTH must refuse startup without Admin credentials');
   assert.match(String(probe.stdout||'')+String(probe.stderr||''),/ADMIN_CREDENTIAL_REQUIRED_MISSING/,'fail-closed auth startup must explain missing Admin credential');
 }
 
 {
-  const env={...process.env,PORT:'4297',DATABASE_URL:'',MARKETPLACE_AUTH_REQUIRED:'1',UNIFIED_REQUIRE_AUTH:'1',UNIFIED_REQUIRE_POSTGRES:'0',MARKETPLACE_ADMIN_PIN:'864200'};
+  const env={...process.env,PORT:'4297',DATABASE_URL:'',MARKETPLACE_AUTH_REQUIRED:'1',UNIFIED_REQUIRE_AUTH:'1',UNIFIED_REQUIRE_POSTGRES:'0',MARKETPLACE_ADMIN_PIN:'',MARKETPLACE_ADMIN_PIN_HASH:staffHash('864200')};
   delete env.MARKETPLACE_DISPATCH_1_4_PIN;
   delete env.MARKETPLACE_DISPATCH_5_6_PIN;
   delete env.MARKETPLACE_DISPATCH_PIN;
