@@ -52,51 +52,8 @@ if(fs.existsSync(clientJs)){
 
 // Apply full Taxi 1–4 driver-safe fare audit after unpacking source data.
 require('child_process').execFileSync(process.execPath,[path.join(__dirname,'reprice-taxi4.cjs'),root],{stdio:'inherit'});
+require('child_process').execFileSync(process.execPath,[path.join(__dirname,'patch-taxi4-policy.cjs'),root],{stdio:'inherit'});
 
 // Policy regression gate: intentionally fails until the surcharge/commission patch is applied.
 require('child_process').execFileSync(process.execPath,[path.join(__dirname,'verify-taxi4-policy.mjs'),root],{stdio:'inherit'});
 
-/* TAXI4_SERVER_INSPECT temporary build-time source inspection */
-{
-  const serverPath=path.join(root,'server.js');
-  if(fs.existsSync(serverPath)){
-    const src=fs.readFileSync(serverPath,'utf8');
-    for(const needle of ['/api/pricing/quote','quotedFare','function quote','pricing']) {
-      const idx=src.indexOf(needle);
-      if(idx>=0) console.log('TAXI4_SERVER_INSPECT',needle,'\\n'+src.slice(Math.max(0,idx-1800),Math.min(src.length,idx+5000)));
-    }
-  }
-}
-
-/* TAXI4_DEEP_INSPECT */
-{
-  const files=[
-    [path.join(root,'src','pricing.js'),['quoteAirportRoute','export','fare']],
-    [path.join(root,'src','service.js'),['createClientBooking','quotedFare','fare']],
-    [path.join(root,'src','routing.js'),['routeDecisionWithHandoff']]
-  ];
-  for(const [file,needles] of files){
-    if(!fs.existsSync(file)) continue;
-    const src=fs.readFileSync(file,'utf8');
-    for(const needle of needles){
-      const idx=src.indexOf(needle);
-      if(idx>=0) console.log('TAXI4_DEEP_INSPECT',path.basename(file),needle,'\\n'+src.slice(Math.max(0,idx-2500),Math.min(src.length,idx+8000)));
-    }
-  }
-}
-
-/* TAXI4_SURCHARGE_INSPECT */
-{
-  const files=[
-    [path.join(root,'src','domain.js'),['commissionForFare','function commission','export function commission']],
-    [path.join(root,'apps','client','public','app.js'),['/api/pricing/quote','quoteBtn','tripAt','returnTripAt']]
-  ];
-  for(const [file,needles] of files){
-    if(!fs.existsSync(file)) continue;
-    const src=fs.readFileSync(file,'utf8');
-    for(const needle of needles){
-      const idx=src.indexOf(needle);
-      if(idx>=0) console.log('TAXI4_SURCHARGE_INSPECT',file.replace(root,''),needle,'\\n'+src.slice(Math.max(0,idx-1800),Math.min(src.length,idx+7000)));
-    }
-  }
-}
