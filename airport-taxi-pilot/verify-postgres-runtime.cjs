@@ -8,6 +8,14 @@ const assert=require('assert/strict');
 const root=path.resolve(process.argv[2]||'app');
 const serverSource=fs.readFileSync(path.join(root,'server.js'),'utf8');
 assert.match(serverSource,/PERSISTENCE_BACKEND/,'runtime server must emit persistence backend telemetry without exposing credentials');
+assert.match(serverSource,/UNIFIED_REQUIRE_POSTGRES/,'runtime must support a fail-closed Postgres requirement for future unified cutover');
+{
+  const guardEnv={...process.env,UNIFIED_REQUIRE_POSTGRES:'1'};
+  delete guardEnv.DATABASE_URL;
+  const guard=spawnSync(process.execPath,['server.js'],{cwd:root,encoding:'utf8',timeout:1500,env:guardEnv});
+  assert.equal(guard.status,1,'UNIFIED_REQUIRE_POSTGRES=1 must refuse startup without DATABASE_URL');
+  assert.match(String(guard.stdout||'')+String(guard.stderr||''),/PERSISTENCE_REQUIRED_POSTGRES_MISSING/,'fail-closed startup must explain missing Postgres binding without leaking secrets');
+}
 const temp=fs.mkdtempSync(path.join(os.tmpdir(),'vc-pg-runtime-'));
 const nodeModules=path.join(root,'node_modules','pg');
 fs.mkdirSync(nodeModules,{recursive:true});
