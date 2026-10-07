@@ -35,6 +35,10 @@ for(const pair of [["Заказы","הזמנות"],["Пополнения","טע
   assert.ok(dispatch.includes(`['${pair[0]}','${pair[1]}']`),`dispatch UI must contain Hebrew tab translation for ${pair[0]}`);
 }
 assert.ok(dispatch.includes("Русский"),'dispatch UI must expose Russian language choice');
+assert.ok(dispatch.includes("Asia/Jerusalem"),'dispatch dates must be fixed to Israel timezone');
+assert.ok(dispatch.includes("weekday:'short'"),'dispatch dates must include weekday');
+assert.ok(dispatch.includes("dispatchLang==='he'?'he-IL':'ru-RU'"),'weekday locale must follow selected dispatcher language');
+assert.ok(dispatch.includes("year:'numeric'"),'dispatch date must use full year');
 
 assert.ok(client.includes('נמצאת בבדיקת המוקד'),'client confirmation must describe staff review before publication');
 assert.ok(dispatch.includes('Отправить в общий пул'),'dispatch UI must expose explicit staff publication action');
