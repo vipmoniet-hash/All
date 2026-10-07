@@ -89,6 +89,131 @@ function marketplacePoolView(db, driver, order) {
     'decorate driver pool eligibility'
   );
 
+
+
+  replaceOnce(
+    /export async function listAdminState\(\) \{[\s\S]*?\n\}/,
+    `function marketplaceAttention(db, now = new Date()) {
+  const current = now instanceof Date ? now : new Date(now);
+  const nowMs = current.getTime();
+  const out = [];
+  for (const order of db.orders) {
+    const tripMs = new Date(order.tripAt).getTime();
+    if (!Number.isFinite(tripMs)) continue;
+    const minutes = Math.floor((tripMs - nowMs) / 60000);
+
+    if (order.issue?.status === 'open') {
+      out.push({
+        id:'attention_issue_'+order.id,
+        orderId:order.id,
+        kind:'open_issue',
+        severity:'critical',
+        minutesUntilTrip:minutes,
+        issue:order.issue
+      });
+    }
+
+    if (order.status === 'pool' && minutes <= 90) {
+      out.push({
+        id:'attention_pool_'+order.id,
+        orderId:order.id,
+        kind:minutes < 0 ? 'unclaimed_overdue' : 'unclaimed_soon',
+        severity:minutes < 0 ? 'critical' : 'high',
+        minutesUntilTrip:minutes
+      });
+    }
+
+    if (order.status === 'assigned' && minutes <= 30 && minutes >= -120 && !order.driverConfirmedAt) {
+      out.push({
+        id:'attention_enroute_'+order.id,
+        orderId:order.id,
+        kind:'driver_not_enroute',
+        severity:'high',
+        minutesUntilTrip:minutes,
+        driverId:order.assignedDriverId
+      });
+    }
+  }
+  const rank={critical:0,high:1,medium:2,low:3};
+  return out.sort((a,b)=>(rank[a.severity]??9)-(rank[b.severity]??9) || a.minutesUntilTrip-b.minutesUntilTrip);
+}
+
+export async function listAdminState(now = new Date()) {
+  const db=await readDb();
+  const counts={};for(const o of db.orders)counts[o.status]=(counts[o.status]||0)+1;
+  const attention=marketplaceAttention(db,now);
+  return {
+    drivers:db.drivers,
+    orders:db.orders.slice().sort((a,b)=>new Date(a.tripAt)-new Date(b.tripAt)),
+    topups:db.topups.slice().reverse(),
+    ledger:db.ledger.slice(-500).reverse(),
+    events:db.events.slice(-500).reverse(),
+    counts,
+    attention,
+    attentionCount:attention.length
+  };
+}`,
+    'exception-first dispatch state'
+  );
+
+  replaceOnce(
+    /export async function driverCompleteOrder\(orderId,driverId,now=new Date\(\)\)\{return transact\(db=>\{[^\n]+\}\);\}/,
+    `export async function driverCompleteOrder(orderId,driverId,now=new Date()){return transact(db=>{
+  const order=db.orders.find(o=>o.id===orderId);
+  const driver=activeDriver(db,driverId);
+  if(!order)throw new Error('ORDER_NOT_FOUND');
+  if(!driver)throw new Error('DRIVER_NOT_FOUND');
+  if(order.assignedDriverId!==driverId)throw new Error('ORDER_NOT_ASSIGNED_TO_DRIVER');
+  if(order.status!=='driver_enroute')throw new Error('DRIVER_MUST_BE_ENROUTE');
+  order.status='completed';
+  order.completedAt=new Date(now).toISOString();
+  driver.completedTrips=Number(driver.completedTrips||0)+1;
+  event(db,order.id,'trip_completed','driver',{driverId});
+  return revealOrderForAssignedDriver(order);
+});}`,
+    'completion requires enroute'
+  );
+
+  replaceOnce(
+    "export async function registerDriver(input){return transact(db=>{",
+    `export async function driverReportIssue(orderId,driverId,input={},now=new Date()){return transact(db=>{
+  const order=db.orders.find(o=>o.id===orderId);
+  const driver=activeDriver(db,driverId);
+  if(!order)throw new Error('ORDER_NOT_FOUND');
+  if(!driver)throw new Error('DRIVER_NOT_FOUND');
+  if(order.assignedDriverId!==driverId || !['assigned','driver_enroute'].includes(order.status))throw new Error('ORDER_NOT_ASSIGNED_TO_DRIVER');
+  if(order.issue?.status==='open')return order.issue;
+  const type=clean(input.type,60);
+  const allowed=['client_unreachable','customer_not_ready','client_no_show','flight_delay','pickup_problem','vehicle_problem','other'];
+  if(!allowed.includes(type))throw new Error('INVALID_ISSUE_TYPE');
+  order.issue={
+    id:id('iss'),
+    type,
+    note:clean(input.note,500),
+    status:'open',
+    driverId,
+    reportedAt:new Date(now).toISOString(),
+    resolvedAt:null,
+    resolutionNote:''
+  };
+  event(db,order.id,'driver_issue_reported','driver',{driverId,issueType:type});
+  return order.issue;
+});}
+
+export async function adminResolveIssue(orderId,input={},now=new Date()){return transact(db=>{
+  const order=db.orders.find(o=>o.id===orderId);
+  if(!order)throw new Error('ORDER_NOT_FOUND');
+  if(!order.issue || order.issue.status!=='open')throw new Error('ORDER_ISSUE_NOT_OPEN');
+  order.issue.status='resolved';
+  order.issue.resolvedAt=new Date(now).toISOString();
+  order.issue.resolutionNote=clean(input.note,500);
+  event(db,order.id,'dispatch_issue_resolved','dispatcher',{issueType:order.issue.type});
+  return order.issue;
+});}
+
+export async function registerDriver(input){return transact(db=>{`,
+    'driver issue workflow'
+  );
   replaceOnce(
     /export async function buyOrder\(orderId,driverId\)\{return transact\(db=>\{[^\n]+\}\);\}/,
     `export async function buyOrder(orderId,driverId){return transact(db=>{
@@ -125,8 +250,20 @@ function marketplacePoolView(db, driver, order) {
 patchFile('server.js',({replaceOnce})=>{
   replaceOnce(
     "ORDER_ALREADY_TAKEN:409,INSUFFICIENT_WALLET_BALANCE:402,LATE_CANCEL_REQUIRES_DISPATCH:409,",
-    "ORDER_ALREADY_TAKEN:409,INSUFFICIENT_WALLET_BALANCE:402,DRIVER_SCHEDULE_CONFLICT:409,LATE_CANCEL_REQUIRES_DISPATCH:409,",
-    'schedule conflict HTTP status'
+    "ORDER_ALREADY_TAKEN:409,INSUFFICIENT_WALLET_BALANCE:402,DRIVER_SCHEDULE_CONFLICT:409,DRIVER_MUST_BE_ENROUTE:409,ORDER_ISSUE_NOT_OPEN:409,LATE_CANCEL_REQUIRES_DISPATCH:409,",
+    'marketplace HTTP statuses'
+  );
+
+  replaceOnce(
+    "m=url.pathname.match(/^\\/api\\/dispatch\\/orders\\/([^/]+)\\/cancel$/);if(req.method==='POST'&&m)return json(res,200,await adminCancelOrder(m[1],await body(req)));",
+    "m=url.pathname.match(/^\\/api\\/dispatch\\/orders\\/([^/]+)\\/cancel$/);if(req.method==='POST'&&m)return json(res,200,await adminCancelOrder(m[1],await body(req)));\\n      m=url.pathname.match(/^\\/api\\/dispatch\\/orders\\/([^/]+)\\/issue\\/resolve$/);if(req.method==='POST'&&m)return json(res,200,await adminResolveIssue(m[1],await body(req)));",
+    'dispatch issue resolve endpoint'
+  );
+
+  replaceOnce(
+    "m=url.pathname.match(/^\\/api\\/drivers\\/([^/]+)\\/orders\\/([^/]+)\\/enroute$/);if(req.method==='POST'&&m)return json(res,200,await driverConfirmEnRoute(m[2],m[1]));",
+    "m=url.pathname.match(/^\\/api\\/drivers\\/([^/]+)\\/orders\\/([^/]+)\\/issue$/);if(req.method==='POST'&&m)return json(res,200,await driverReportIssue(m[2],m[1],await body(req)));\\n      m=url.pathname.match(/^\\/api\\/drivers\\/([^/]+)\\/orders\\/([^/]+)\\/enroute$/);if(req.method==='POST'&&m)return json(res,200,await driverConfirmEnRoute(m[2],m[1]));",
+    'driver issue endpoint'
   );
 });
 
@@ -135,5 +272,7 @@ console.log('MARKETPLACE_V1_PATCH_APPLIED', JSON.stringify({
   fareFinalizedAtBooking:true,
   commissionFinalizedAtBooking:true,
   idempotentClaim:true,
-  scheduleConflictGuard:true
+  scheduleConflictGuard:true,
+  exceptionQueue:true,
+  completionStateGuard:true
 }));
