@@ -27,6 +27,7 @@ try{
     exactPickup:'Race 1',exactDropoff:'TLV T3'
   });
   const orderId=booking.orders[0].id;
+  await service.publishOrder(orderId,booking.orders[0].quotedFare);
 
   const attempts=await Promise.allSettled(drivers.map(d=>service.buyOrder(orderId,d.id)));
   const winners=attempts.filter(x=>x.status==='fulfilled');
