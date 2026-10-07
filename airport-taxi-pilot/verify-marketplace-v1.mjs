@@ -164,3 +164,27 @@ console.log('MARKETPLACE_V1_FINANCE_ATTENTION_OK', JSON.stringify({
   vanClickCommission:admin.finance.netCommissionCollected,
   attention:admin.attention.filter(x=>x.orderId===secondOrderId).map(x=>x.kind)
 }));
+
+
+const secondClaim = await service.buyOrder(secondOrderId,'drv-test-001');
+assert.equal(secondClaim.wallet,480,'second claim debits its commission');
+const secondCancel = await service.driverCancelOrder(secondOrderId,'drv-test-001',new Date('2026-10-08T06:00:00Z'));
+assert.equal(secondCancel.order.status,'pool','allowed driver cancellation returns ride to pool');
+assert.equal(secondCancel.wallet,490,'allowed cancellation refunds commission');
+
+state = await service.listDriverState('drv-test-001');
+assert.equal(state.stats.selfCancelledTrips,1,'driver stats expose self-cancellation count');
+assert.equal(state.stats.netCommissionPaid,10,'refunded cancellation does not inflate net commission paid');
+
+admin = await service.listAdminState(new Date('2026-10-08T06:00:00Z'));
+assert.equal(admin.finance.commissionDebited,20,'dispatch tracks gross commission debits');
+assert.equal(admin.finance.commissionRefunded,10,'dispatch tracks commission refunds');
+assert.equal(admin.finance.netCommissionCollected,10,'dispatch net commission remains correct after refund');
+
+console.log('MARKETPLACE_V1_CANCELLATION_LEDGER_OK',JSON.stringify({
+  wallet:state.driver.wallet,
+  selfCancelledTrips:state.stats.selfCancelledTrips,
+  debited:admin.finance.commissionDebited,
+  refunded:admin.finance.commissionRefunded,
+  net:admin.finance.netCommissionCollected
+}));
