@@ -6,6 +6,8 @@ const {spawnSync}=require('child_process');
 const assert=require('assert/strict');
 
 const root=path.resolve(process.argv[2]||'app');
+const serverSource=fs.readFileSync(path.join(root,'server.js'),'utf8');
+assert.match(serverSource,/PERSISTENCE_BACKEND/,'runtime server must emit persistence backend telemetry without exposing credentials');
 const temp=fs.mkdtempSync(path.join(os.tmpdir(),'vc-pg-runtime-'));
 const nodeModules=path.join(root,'node_modules','pg');
 fs.mkdirSync(nodeModules,{recursive:true});
