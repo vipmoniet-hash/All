@@ -83,7 +83,7 @@ function finalFareForTrip(baseFare, tripAt) {
   return {fare,peakSurchargePct,shabbatSurchargePct,surchargePct};
 }
 
-export function quoteAirportRoute(fromArea, toArea, tripAt = '') {
+export function quoteAirportRoute(fromArea, toArea, tripAt = '', paymentMethod = '') {
   const from = resolveLocation(fromArea);
   const to = resolveLocation(toArea);
   if (!from) throw new Error('FROM_LOCATION_NOT_PRICED');
@@ -94,7 +94,12 @@ export function quoteAirportRoute(fromArea, toArea, tripAt = '') {
   const location = fromAirport ? to : from;
   const baseFare=Number(location.fare);
   const adjusted=finalFareForTrip(baseFare,tripAt);
-  const commission=taxi4CommissionForFare(adjusted.fare);
+  const paymentSurcharge=String(paymentMethod||'').toLowerCase()==='bit'?10:0;
+  const transportFare=adjusted.fare;
+  const fare=transportFare+paymentSurcharge;
+  // Platform commission is based on the transport fare only.
+  // The 10₪ Bit surcharge belongs to the payment method, not the trip-price band.
+  const commission=taxi4CommissionForFare(transportFare);
   return {
     version: pricing.version,
     currency: pricing.currency,
@@ -102,9 +107,12 @@ export function quoteAirportRoute(fromArea, toArea, tripAt = '') {
     to: toAirport ? pricing.airport.nameHe : location.nameHe,
     city: location.nameHe,
     baseFare,
-    fare: adjusted.fare,
+    transportFare,
+    paymentSurcharge,
+    paymentSurchargeReason:paymentSurcharge?'bit':null,
+    fare,
     commission,
-    driverNet: adjusted.fare-commission,
+    driverNet: fare-commission,
     roadKm: location.roadKm,
     direction: fromAirport ? 'from_airport' : 'to_airport',
     peakSurchargePct: adjusted.peakSurchargePct,
@@ -172,13 +180,14 @@ function normalizeTripAt(value) {
   src=mustReplace(
     src,
     "if(req.method==='POST'&&url.pathname==='/api/pricing/quote'){const b=await body(req);return json(res,200,quoteAirportRoute(b.fromArea,b.toArea));}",
-    "if(req.method==='POST'&&url.pathname==='/api/pricing/quote'){const b=await body(req);return json(res,200,quoteAirportRoute(b.fromArea,b.toArea,b.tripAt));}",
+    "if(req.method==='POST'&&url.pathname==='/api/pricing/quote'){const b=await body(req);return json(res,200,quoteAirportRoute(b.fromArea,b.toArea,b.tripAt,b.paymentMethod));}",
     'server quote endpoint tripAt'
   );
   write(rel,src);
 }
 
-// 5) Client sends tripAt to the quote API. Stored booking already sends it through the form.
+// 5) Client sends tripAt to the quote API and shows the Bit +10₪ surcharge
+// before confirmation. Cash keeps the transport fare unchanged.
 {
   const rel=path.join('apps','client','public','app.js');
   let src=read(rel);
@@ -188,7 +197,43 @@ function normalizeTripAt(value) {
     "const r0={...routeFromUi(),tripAt:q('#tripAt').value};q('#quoteResult')",
     'client quote tripAt'
   );
+
+  src=mustReplace(
+    src,
+    "function syncBooking(){if(!currentQuote)return;const r=routeFromUi();q('#formFromArea').value=r.fromArea;q('#formToArea').value=r.toArea;q('#formTripAt').value=q('#tripAt').value;q('#formPassengers').value=q('#passengers').value;q('#summaryRoute').textContent=\`\${r.fromArea} ← \${r.toArea}\`;q('#summaryFare').textContent=\`\${currentQuote.fare} ₪\`;q('#miniFare').textContent=\`\${currentQuote.fare} ₪\`;q('#submitFare').textContent=\`\${currentQuote.fare} ₪\`;q('#mobileFare').textContent=\`\${currentQuote.fare} ₪\`;",
+    "function selectedPayment(){return q('[name=paymentMethod]:checked')?.value||'bit';}function visibleFare(){if(!currentQuote)return 0;return Number(currentQuote.fare)+(selectedPayment()==='bit'?10:0);}function syncBooking(){if(!currentQuote)return;const r=routeFromUi(),fee=selectedPayment()==='bit'?10:0,total=visibleFare();q('#formFromArea').value=r.fromArea;q('#formToArea').value=r.toArea;q('#formTripAt').value=q('#tripAt').value;q('#formPassengers').value=q('#passengers').value;q('#summaryRoute').textContent=\`\${r.fromArea} ← \${r.toArea}\`;q('#summaryFare').textContent=\`\${total} ₪\`;q('#miniFare').textContent=\`\${total} ₪\`;q('#submitFare').textContent=\`\${total} ₪\`;q('#mobileFare').textContent=\`\${total} ₪\`;const feeLine=q('#bitFeeLine');if(feeLine){feeLine.classList.toggle('hidden',!fee);q('#bitFeeAmount').textContent=fee?'+10 ₪':'';}const baseLine=q('#baseFareLine');if(baseLine)q('#baseFareAmount').textContent=\`\${currentQuote.fare} ₪\`;",
+    'client Bit surcharge visible fare'
+  );
+
+  src=mustReplace(
+    src,
+    "q('#returnToggle').onchange=()=>{",
+    "qa('[name=paymentMethod]').forEach(x=>x.onchange=syncBooking);q('#returnToggle').onchange=()=>{",
+    'client payment change updates price'
+  );
   write(rel,src);
+
+  const htmlRel=path.join('apps','client','public','index.html');
+  let html=read(htmlRel);
+  html=mustReplace(
+    html,
+    '<label class="payment-option"><input type="radio" name="paymentMethod" value="bit" checked><span><b>Bit</b><small>ישירות לנהג</small></span></label>',
+    '<label class="payment-option"><input type="radio" name="paymentMethod" value="bit" checked><span><b>Bit</b><small>ישירות לנהג · תוספת 10 ₪</small></span></label>',
+    'client Bit option surcharge disclosure'
+  );
+  html=mustReplace(
+    html,
+    '<div class="summary-fare"><span>מחיר קבוע</span><strong id="summaryFare"></strong></div>',
+    '<div class="price-breakdown"><div id="baseFareLine"><span>מחיר נסיעה</span><b id="baseFareAmount"></b></div><div id="bitFeeLine"><span>תוספת תשלום ב-Bit</span><b id="bitFeeAmount">+10 ₪</b></div></div><div class="summary-fare"><span>סה״כ לתשלום</span><strong id="summaryFare"></strong></div>',
+    'client price breakdown'
+  );
+  html=mustReplace(
+    html,
+    '<li>✓ Bit או מזומן</li>',
+    '<li>✓ מזומן ללא תוספת · Bit בתוספת 10 ₪</li>',
+    'client payment summary disclosure'
+  );
+  write(htmlRel,html);
 }
 
 // 6) Driver wallet top-up is Bit-only.
