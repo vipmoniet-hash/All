@@ -134,6 +134,34 @@ function renderAttention(){
     }).join(''):'<div class="all-clear">Нет ситуаций, требующих вмешательства</div>');
 }
 
+function setQuickFilter(filter){
+  const select=q('#filter');
+  if(filter==='attention'){
+    select.value='all';
+    renderOrders();
+    q('#attentionPanel')?.scrollIntoView({behavior:'smooth',block:'start'});
+  }else{
+    select.value=filter;
+    renderOrders();
+    q('#ordersPane')?.scrollIntoView({behavior:'smooth',block:'start'});
+  }
+  qa('.dispatch-quick-nav button').forEach(b=>b.classList.toggle('active',b.dataset.quick===filter));
+}
+
+function ensureQuickNav(){
+  if(q('#dispatchQuickNav'))return;
+  const nav=document.createElement('nav');
+  nav.id='dispatchQuickNav';
+  nav.className='dispatch-quick-nav';
+  nav.innerHTML=`
+    <button data-quick="awaiting_dispatch"><span>Новые</span><b id="quickNew">0</b></button>
+    <button data-quick="attention"><span>Внимание</span><b id="quickAttention">0</b></button>
+    <button data-quick="pool"><span>Пул</span><b id="quickPool">0</b></button>
+    <button data-quick="assigned"><span>В работе</span><b id="quickActive">0</b></button>`;
+  document.body.appendChild(nav);
+  nav.querySelectorAll('button').forEach(b=>b.onclick=()=>setQuickFilter(b.dataset.quick));
+}
+
 function orderPriority(o){
   const attention=(state.attention||[]).some(a=>a.orderId===o.id);
   return attention?0:1;
@@ -144,14 +172,15 @@ function renderOrders(){
   const xs=(state.orders||[]).filter(o=>f==='all'||o.status===f).sort((a,b)=>orderPriority(a)-orderPriority(b)||new Date(a.tripAt)-new Date(b.tripAt));
   q('#orders').innerHTML=xs.length?xs.map(o=>{
     const issue=o.issue?.status==='open'?o.issue:null;
-    return `<article class="order ${issue?'has-issue':''}" id="order-${o.id}">
+    return `<article class="order compact-order ${issue?'has-issue':''}" id="order-${o.id}">
+      <button class="order-expand" type="button" onclick="toggleOrderDetails('${o.id}')" aria-label="Показать детали">⋯</button>
       <div class="order-head">
         <span class="code">${esc(o.bookingCode||o.id)}</span>
         <div class="route">${esc(o.fromArea)} → ${esc(o.toArea)}<small>${fmt(o.tripAt)} · ${o.leg===2?'обратно':'туда'}</small></div>
         <span class="state">${statusRu(o.status)}</span>
       </div>
       ${issue?`<div class="issue-open"><b>⚠ ${esc(issue.type)}</b>${issue.note?' · '+esc(issue.note):''}</div>`:''}
-      <div class="details">
+      <div class="details collapsible-details">
         <div class="detail">Пассажиры<b>${o.passengers}</b></div>
         <div class="detail">Багаж<b>${o.largeLuggage||0} больших · ${o.smallLuggage||0} малых</b></div>
         <div class="detail">Цена<b>${money(o.fare??o.quotedFare)} ₪</b></div>
@@ -160,7 +189,7 @@ function renderOrders(){
         <div class="detail">Оплата<b>${pay(o.ridePaymentMethod)}</b></div>
         ${o.flightNumber?`<div class="detail">Рейс<b>✈ ${esc(o.flightNumber)} ${o.terminal?'· T'+esc(o.terminal):''}</b></div>`:''}
       </div>
-      <div class="private"><b>${esc(o.customerName)} · ${esc(o.customerPhone)}</b><br>Подача: ${esc(o.exactPickup)}<br>Назначение: ${esc(o.exactDropoff)}${o.notes?`<br>Комментарий: ${esc(o.notes)}`:''}${o.assignedDriverId?`<br>Водитель: ${esc(o.assignedDriverId)}`:''}</div>
+      <div class="private collapsible-details"><b>${esc(o.customerName)} · ${esc(o.customerPhone)}</b><br>Подача: ${esc(o.exactPickup)}<br>Назначение: ${esc(o.exactDropoff)}${o.notes?`<br>Комментарий: ${esc(o.notes)}`:''}${o.assignedDriverId?`<br>Водитель: ${esc(o.assignedDriverId)}`:''}</div>
       <div class="order-actions">
         ${o.status==='awaiting_dispatch'?`<input id="fare-${o.id}" type="number" min="1" value="${o.quotedFare}"><button onclick="publishOrder('${o.id}')">Отправить в общий пул</button>`:''}
         ${o.status==='pool'?`<button onclick="message('${o.id}','approved')">WhatsApp: заказ получен</button>`:''}
@@ -189,6 +218,10 @@ function render(){
 
   renderAttention();
   renderOrders();
+  if(q('#quickNew'))q('#quickNew').textContent=c.awaiting_dispatch||0;
+  if(q('#quickAttention'))q('#quickAttention').textContent=state.attentionCount||0;
+  if(q('#quickPool'))q('#quickPool').textContent=c.pool||0;
+  if(q('#quickActive'))q('#quickActive').textContent=(c.assigned||0)+(c.driver_enroute||0);
 
   q('#topups').innerHTML=(state.topups||[]).filter(t=>t.status==='pending').map(t=>`<div class="topup"><b>${esc(t.driverId)}</b> · ${money(t.amount)} ₪ · ${pay(t.method)} <button onclick="approve('${t.id}')">Подтвердить</button><button class="danger" onclick="rejectT('${t.id}')">Отклонить</button></div>`).join('')||'<p class="muted">Нет ожидающих пополнений</p>';
 
@@ -207,6 +240,7 @@ async function load(silent=false){
   }catch(e){if(!silent)alert(e.message);}
 }
 
+window.toggleOrderDetails=id=>q('#order-'+CSS.escape(id))?.classList.toggle('expanded');
 window.publishOrder=async id=>{try{await post(`/api/dispatch/orders/${id}/publish`,{fare:Number(q(`#fare-${id}`).value)});await load(true)}catch(e){alert(e.message)}};
 window.releaseOrder=async(id,refundCommission)=>{
   if(!confirm(refundCommission?'Снять водителя и вернуть ему комиссию?':'Снять водителя без возврата комиссии?'))return;
@@ -249,8 +283,10 @@ qa('.tabs button').forEach(b=>b.onclick=()=>{
 
 async function boot(){
   ensureMarketplaceUi();
+  ensureQuickNav();
+  q('#filter').value='awaiting_dispatch';
   const ready=await initDispatchAuth();
-  if(ready)await load(true);
+  if(ready){await load(true);setQuickFilter('awaiting_dispatch');}
 }
 boot();
 setInterval(()=>{if(document.visibilityState==='visible'&&(!authRequired||authToken))load(true)},10000);
