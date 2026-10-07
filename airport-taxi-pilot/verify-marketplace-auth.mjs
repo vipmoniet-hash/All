@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { spawn } from 'node:child_process';
+import { spawn, spawnSync } from 'node:child_process';
 
 const root=path.resolve(process.argv[2]||'app');
 const port=4201;
@@ -16,6 +16,17 @@ const child=spawn(process.execPath,['server.js'],{
 let output='';
 child.stdout.on('data',d=>output+=String(d));child.stderr.on('data',d=>output+=String(d));
 const base='http://127.0.0.1:'+port;
+
+{
+  const env={...process.env,PORT:'4298',MARKETPLACE_AUTH_REQUIRED:'1',UNIFIED_REQUIRE_AUTH:'1'};
+  delete env.MARKETPLACE_ADMIN_PIN;
+  delete env.MARKETPLACE_DISPATCH_1_4_PIN;
+  delete env.MARKETPLACE_DISPATCH_5_6_PIN;
+  delete env.MARKETPLACE_DISPATCH_PIN;
+  const probe=spawnSync(process.execPath,['server.js'],{cwd:root,encoding:'utf8',timeout:1500,env});
+  assert.equal(probe.status,1,'UNIFIED_REQUIRE_AUTH must refuse startup without all staff credentials');
+  assert.match(String(probe.stdout||'')+String(probe.stderr||''),/STAFF_CREDENTIALS_REQUIRED_MISSING/,'fail-closed auth startup must explain missing staff credentials');
+}
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 
 async function waitHealth(){
