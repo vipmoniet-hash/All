@@ -43,16 +43,16 @@ try{
   const admin=await login('864200');
 
   x=await call('/api/unified/large/orders/'+id+'/approve',{method:'POST',token:small.token,body:{fare:420}});
-  assert.equal(x.r.status,403,'dispatcher_1_4 cannot manage 5-6 order');
+  assert.equal(x.r.status,200,'unified dispatcher can manage 5-6 order');
 
   x=await call('/api/unified/large/orders/'+id+'/approve',{method:'POST',token:large.token,body:{fare:420}});
-  assert.equal(x.r.status,200,'dispatcher_5_6 can approve fare');
+  assert.equal(x.r.status,200,'any owner-appointed unified dispatcher can approve fare');
   assert.equal(x.j.status,'confirmed');
   assert.equal(x.j.fare,420);
   assert.equal(x.j.commission,0,'large staff approval does not create driver commission');
 
   x=await call('/api/unified/large/orders/'+id+'/assign',{method:'POST',token:large.token,body:{driverName:'Large Driver',driverPhone:'0504444444',vehiclePlate:'12-345-67'}});
-  assert.equal(x.r.status,200,'dispatcher_5_6 can assign a large driver');
+  assert.equal(x.r.status,200,'unified dispatcher can assign a large driver');
   assert.equal(x.j.status,'assigned');
   assert.equal(x.j.assignedDriverName,'Large Driver');
 
@@ -70,7 +70,7 @@ try{
   assert.equal(done.status,'completed','admin unified state sees completed large order');
 
   x=await call('/api/unified/large/state',{token:large.token});
-  assert.ok(x.j.events.some(e=>e.orderId===id&&e.actor==='dispatcher_5_6'),'large audit records dispatcher role');
+  assert.ok(x.j.events.some(e=>e.orderId===id&&e.actor==='dispatcher'),'large audit records unified dispatcher role');
 
   console.log('LARGE_5_6_WORKFLOW_OK',JSON.stringify({
     approved:true,assigned:true,enroute:true,completed:true,commission:0,audited:true
