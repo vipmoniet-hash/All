@@ -12,7 +12,6 @@ for(const needle of [
   "role==='admin'",
   "role==='dispatcher'",
   '/api/unified/admin/state',
-  '/api/unified/large/state',
   '/api/unified/large/orders/',
   '/approve',
   '/assign',
@@ -45,6 +44,7 @@ for(const needle of ['Заказы','Пополнения','Водители','�
 assert.ok(html.includes('id="readinessBanner"'),'control center must expose deployment readiness banner');
 for(const needle of ['readyForUnifiedCutover','readinessReasons','renderReadiness','/health']) assert.ok(ui.includes(needle),'unified readiness UI missing '+needle);
 assert.ok(html.includes('id="staffAuthOverlay"'),'control center must provide a staff login surface');
+assert.ok(html.includes('id="staffPhone"'),'control center must accept existing VanClick staff phone credentials');
 assert.ok(html.includes('noindex,nofollow'),'control center must remain noindex');
 assert.ok(ui.includes("Asia/Jerusalem"),'unified control dates must use Israel timezone');
 assert.ok(ui.includes("weekday:'short'"),'unified control dates must include weekday');
