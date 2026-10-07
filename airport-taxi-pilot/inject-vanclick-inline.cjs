@@ -71,15 +71,3 @@ require('child_process').execFileSync(process.execPath,[path.join(__dirname,'aud
   console.log('VANCLICK DRIVER V2 INSTALLED');
 }
 
-/* TAXI4_TOPUP_INSPECT */
-{
-  for(const rel of ['server.js','src/service.js','src/domain.js']){
-    const file=path.join(root,rel);
-    if(!fs.existsSync(file)) continue;
-    const src=fs.readFileSync(file,'utf8');
-    for(const needle of ['topup','topups','createTopup','method']){
-      const idx=src.indexOf(needle);
-      if(idx>=0) console.log('TAXI4_TOPUP_INSPECT',rel,needle,'\\n'+src.slice(Math.max(0,idx-1600),Math.min(src.length,idx+5000)));
-    }
-  }
-}
