@@ -5,13 +5,29 @@ const root=process.argv[2]||'app';
 const pricing=JSON.parse(fs.readFileSync(path.join(root,'data','pricing.json'),'utf8'));
 const bench=JSON.parse(fs.readFileSync(path.join(__dirname,'taxi4-pricing-overrides.json'),'utf8')).overrides||{};
 
+const AIRPORT={lat:32.0055,lon:34.8854};
+function rad(v){return Number(v)*Math.PI/180;}
+function airKm(x){
+  const lat=Number(x.lat ?? x.latitude ?? x.Latitude);
+  const lon=Number(x.lon ?? x.lng ?? x.longitude ?? x.Longitude ?? x.long);
+  if(!Number.isFinite(lat)||!Number.isFinite(lon)) return null;
+  const dLat=rad(lat-AIRPORT.lat),dLon=rad(lon-AIRPORT.lon);
+  const a=Math.sin(dLat/2)**2+Math.cos(rad(AIRPORT.lat))*Math.cos(rad(lat))*Math.sin(dLon/2)**2;
+  return 6371*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+}
 const rows=pricing.locations.map(x=>{
   const b=bench[x.nameHe]||{};
+  const benchmark=(b.benchmark!==null && b.benchmark!==undefined && Number.isFinite(Number(b.benchmark)))?Number(b.benchmark):null;
+  const air=airKm(x);
+  const km=Number(x.roadKm);
+  const roadValid=Number.isFinite(km)&&km>0&&air!=null&&km>=air*.95&&km<=air*2.2+20;
   return {
     name:x.nameHe,
     fare:Number(x.fare),
-    km:Number(x.roadKm),
-    benchmark:Number.isFinite(Number(b.benchmark))?Number(b.benchmark):null,
+    km,
+    airKm:air==null?null:Number(air.toFixed(1)),
+    roadValid,
+    benchmark,
     reason:b.reason||'',
     oldFare:Number(b.oldFare)
   };
@@ -26,8 +42,10 @@ function median(a){
   return x.length%2?x[i]:(x[i-1]+x[i])/2;
 }
 function neighborMedian(row){
-  let pool=matched.filter(r=>r.name!==row.name && Math.abs(r.km-row.km)<=Math.max(4,row.km*.08));
-  if(pool.length<15) pool=matched.filter(r=>r.name!==row.name && Math.abs(r.km-row.km)<=Math.max(8,row.km*.15));
+  const d=Number(row.airKm);
+  if(!Number.isFinite(d)) return null;
+  let pool=matched.filter(r=>r.name!==row.name && Number.isFinite(r.airKm) && Math.abs(r.airKm-d)<=Math.max(5,d*.08));
+  if(pool.length<15) pool=matched.filter(r=>r.name!==row.name && Number.isFinite(r.airKm) && Math.abs(r.airKm-d)<=Math.max(10,d*.15));
   if(pool.length<8) return null;
   const vals=pool.map(r=>r.benchmark);
   const med=median(vals);
@@ -66,6 +84,7 @@ const underpriced=analysed
   .sort((a,b)=>Math.min(a.vsBenchmarkPct,a.vsNeighborPct??999)-Math.min(b.vsBenchmarkPct,b.vsNeighborPct??999));
 
 const unmatched=rows.filter(r=>r.benchmark==null || r.reason==='owner_anchor');
+const badRoad=rows.filter(r=>!r.roadValid).sort((a,b)=>(b.airKm??0)-(a.airKm??0));
 const marketCurve=unmatched.map(r=>{
   const synthetic={...r,benchmark:null};
   const n=neighborMedian(synthetic);
@@ -84,10 +103,12 @@ const out={
   underpricedCount:underpriced.length,
   unmatchedHighCount:unmatchedHigh.length,
   unmatchedLowCount:unmatchedLow.length,
+  badRoadKmCount:badRoad.length,
   topSuspiciousMatches:suspiciousMatches.slice(0,40),
   topOverpriced:overpriced.slice(0,40),
   topUnderpriced:underpriced.slice(0,30),
   topUnmatchedHigh:unmatchedHigh.slice(0,30),
-  topUnmatchedLow:unmatchedLow.slice(0,30)
+  topUnmatchedLow:unmatchedLow.slice(0,30),
+  topBadRoadKm:badRoad.slice(0,40)
 };
 console.log('TAXI4_MARKET_AUDIT',JSON.stringify(out));
