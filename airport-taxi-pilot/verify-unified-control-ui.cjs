@@ -20,8 +20,16 @@ for(const needle of [
   '/enroute',
   '/complete',
   '/cancel',
-  'taxi4_dispatch_token'
+  'taxi4_dispatch_token',
+  'customerProfiles',
+  'unifiedJournal',
+  'renderCustomers',
+  'renderJournal'
 ]) assert.ok(ui.includes(needle),'unified control UI missing '+needle);
+
+for(const needle of ['Клиенты','Журнал','לקוחות','יומן']) assert.ok(ui.includes(needle),'unified control UI missing bilingual admin label '+needle);
+assert.ok(html.includes('id="customerProfiles"'),'admin control center must render shared customer profiles');
+assert.ok(html.includes('id="unifiedJournal"'),'admin control center must render unified journal');
 
 assert.ok(html.includes('id="staffAuthOverlay"'),'control center must provide a staff login surface');
 assert.ok(html.includes('noindex,nofollow'),'control center must remain noindex');
