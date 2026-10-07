@@ -284,13 +284,13 @@ patchFile('server.js',({replaceOnce})=>{
 
   replaceOnce(
     "m=url.pathname.match(/^\\/api\\/dispatch\\/orders\\/([^/]+)\\/cancel$/);if(req.method==='POST'&&m)return json(res,200,await adminCancelOrder(m[1],await body(req)));",
-    "m=url.pathname.match(/^\\/api\\/dispatch\\/orders\\/([^/]+)\\/cancel$/);if(req.method==='POST'&&m)return json(res,200,await adminCancelOrder(m[1],await body(req)));\\n      m=url.pathname.match(/^\\/api\\/dispatch\\/orders\\/([^/]+)\\/issue\\/resolve$/);if(req.method==='POST'&&m)return json(res,200,await adminResolveIssue(m[1],await body(req)));",
+    "m=url.pathname.match(/^\\/api\\/dispatch\\/orders\\/([^/]+)\\/cancel$/);if(req.method==='POST'&&m)return json(res,200,await adminCancelOrder(m[1],await body(req)));\n      m=url.pathname.match(/^\\/api\\/dispatch\\/orders\\/([^/]+)\\/issue\\/resolve$/);if(req.method==='POST'&&m)return json(res,200,await adminResolveIssue(m[1],await body(req)));",
     'dispatch issue resolve endpoint'
   );
 
   replaceOnce(
     "m=url.pathname.match(/^\\/api\\/drivers\\/([^/]+)\\/orders\\/([^/]+)\\/enroute$/);if(req.method==='POST'&&m)return json(res,200,await driverConfirmEnRoute(m[2],m[1]));",
-    "m=url.pathname.match(/^\\/api\\/drivers\\/([^/]+)\\/orders\\/([^/]+)\\/issue$/);if(req.method==='POST'&&m)return json(res,200,await driverReportIssue(m[2],m[1],await body(req)));\\n      m=url.pathname.match(/^\\/api\\/drivers\\/([^/]+)\\/orders\\/([^/]+)\\/enroute$/);if(req.method==='POST'&&m)return json(res,200,await driverConfirmEnRoute(m[2],m[1]));",
+    "m=url.pathname.match(/^\\/api\\/drivers\\/([^/]+)\\/orders\\/([^/]+)\\/issue$/);if(req.method==='POST'&&m)return json(res,200,await driverReportIssue(m[2],m[1],await body(req)));\n      m=url.pathname.match(/^\\/api\\/drivers\\/([^/]+)\\/orders\\/([^/]+)\\/enroute$/);if(req.method==='POST'&&m)return json(res,200,await driverConfirmEnRoute(m[2],m[1]));",
     'driver issue endpoint'
   );
 });
