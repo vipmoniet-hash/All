@@ -13,21 +13,23 @@ function mustReplace(src,search,replacement,label){
   return src;
 }
 
-// 1) Core platform commission: 1–99 => 5; 100–199 => 10; each next 100 => +5.
+// 1) Core platform commission: 1–99 => 5; 100–199 => 10; 200–299 => 20; then +10 per 100.
 {
   const rel='src/domain.js';
   let src=read(rel);
-  src=mustReplace(
-    src,
-    /export function commissionForFare\(fare\) \{[\s\S]*?\n\}/,
+  if(!src.includes("return Math.floor(n / 100) * 10;")){
+    src=mustReplace(
+      src,
+      /export function commissionForFare\(fare\) \{[\s\S]*?\n\}/,
 `export function commissionForFare(fare) {
   const n = Number(fare);
   if (!Number.isFinite(n) || n <= 0) throw new Error('FARE_MUST_BE_POSITIVE');
   if (n < 100) return 5;
   return Math.floor(n / 100) * 10;
 }`,
-    'domain commissionForFare'
-  );
+      'domain commissionForFare'
+    );
+  }
   write(rel,src);
 }
 
