@@ -92,3 +92,6 @@ require('child_process').execFileSync(process.execPath,[path.join(__dirname,'ver
 
 // Unified VanClick staging HTTP isolation gate.
 require('child_process').execFileSync(process.execPath,[path.join(__dirname,'verify-unified-staging.mjs'),root],{stdio:'inherit'});
+
+// Transactional Postgres persistence contract gate.
+require('child_process').execFileSync(process.execPath,[path.join(__dirname,'verify-postgres-state-store.mjs')],{stdio:'inherit'});
