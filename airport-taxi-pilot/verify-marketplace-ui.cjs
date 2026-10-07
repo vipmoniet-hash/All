@@ -8,6 +8,7 @@ const read=rel=>fs.readFileSync(path.join(root,rel),'utf8');
 const driver=read('apps/driver/public/app.js');
 const dispatch=read('apps/dispatch/public/app.js');
 const client=read('apps/client/public/app.js');
+const driverHtml=read('apps/driver/public/index.html');
 
 assert.ok(driver.includes('MARKETPLACE_V1_DRIVER_UI'),'driver UI must carry marketplace v1 marker');
 assert.ok(driver.includes('poolFilters'),'driver UI must provide high-volume pool filters');
@@ -16,6 +17,10 @@ assert.ok(driver.includes('/issue'),'driver UI must expose issue reporting');
 assert.ok(driver.includes('location.origin'),'driver UI must default API to its isolated origin');
 assert.ok(driver.includes('/api/auth/driver/login'),'driver UI must support protected driver login');
 assert.ok(driver.includes('sessionStorage'),'driver UI must persist only browser-session auth token');
+assert.ok(driver.includes('TOPUP_VAT_RATE'),'driver UI must calculate VAT for credit top-ups');
+assert.ok(driver.includes('totalAmount'),'driver UI must show total payment including VAT');
+assert.ok(driverHtml.includes('קרדיטים'),'driver wallet UI must label balance and purchases as credits');
+assert.ok(driverHtml.includes('מע״מ 18%'),'driver wallet UI must disclose 18% VAT');
 
 assert.ok(dispatch.includes('MARKETPLACE_V1_DISPATCH_UI'),'dispatch UI must carry marketplace v1 marker');
 assert.ok(dispatch.includes('state.attention'),'dispatch UI must render attention queue');
@@ -29,6 +34,8 @@ assert.ok(dispatch.includes('/unified/dispatch/'),'Large 5-6 dispatcher must be 
 assert.ok(dispatch.includes('/drivers/${id}/pin'),'dispatch UI must support driver PIN rotation');
 assert.ok(dispatch.includes('dispatchLang'),'dispatch UI must persist selected Russian/Hebrew language');
 assert.ok(dispatch.includes('setDispatchLang'),'dispatch UI must expose language switch');
+assert.ok(dispatch.includes('topupTotal'),'dispatch UI must show gross top-up payment');
+assert.ok(dispatch.includes('18%'),'dispatch UI must disclose VAT on pending credit purchases');
 assert.ok(dispatch.includes("document.documentElement.dir"),'dispatch UI must switch RTL/LTR direction');
 assert.ok(dispatch.includes("עברית"),'dispatch UI must expose Hebrew language choice');
 for(const pair of [["Заказы","הזמנות"],["Пополнения","טעינות"],["Водители","נהגים"],["Журнал","יומן"]]){
