@@ -1,6 +1,7 @@
 (() => {
   const ROOT='https://vanclick.co.il/';
   const LARGE='https://vanclick.co.il/#calculator';
+  const SWITCH_KEY='vanclickVehicleSwitchDraftV1';
   const GOOGLE='https://www.google.com/maps/search/?api=1&query=VanClick&query_place_id=ChIJJ0rMhnYJ7w0RuUQKhFcvpYs';
   const ready=fn=>document.readyState==='loading'?document.addEventListener('DOMContentLoaded',fn,{once:true}):fn();
 
@@ -65,6 +66,55 @@
     if(quote) hero.querySelector('.vc-booking-slot').appendChild(quote);
     if(booking) hero.querySelector('.vc-details-slot').appendChild(booking);
     return hero;
+  }
+
+  function collectVehicleSwitchDraft(){
+    const get=id=>document.getElementById(id)?.value||'';
+    return {
+      direction:[...document.querySelectorAll('.direction')].find(b=>b.classList.contains('active'))?.dataset.direction||'to',
+      area:get('area'),
+      tripAt:get('tripAt'),
+      passengers:get('passengers')||'1',
+      returnTrip:!!document.getElementById('returnToggle')?.checked,
+      returnTripAt:document.querySelector('[name="returnTripAt"]')?.value||'',
+      customerName:document.querySelector('[name="customerName"]')?.value||'',
+      customerPhone:document.querySelector('[name="customerPhone"]')?.value||'',
+      exactPickup:document.querySelector('[name="exactPickup"]')?.value||'',
+      exactDropoff:document.querySelector('[name="exactDropoff"]')?.value||'',
+      savedAt:Date.now()
+    };
+  }
+
+  function largeTransferUrl(){
+    const draft=collectVehicleSwitchDraft();
+    try{sessionStorage.setItem(SWITCH_KEY,JSON.stringify(draft));}catch{}
+    const u=new URL(LARGE);
+    u.searchParams.set('vc_vehicle','large');
+    if(draft.direction)u.searchParams.set('vc_direction',draft.direction);
+    if(draft.area)u.searchParams.set('vc_area',draft.area);
+    if(draft.tripAt)u.searchParams.set('vc_tripAt',draft.tripAt);
+    if(draft.passengers)u.searchParams.set('vc_passengers',draft.passengers);
+    u.searchParams.set('vc_return','https://vanclick-taxi4-marketplace-dev.onrender.com/client/?vehicle=small');
+    return u.toString();
+  }
+
+  function wireVehicleSwitchLinks(root=document){
+    root.querySelectorAll('.vc-size-large,.vc-header-large,.vc-large-card a').forEach(a=>{
+      a.href=largeTransferUrl();
+      a.addEventListener('click',()=>{a.href=largeTransferUrl();});
+    });
+  }
+
+  function restoreSmallDraft(){
+    let draft=null;
+    try{draft=JSON.parse(sessionStorage.getItem(SWITCH_KEY)||'null');}catch{}
+    if(!draft)return;
+    const area=document.getElementById('area'),trip=document.getElementById('tripAt'),p=document.getElementById('passengers');
+    if(area&&draft.area)area.value=draft.area;
+    if(trip&&draft.tripAt)trip.value=draft.tripAt;
+    if(p&&draft.passengers)p.value=Math.min(4,Number(draft.passengers)||1);
+    const dir=document.querySelector('.direction[data-direction="'+(draft.direction||'to')+'"]');
+    if(dir)dir.click();
   }
 
   function normalizeFlow(){
@@ -169,6 +219,8 @@
 
     normalizeFlow();
     addSupport(main);
+    wireVehicleSwitchLinks(document);
+    restoreSmallDraft();
     sticky();
     document.body.classList.add('vc-cro-ready');
   });
