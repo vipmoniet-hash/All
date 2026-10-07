@@ -101,3 +101,44 @@ console.log('MARKETPLACE_V1_CLAIM_SAFETY_OK', JSON.stringify({
   conflictOrderId:secondOrderId,
   conflictReason:conflict.claimBlockReason
 }));
+
+
+await assert.rejects(
+  service.driverCompleteOrder(firstOrderId,'drv-test-001',new Date('2026-10-08T07:40:00Z')),
+  err=>err?.message==='DRIVER_MUST_BE_ENROUTE',
+  'driver cannot complete a ride before marking en route'
+);
+
+const issue = await service.driverReportIssue(
+  firstOrderId,
+  'drv-test-001',
+  {type:'client_unreachable',note:'אין מענה בטלפון'},
+  new Date('2026-10-08T07:35:00Z')
+);
+assert.equal(issue.status,'open','driver issue opens an exception');
+assert.equal(issue.type,'client_unreachable','issue type is retained');
+
+let admin = await service.listAdminState(new Date('2026-10-08T07:35:00Z'));
+assert.ok(admin.attention.some(x=>x.orderId===firstOrderId&&x.kind==='open_issue'),'open driver issue appears in dispatch attention');
+
+const resolved = await service.adminResolveIssue(firstOrderId,{note:'נוצר קשר עם הלקוח'},new Date('2026-10-08T07:38:00Z'));
+assert.equal(resolved.status,'resolved','dispatcher can resolve driver issue');
+
+admin = await service.listAdminState(new Date('2026-10-08T07:38:00Z'));
+assert.ok(!admin.attention.some(x=>x.orderId===firstOrderId&&x.kind==='open_issue'),'resolved issue leaves open-issue attention queue');
+
+const enroute = await service.driverConfirmEnRoute(firstOrderId,'drv-test-001',new Date('2026-10-08T07:30:00Z'));
+assert.equal(enroute.status,'driver_enroute','driver can mark en route near pickup');
+
+const completed = await service.driverCompleteOrder(firstOrderId,'drv-test-001',new Date('2026-10-08T08:10:00Z'));
+assert.equal(completed.status,'completed','en-route ride can be completed');
+
+db=await persistence.readDb();
+assert.equal(db.drivers.find(x=>x.id==='drv-test-001').completedTrips,1,'driver completed-trip counter increments');
+
+console.log('MARKETPLACE_V1_EXCEPTION_FLOW_OK', JSON.stringify({
+  issueType:issue.type,
+  resolved:resolved.status,
+  finalStatus:completed.status,
+  completedTrips:db.drivers.find(x=>x.id==='drv-test-001').completedTrips
+}));
