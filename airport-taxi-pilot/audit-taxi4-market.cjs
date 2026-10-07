@@ -4,6 +4,8 @@ const path=require('path');
 const root=process.argv[2]||'app';
 const pricing=JSON.parse(fs.readFileSync(path.join(root,'data','pricing.json'),'utf8'));
 const bench=JSON.parse(fs.readFileSync(path.join(__dirname,'taxi4-pricing-overrides.json'),'utf8')).overrides||{};
+const safeAliasPath=path.join(__dirname,'taxi4-safe-alias-benchmarks.json');
+const safeAliases=fs.existsSync(safeAliasPath)?JSON.parse(fs.readFileSync(safeAliasPath,'utf8')).aliases||{}:{};
 
 const AIRPORT={lat:32.0055,lon:34.8854};
 function rad(v){return Number(v)*Math.PI/180;}
@@ -17,7 +19,11 @@ function airKm(x){
 }
 const rows=pricing.locations.map(x=>{
   const b=bench[x.nameHe]||{};
-  const benchmark=(b.benchmark!==null && b.benchmark!==undefined && Number.isFinite(Number(b.benchmark)))?Number(b.benchmark):null;
+  const a=safeAliases[x.nameHe]||{};
+  const directBenchmark=(b.benchmark!==null && b.benchmark!==undefined && Number.isFinite(Number(b.benchmark)))?Number(b.benchmark):null;
+  const aliasBenchmark=(a.benchmark!==null && a.benchmark!==undefined && Number.isFinite(Number(a.benchmark)))?Number(a.benchmark):null;
+  const benchmark=directBenchmark==null?aliasBenchmark:(aliasBenchmark==null?directBenchmark:Math.max(directBenchmark,aliasBenchmark));
+  const benchmarkSource=(b.reason==='owner_anchor')?'owner_anchor':(aliasBenchmark!=null && (directBenchmark==null || aliasBenchmark>directBenchmark)?'safe_alias':(b.reason||''));
   const air=airKm(x);
   const km=Number(x.roadKm);
   const roadValid=Number.isFinite(km)&&km>0&&air!=null&&km>=air*.95&&km<=air*2.2+20;
@@ -28,7 +34,8 @@ const rows=pricing.locations.map(x=>{
     airKm:air==null?null:Number(air.toFixed(1)),
     roadValid,
     benchmark,
-    reason:b.reason||'',
+    reason:benchmarkSource,
+    matchedCity:a.matchedCity||null,
     oldFare:Number(b.oldFare)
   };
 });
@@ -97,6 +104,7 @@ const out={
   total:rows.length,
   matched:matched.length,
   unmatched:unmatched.length,
+  safeAliasBenchmarks:Object.keys(safeAliases).length,
   buckets,
   suspiciousMatchCount:suspiciousMatches.length,
   overpricedCount:overpriced.length,
