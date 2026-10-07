@@ -188,3 +188,10 @@ console.log('MARKETPLACE_V1_CANCELLATION_LEDGER_OK',JSON.stringify({
   refunded:admin.finance.commissionRefunded,
   net:admin.finance.netCommissionCollected
 }));
+
+
+await persistence.resetDb();
+const clean = await persistence.readDb();
+assert.equal(clean.orders.length,0,'green regression suite leaves live dev database clean');
+assert.ok(clean.drivers.some(x=>x.id==='drv-001')&&clean.drivers.some(x=>x.id==='drv-002'),'green regression suite restores demo drivers');
+console.log('MARKETPLACE_V1_TEST_STATE_RESET_OK',JSON.stringify({orders:clean.orders.length,drivers:clean.drivers.map(x=>x.id)}));
