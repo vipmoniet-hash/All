@@ -73,10 +73,10 @@ try{
   assert.equal(x.r.status,200,'driver token opens its own state');
 
   x=await call('/api/dispatch/state',{token:driverToken});
-  assert.equal(x.r.status,401,'driver token cannot open dispatcher state');
+  assert.equal(x.r.status,403,'authenticated driver is forbidden from dispatcher state');
 
   x=await call('/api/drivers/drv-002/state',{token:driverToken});
-  assert.equal(x.r.status,401,'driver token cannot impersonate another driver');
+  assert.equal(x.r.status,403,'authenticated driver is forbidden from impersonating another driver');
 
   x=await call('/api/auth/logout',{method:'POST',token:driverToken});
   assert.equal(x.r.status,200,'driver can log out');
