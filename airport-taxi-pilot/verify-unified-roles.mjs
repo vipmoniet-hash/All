@@ -14,6 +14,7 @@ const child=spawn(process.execPath,['server.js'],{
     ...process.env,
     PORT:String(port),
     TAXI4_DATA_DIR:dataDir,
+    DATABASE_URL:'',
     MARKETPLACE_AUTH_REQUIRED:'1',
     UNIFIED_REQUIRE_POSTGRES:'0',
     UNIFIED_REQUIRE_AUTH:'0',
