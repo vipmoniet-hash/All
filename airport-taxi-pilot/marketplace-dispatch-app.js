@@ -225,7 +225,7 @@ function ensureDispatchAuthUi(){
         staffRole=j.role||'';
         sessionStorage.setItem('taxi4_dispatch_token',authToken);
         sessionStorage.setItem('taxi4_staff_role',staffRole);
-        if(staffRole==='dispatcher_5_6'){location.replace('/unified/dispatch/');return;}
+        if(['admin','dispatcher'].includes(staffRole)){location.replace('/unified/dispatch/');return;}
         q('#dispatchAuthOverlay').classList.add('hidden');
         q('#dispatchLogout')?.classList.remove('hidden');
         await load(true);
@@ -253,7 +253,7 @@ async function initDispatchAuth(){
   if(!authRequired){q('#dispatchLogout')?.classList.add('hidden');return true;}
   q('#dispatchLogout')?.classList.remove('hidden');
   if(!authToken){showDispatchLogin();return false;}
-  if(staffRole==='dispatcher_5_6'){location.replace('/unified/dispatch/');return false;}
+  if(['admin','dispatcher'].includes(staffRole)){location.replace('/unified/dispatch/');return false;}
   return true;
 }
 
@@ -528,7 +528,7 @@ async function unifiedParentLogin(phone,pin){
     staffRole=payload.role||'';
     sessionStorage.setItem('taxi4_dispatch_token',authToken);
     sessionStorage.setItem('taxi4_staff_role',staffRole);
-    if(staffRole==='dispatcher_5_6')throw Error('FORBIDDEN');
+    if(!['admin','dispatcher'].includes(staffRole))throw Error('FORBIDDEN');
     q('#dispatchAuthOverlay')?.classList.add('hidden');
     q('#dispatchLogout')?.classList.remove('hidden');
     await load(true);
