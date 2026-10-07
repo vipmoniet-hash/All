@@ -1,17 +1,17 @@
 {
-  "version": "2026-10-07-driver-floor-v1",
+  "version": "2026-10-07-balanced-driver-market-v2",
   "policy": {
-    "matched": "max(existing, ceil(max(iCab daytime directions)*1.10 / 10)*10)",
+    "matched": "Safe target = max(driver km floor, commission-aware floor from max(iCab daytime/safe-alias benchmark, robust distance-neighbor median)); reduce only when current fare is >10% above target",
     "unmatched": "max(existing, ceil((80 + 4*roadKm)/10)*10)",
     "direction": "same fixed fare city ↔ Ben Gurion",
-    "decreases": false,
+    "decreases": true,
     "ownerAnchors": {
       "ראשון לציון": 170,
       "תל אביב-יפו": 190,
       "הרצליה": 250,
       "נתניה": 320
     },
-    "note": "Customer pays driver directly; platform commission is paid separately from driver wallet. 10% market buffer is intended to leave the driver at/above the benchmark after typical platform commission."
+    "note": "Customer pays driver directly; platform commission is paid separately from driver wallet. Controlled reductions remove clear overpricing while the driver-net and kilometer floors remain protected."
   },
   "stats": {
     "locations": 1354,
