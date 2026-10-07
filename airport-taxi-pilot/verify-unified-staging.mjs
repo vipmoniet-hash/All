@@ -61,10 +61,30 @@ try{
   assert.equal(x.j.status,'awaiting_dispatch','large shadow booking must enter staff-only intake');
   const largeId=x.j.id;
 
+  x=await json('/api/client/bookings',{method:'POST',body:{
+    passengers:2,
+    largeLuggage:1,
+    smallLuggage:1,
+    paymentMethod:'cash',
+    customerName:'Unified Small Test',
+    customerPhone:'0507654321',
+    fromArea:'ראשון לציון',
+    toArea:'Ben Gurion Airport',
+    tripAt:'2026-10-20T12:30',
+    exactPickup:'Small test pickup',
+    exactDropoff:'Ben Gurion Airport'
+  }});
+  assert.equal(x.r.status,201,'small booking must still use the Taxi 1-4 engine');
+  assert.equal(x.j.orders[0].serviceType,'taxi_1_4','small booking response must expose the shared service type');
+  const smallId=x.j.orders[0].id;
+
   x=await json('/api/dispatch/state');
   assert.equal(x.r.status,200,'staff state must remain available');
   assert.ok(Array.isArray(x.j.largeOrders),'staff state must expose isolated large shadow orders');
   assert.ok(x.j.largeOrders.some(o=>o.id===largeId),'staff must see the large shadow booking');
+  assert.ok(Array.isArray(x.j.unifiedOrders),'staff state must expose a common order contract');
+  assert.ok(x.j.unifiedOrders.some(o=>o.id===largeId&&o.serviceType==='large_5_6'),'common contract must include large 5-6');
+  assert.ok(x.j.unifiedOrders.some(o=>o.id===smallId&&o.serviceType==='taxi_1_4'),'common contract must include Taxi 1-4');
 
   x=await json('/api/drivers/drv-001/state');
   assert.equal(x.r.status,200,'small-taxi driver state must remain available');
@@ -76,6 +96,7 @@ try{
   console.log('UNIFIED_VANCLICK_HTTP_E2E_OK',JSON.stringify({
     publicUnified:true,
     largeShadowStored:true,
+    unifiedOrderContract:true,
     staffVisible:true,
     smallDriverIsolation:true,
     productionUntouched:true
