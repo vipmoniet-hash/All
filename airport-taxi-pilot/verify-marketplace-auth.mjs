@@ -105,7 +105,9 @@ try{
   assert.equal(x.r.status,200,'legacy owner admin can access the unified admin state');
 
   x=await call('/api/auth/dispatch/login',{method:'POST',body:{phone:'dispatcher-phone',pin:'2468'},ip:'198.51.100.23'});
-  assert.equal(x.r.status,401,'legacy non-owner credentials must not be promoted to admin');
+  assert.equal(x.r.status,200,'legacy owner-appointed dispatcher credentials are accepted');
+  assert.equal(x.j.role,'dispatcher','legacy dispatcher maps to unified dispatcher role');
+  assert.equal(x.j.serviceScope,'all_ops','legacy dispatcher can operate both service lines');
 
   x=await call('/api/auth/dispatch/login',{method:'POST',body:{pin:'753100'},ip:'198.51.100.21'});
   assert.equal(x.r.status,200,'dispatcher can log in');
@@ -157,6 +159,7 @@ try{
     dispatchProtected:true,
     adminAndDispatcherRoles:true,
     legacyOwnerBridge:true,
+    legacyDispatcherBridge:true,
     driverPwaOwnerHandoff:true,
     driverProtected:true,
     roleIsolation:true,
