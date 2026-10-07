@@ -62,17 +62,30 @@ export async function driverLogin(driverId,pin,now=new Date()){
 
 export async function dispatchLogin(pin,now=new Date()){
   const adminPin=String(process.env.MARKETPLACE_ADMIN_PIN||'');
-  const dispatchPin=String(process.env.MARKETPLACE_DISPATCH_PIN||'');
-  if(!adminPin&&!dispatchPin)throw new Error('STAFF_PIN_NOT_CONFIGURED');
+  const smallPin=String(process.env.MARKETPLACE_DISPATCH_1_4_PIN||process.env.MARKETPLACE_DISPATCH_PIN||'');
+  const largePin=String(process.env.MARKETPLACE_DISPATCH_5_6_PIN||'');
+  if(!adminPin&&!smallPin&&!largePin)throw new Error('STAFF_PIN_NOT_CONFIGURED');
   const supplied=String(pin||'');
-  const role=adminPin&&safeEqualText(supplied,adminPin)?'admin':dispatchPin&&safeEqualText(supplied,dispatchPin)?'dispatch':null;
+  const role=
+    adminPin&&safeEqualText(supplied,adminPin)?'admin':
+    smallPin&&safeEqualText(supplied,smallPin)?'dispatcher_1_4':
+    largePin&&safeEqualText(supplied,largePin)?'dispatcher_5_6':
+    null;
   if(!role)throw new Error('INVALID_CREDENTIALS');
   return transact(db=>{
     cleanSessions(db,new Date(now).getTime());
     const token=crypto.randomBytes(32).toString('base64url');
-    const session={id:id('ses'),tokenHash:tokenHash(token),role,driverId:null,createdAt:new Date(now).toISOString(),expiresAt:new Date(new Date(now).getTime()+SESSION_MS).toISOString()};
+    const session={
+      id:id('ses'),
+      tokenHash:tokenHash(token),
+      role,
+      serviceScope:role==='admin'?'all':role==='dispatcher_1_4'?'taxi_1_4':'large_5_6',
+      driverId:null,
+      createdAt:new Date(now).toISOString(),
+      expiresAt:new Date(new Date(now).getTime()+SESSION_MS).toISOString()
+    };
     db.sessions.push(session);
-    return {token,expiresAt:session.expiresAt,role};
+    return {token,expiresAt:session.expiresAt,role,serviceScope:session.serviceScope};
   });
 }
 
