@@ -10,7 +10,7 @@ await fs.rm(dataDir,{recursive:true,force:true});
 
 const child=spawn(process.execPath,['server.js'],{
   cwd:root,
-  env:{...process.env,PORT:String(port),TAXI4_DATA_DIR:dataDir,MARKETPLACE_AUTH_REQUIRED:'1',MARKETPLACE_ADMIN_PIN:'864200',MARKETPLACE_DISPATCH_1_4_PIN:'753100',MARKETPLACE_DISPATCH_5_6_PIN:'642900',MARKETPLACE_DISPATCH_PIN:''},
+  env:{...process.env,PORT:String(port),TAXI4_DATA_DIR:dataDir,MARKETPLACE_AUTH_REQUIRED:'1',UNIFIED_REQUIRE_POSTGRES:'0',UNIFIED_REQUIRE_AUTH:'0',MARKETPLACE_ADMIN_PIN:'864200',MARKETPLACE_DISPATCH_1_4_PIN:'753100',MARKETPLACE_DISPATCH_5_6_PIN:'642900',MARKETPLACE_DISPATCH_PIN:''},
   stdio:['ignore','pipe','pipe']
 });
 let output='';
@@ -18,7 +18,7 @@ child.stdout.on('data',d=>output+=String(d));child.stderr.on('data',d=>output+=S
 const base='http://127.0.0.1:'+port;
 
 {
-  const env={...process.env,PORT:'4298',MARKETPLACE_AUTH_REQUIRED:'1',UNIFIED_REQUIRE_AUTH:'1'};
+  const env={...process.env,PORT:'4298',MARKETPLACE_AUTH_REQUIRED:'1',UNIFIED_REQUIRE_AUTH:'1',UNIFIED_REQUIRE_POSTGRES:'0'};
   delete env.MARKETPLACE_ADMIN_PIN;
   delete env.MARKETPLACE_DISPATCH_1_4_PIN;
   delete env.MARKETPLACE_DISPATCH_5_6_PIN;
@@ -29,7 +29,7 @@ const base='http://127.0.0.1:'+port;
 }
 
 {
-  const env={...process.env,PORT:'4297',MARKETPLACE_AUTH_REQUIRED:'1',UNIFIED_REQUIRE_AUTH:'1',MARKETPLACE_ADMIN_PIN:'864200'};
+  const env={...process.env,PORT:'4297',MARKETPLACE_AUTH_REQUIRED:'1',UNIFIED_REQUIRE_AUTH:'1',UNIFIED_REQUIRE_POSTGRES:'0',MARKETPLACE_ADMIN_PIN:'864200'};
   delete env.MARKETPLACE_DISPATCH_1_4_PIN;
   delete env.MARKETPLACE_DISPATCH_5_6_PIN;
   delete env.MARKETPLACE_DISPATCH_PIN;
