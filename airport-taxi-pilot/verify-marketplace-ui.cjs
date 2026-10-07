@@ -28,6 +28,11 @@ assert.ok(dispatch.includes('/drivers/${id}/pin'),'dispatch UI must support driv
 assert.ok(client.includes('נמצאת בבדיקת המוקד'),'client confirmation must describe staff review before publication');
 assert.ok(dispatch.includes('Отправить в общий пул'),'dispatch UI must expose explicit staff publication action');
 assert.ok(dispatch.includes("awaiting_dispatch:'Новый'"),'dispatch UI must label private incoming rides as new');
+assert.ok(dispatch.includes('publicRideText'),'dispatch UI must build privacy-safe WhatsApp ride text');
+assert.ok(dispatch.includes('copyRideForGroup'),'dispatch UI must support one-tap single ride copy');
+assert.ok(dispatch.includes('exportVisibleForGroup'),'dispatch UI must support batch export of visible rides');
+assert.ok(dispatch.includes('navigator.share'),'dispatch UI must support native mobile sharing when available');
+assert.ok(!dispatch.includes('customerPhone)} · ${esc(o.exactPickup)}'),'privacy-safe export must not concatenate customer phone and exact pickup into group text');
 
 console.log('MARKETPLACE_V1_UI_GATE_OK',JSON.stringify({
   driver:true,
