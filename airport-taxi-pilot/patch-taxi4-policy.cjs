@@ -191,4 +191,19 @@ function normalizeTripAt(value) {
   write(rel,src);
 }
 
+// 6) Driver wallet top-up is Bit-only.
+// Money is transferred manually to the owner's Bit number and the dispatcher
+// approves the wallet credit only after the transfer is verified.
+{
+  const rel='src/service.js';
+  let src=read(rel);
+  src=mustReplace(
+    src,
+    "export async function requestDriverTopup(driverId,amount,method){return transact(db=>{const driver=activeDriver(db,driverId);if(!driver)throw new Error('DRIVER_NOT_FOUND');const topup={id:id('top'),driverId,amount:positiveAmount(amount,'TOPUP_MUST_BE_POSITIVE'),method:normalizePaymentMethod(method),status:'pending',requestedAt:new Date().toISOString(),approvedAt:null,approvedBy:null};db.topups.push(topup);db.ledger.push({id:id('led'),at:topup.requestedAt,driverId,orderId:null,type:'wallet_topup_requested',amount:topup.amount,method:topup.method,topupId:topup.id});return topup;});}",
+    "export async function requestDriverTopup(driverId,amount,method){return transact(db=>{const driver=activeDriver(db,driverId);if(!driver)throw new Error('DRIVER_NOT_FOUND');if(String(method||'').toLowerCase()!=='bit')throw new Error('BIT_TOPUP_ONLY');const topup={id:id('top'),driverId,amount:positiveAmount(amount,'TOPUP_MUST_BE_POSITIVE'),method:'bit',bitRecipient:'+972545718740',status:'pending',requestedAt:new Date().toISOString(),approvedAt:null,approvedBy:null};db.topups.push(topup);db.ledger.push({id:id('led'),at:topup.requestedAt,driverId,orderId:null,type:'wallet_topup_requested',amount:topup.amount,method:'bit',bitRecipient:topup.bitRecipient,topupId:topup.id});return topup;});}",
+    'Bit-only driver topup'
+  );
+  write(rel,src);
+}
+
 console.log('TAXI4_POLICY_PATCH_APPLIED');
