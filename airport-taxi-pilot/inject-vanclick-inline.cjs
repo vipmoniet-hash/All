@@ -69,49 +69,56 @@ for(const rel of [
 }
 console.log('MARKETPLACE_BROWSER_SYNTAX_OK');
 
+// Build verification must never read from or mutate the live Render database.
+// Runtime keeps DATABASE_URL; child verification processes get an isolated environment.
+const VERIFY_ENV={...process.env,DATABASE_URL:'',UNIFIED_REQUIRE_POSTGRES:'0',UNIFIED_REQUIRE_AUTH:'0'};
+function verify(script,args=[]){
+  require('child_process').execFileSync(process.execPath,[path.join(__dirname,script),...args],{stdio:'inherit',env:VERIFY_ENV});
+}
+
 // Policy regression gate: blocks deploys if surcharge or commission behavior regresses.
-require('child_process').execFileSync(process.execPath,[path.join(__dirname,'verify-taxi4-policy.mjs'),root],{stdio:'inherit'});
-require('child_process').execFileSync(process.execPath,[path.join(__dirname,'audit-taxi4-market.cjs'),root],{stdio:'inherit'});
+verify('verify-taxi4-policy.mjs',[root]);
+verify('audit-taxi4-market.cjs',[root]);
 
 
 // Marketplace regression gate.
-require('child_process').execFileSync(process.execPath,[path.join(__dirname,'verify-marketplace-v1.mjs'),root],{stdio:'inherit'});
+verify('verify-marketplace-v1.mjs',[root]);
 
 // High-volume marketplace UI regression gate.
-require('child_process').execFileSync(process.execPath,[path.join(__dirname,'verify-marketplace-ui.cjs'),root],{stdio:'inherit'});
+verify('verify-marketplace-ui.cjs',[root]);
 
 // Full isolated API workflow gate.
-require('child_process').execFileSync(process.execPath,[path.join(__dirname,'verify-marketplace-http.mjs'),root],{stdio:'inherit'});
+verify('verify-marketplace-http.mjs',[root]);
 
 // Concurrent marketplace claim race gate.
-require('child_process').execFileSync(process.execPath,[path.join(__dirname,'verify-marketplace-race.mjs'),root],{stdio:'inherit'});
+verify('verify-marketplace-race.mjs',[root]);
 
 // Role-isolated marketplace authentication gate.
-require('child_process').execFileSync(process.execPath,[path.join(__dirname,'verify-marketplace-auth.mjs'),root],{stdio:'inherit'});
+verify('verify-marketplace-auth.mjs',[root]);
 
 // Concurrent quote and booking spike gate.
-require('child_process').execFileSync(process.execPath,[path.join(__dirname,'verify-marketplace-load.mjs'),root],{stdio:'inherit'});
+verify('verify-marketplace-load.mjs',[root]);
 
 // Unified VanClick staging HTTP isolation gate.
-require('child_process').execFileSync(process.execPath,[path.join(__dirname,'verify-unified-staging.mjs'),root],{stdio:'inherit'});
+verify('verify-unified-staging.mjs',[root]);
 
 // Transactional Postgres persistence contract gate.
-require('child_process').execFileSync(process.execPath,[path.join(__dirname,'verify-postgres-state-store.mjs')],{stdio:'inherit'});
+verify('verify-postgres-state-store.mjs');
 
 // DATABASE_URL runtime persistence switch gate.
-require('child_process').execFileSync(process.execPath,[path.join(__dirname,'verify-postgres-runtime.cjs'),root],{stdio:'inherit'});
+verify('verify-postgres-runtime.cjs',[root]);
 
 // Server-enforced admin / dispatcher scope isolation gate.
-require('child_process').execFileSync(process.execPath,[path.join(__dirname,'verify-unified-roles.mjs'),root],{stdio:'inherit'});
+verify('verify-unified-roles.mjs',[root]);
 
 // Large 5-6 dispatcher workflow gate.
-require('child_process').execFileSync(process.execPath,[path.join(__dirname,'verify-large-workflow.mjs'),root],{stdio:'inherit'});
+verify('verify-large-workflow.mjs',[root]);
 
 // Role-aware unified Control Center UI gate.
-require('child_process').execFileSync(process.execPath,[path.join(__dirname,'verify-unified-control-ui.cjs'),root],{stdio:'inherit'});
+verify('verify-unified-control-ui.cjs',[root]);
 
 // Unified runtime security regression gate.
-require('child_process').execFileSync(process.execPath,[path.join(__dirname,'verify-unified-security-surface.cjs'),root],{stdio:'inherit'});
+verify('verify-unified-security-surface.cjs',[root]);
 
 // Render Blueprint must keep private Postgres wiring and fail-closed security.
-require('child_process').execFileSync(process.execPath,[path.join(__dirname,'verify-render-blueprint.cjs'),path.join(__dirname,'..','render.yaml')],{stdio:'inherit'});
+verify('verify-render-blueprint.cjs',[path.join(__dirname,'..','render.yaml')]);
