@@ -90,6 +90,12 @@ function marketplacePoolView(db, driver, order) {
   );
 
   replaceOnce(
+    "driver.wallet=Number((Number(driver.wallet)+refund).toFixed(2));db.ledger.push({id:id('led'),at:new Date(now).toISOString(),driverId,orderId,type:'commission_refund_driver_cancel_ge_2h'",
+    "driver.wallet=Number((Number(driver.wallet)+refund).toFixed(2));driver.selfCancelledTrips=Number(driver.selfCancelledTrips||0)+1;db.ledger.push({id:id('led'),at:new Date(now).toISOString(),driverId,orderId,type:'commission_refund_driver_cancel_ge_2h'",
+    'count driver self cancellations'
+  );
+
+  replaceOnce(
     "return {driver:{id:driver.id,name:driver.name,wallet:driver.wallet,reliability:driver.reliability,vehiclePlate:driver.vehiclePlate||''},pool,mine,completed,topups};",
     `const allCompleted=db.orders.filter(o=>o.assignedDriverId===driverId&&o.status==='completed');
   const commissionDebited=db.ledger.filter(x=>x.driverId===driverId&&x.type==='commission_debit').reduce((s,x)=>s+Number(x.amount||0),0);
@@ -100,7 +106,8 @@ function marketplacePoolView(db, driver, order) {
     completedDriverNet:Number(allCompleted.reduce((s,x)=>s+Number(x.fare||0)-Number(x.commission||0),0).toFixed(2)),
     commissionDebited:Number(commissionDebited.toFixed(2)),
     commissionRefunded:Number(commissionRefunded.toFixed(2)),
-    netCommissionPaid:Number((commissionDebited-commissionRefunded).toFixed(2))
+    netCommissionPaid:Number((commissionDebited-commissionRefunded).toFixed(2)),
+    selfCancelledTrips:Number(driver.selfCancelledTrips||0)
   };
   return {driver:{id:driver.id,name:driver.name,wallet:driver.wallet,reliability:driver.reliability,vehiclePlate:driver.vehiclePlate||'',completedTrips:Number(driver.completedTrips||allCompleted.length)},pool,mine,completed,topups,stats};`,
     'driver finance stats'
@@ -336,6 +343,7 @@ console.log('MARKETPLACE_V1_PATCH_APPLIED', JSON.stringify({
   exceptionQueue:true,
   completionStateGuard:true,
   commissionMetrics:true,
+  driverCancellationMetrics:true,
   highVolumeDriverUi:true,
   exceptionFirstDispatchUi:true
 }));
