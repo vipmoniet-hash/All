@@ -25,6 +25,18 @@ patchFile('src/service.js',({replaceOnce})=>{
   );
 
   const roleFns=[
+    "function largeOrderOrThrow(db,orderId){const o=(db.largeOrders||[]).find(x=>x.id===orderId);if(!o)throw new Error('ORDER_NOT_FOUND');return o;}",
+    "",
+    "export async function approveLargeOrder(orderId,input={},actor='dispatcher_5_6'){return transact(db=>{const o=largeOrderOrThrow(db,orderId);if(!['awaiting_dispatch','confirmed'].includes(o.status))throw new Error('ORDER_NOT_APPROVABLE');const fare=Number(input.fare);if(!Number.isFinite(fare)||fare<=0)throw new Error('FARE_MUST_BE_POSITIVE');o.fare=Number(fare.toFixed(2));o.commission=0;o.status='confirmed';o.confirmedAt=new Date().toISOString();event(db,o.id,'large_order_confirmed',actor,{fare:o.fare});return {...o};});}",
+    "",
+    "export async function assignLargeOrder(orderId,input={},actor='dispatcher_5_6'){return transact(db=>{const o=largeOrderOrThrow(db,orderId);if(o.status!=='confirmed')throw new Error('ORDER_NOT_ASSIGNABLE');o.assignedDriverName=requireText(input.driverName,'DRIVER_NAME_REQUIRED');o.assignedDriverPhone=requireText(input.driverPhone,'DRIVER_PHONE_REQUIRED');o.vehiclePlate=clean(input.vehiclePlate,40);o.status='assigned';o.assignedAt=new Date().toISOString();event(db,o.id,'large_driver_assigned',actor,{driverName:o.assignedDriverName});return {...o};});}",
+    "",
+    "export async function largeOrderEnroute(orderId,actor='dispatcher_5_6'){return transact(db=>{const o=largeOrderOrThrow(db,orderId);if(o.status!=='assigned')throw new Error('ORDER_NOT_ASSIGNED');o.status='driver_enroute';o.driverConfirmedAt=new Date().toISOString();event(db,o.id,'large_driver_enroute',actor,{driverName:o.assignedDriverName});return {...o};});}",
+    "",
+    "export async function completeLargeOrder(orderId,actor='dispatcher_5_6'){return transact(db=>{const o=largeOrderOrThrow(db,orderId);if(o.status!=='driver_enroute')throw new Error('DRIVER_MUST_BE_ENROUTE');o.status='completed';o.completedAt=new Date().toISOString();event(db,o.id,'large_trip_completed',actor,{driverName:o.assignedDriverName});return {...o};});}",
+    "",
+    "export async function cancelLargeOrder(orderId,input={},actor='dispatcher_5_6'){return transact(db=>{const o=largeOrderOrThrow(db,orderId);if(['completed','cancelled'].includes(o.status))throw new Error('ORDER_NOT_CANCELLABLE');o.status='cancelled';o.cancelledAt=new Date().toISOString();o.cancellationReason=clean(input.reason,240)||'staff_cancelled';event(db,o.id,'large_order_cancelled',actor,{reason:o.cancellationReason});return {...o};});}",
+    "",
     "export async function listLargeDispatchState() {",
     "  const db=await readDb();",
     "  const orders=(db.largeOrders||[]).slice().sort((a,b)=>new Date(a.tripAt)-new Date(b.tripAt));",
@@ -59,7 +71,7 @@ patchFile('src/service.js',({replaceOnce})=>{
 patchFile('server.js',({replaceOnce})=>{
   replaceOnce(
     "listAdminState, listDriverState, buyOrder,",
-    "listAdminState, listLargeDispatchState, listUnifiedAdminState, listDriverState, buyOrder,",
+    "listAdminState, listLargeDispatchState, listUnifiedAdminState, approveLargeOrder, assignLargeOrder, largeOrderEnroute, completeLargeOrder, cancelLargeOrder, listDriverState, buyOrder,",
     'role-scoped state imports'
   );
 
@@ -71,13 +83,13 @@ patchFile('server.js',({replaceOnce})=>{
 
   replaceOnce(
     "UNAUTHORIZED:401,INVALID_CREDENTIALS:401,",
-    "UNAUTHORIZED:401,FORBIDDEN:403,INVALID_CREDENTIALS:401,",
+    "UNAUTHORIZED:401,FORBIDDEN:403,ORDER_NOT_APPROVABLE:409,ORDER_NOT_ASSIGNABLE:409,INVALID_CREDENTIALS:401,",
     'forbidden status'
   );
 
   replaceOnce(
     "      await enforceMarketplaceAuth(req,url);",
-    "      await enforceMarketplaceAuth(req,url);\n      if(req.method==='GET'&&url.pathname==='/api/unified/large/state')return json(res,200,await listLargeDispatchState());\n      if(req.method==='GET'&&url.pathname==='/api/unified/admin/state')return json(res,200,await listUnifiedAdminState());",
+    "      const staffSession=await enforceMarketplaceAuth(req,url);\n      if(req.method==='GET'&&url.pathname==='/api/unified/large/state')return json(res,200,await listLargeDispatchState());\n      if(req.method==='GET'&&url.pathname==='/api/unified/admin/state')return json(res,200,await listUnifiedAdminState());\n      let largeMatch=url.pathname.match(/^\\/api\\/unified\\/large\\/orders\\/([^/]+)\\/(approve|assign|enroute|complete|cancel)$/);if(req.method==='POST'&&largeMatch){const orderId=largeMatch[1],action=largeMatch[2],actor=staffSession?.role||'dispatcher_5_6',b=await body(req);if(action==='approve')return json(res,200,await approveLargeOrder(orderId,b,actor));if(action==='assign')return json(res,200,await assignLargeOrder(orderId,b,actor));if(action==='enroute')return json(res,200,await largeOrderEnroute(orderId,actor));if(action==='complete')return json(res,200,await completeLargeOrder(orderId,actor));if(action==='cancel')return json(res,200,await cancelLargeOrder(orderId,b,actor));}",
     'role-scoped state routes'
   );
 });
