@@ -7,7 +7,7 @@ const domain = await import(pathToFileURL(path.resolve(root,'src','domain.js')).
 const pricing = await import(pathToFileURL(path.resolve(root,'src','pricing.js')).href + '?policy-test=1');
 
 const commissionCases = [
-  [99,5],[100,10],[199,10],[200,15],[299,15],[300,20],[399,20],[400,25]
+  [99,5],[100,10],[199,10],[200,20],[299,20],[300,30],[399,30],[400,40]
 ];
 for (const [fare, expected] of commissionCases) {
   assert.equal(domain.commissionForFare(fare), expected, 'commission '+fare);
@@ -37,8 +37,8 @@ assert.equal(shabbat.fare, 200, 'Shabbat +15%, rounded up to 5');
 
 const overlap = pricing.quoteAirportRoute('ראשון לציון','נתב״ג','2026-10-10T15:00');
 assert.equal(overlap.fare, 205, 'peak + Shabbat additive 20%, rounded up to 5');
-assert.equal(overlap.commission, 15, 'commission recalculated from final fare');
-assert.equal(overlap.driverNet, 190, 'driver net from final fare');
+assert.equal(overlap.commission, 20, 'commission recalculated from final fare');
+assert.equal(overlap.driverNet, 185, 'driver net from final fare');
 
 console.log('TAXI4_POLICY_TEST_OK', JSON.stringify({
   commissionCases:commissionCases.length,
