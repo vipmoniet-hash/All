@@ -22,6 +22,7 @@ function ensureDriverAuthUi(){
     wrap.innerHTML=`<form id="driverAuthForm" class="auth-card">
       <h2>כניסת נהג</h2>
       <p>הזן מספר טלפון או קוד נהג ואת ה-PIN שקיבלת מ-VanClick.</p>
+      <small>בעלים/מנהל יכול להיכנס כאן עם פרטי VanClick הישנים ויועבר אוטומטית לניהול.</small>
       <input name="driverId" inputmode="tel" autocomplete="username" placeholder="טלפון / קוד נהג" required>
       <input name="pin" type="password" inputmode="numeric" autocomplete="current-password" pattern="\\d{4,12}" placeholder="PIN" required>
       <button class="buy">כניסה</button>
@@ -36,6 +37,12 @@ function ensureDriverAuthUi(){
         const r=await fetch(API+'/api/auth/driver/login',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(b)});
         const j=await r.json();
         if(!r.ok)throw Error(j.error);
+        if(j.role==='admin'){
+          sessionStorage.setItem('taxi4_dispatch_token',j.token);
+          sessionStorage.setItem('taxi4_staff_role','admin');
+          location.replace('/dispatch/');
+          return;
+        }
         authToken=j.token;driverId=j.driver.id;
         sessionStorage.setItem('taxi4_driver_token',authToken);
         sessionStorage.setItem('taxi4_driver_id',driverId);
@@ -46,7 +53,7 @@ function ensureDriverAuthUi(){
         q('#driverLogout')?.classList.remove('hidden');
         q('#driver').classList.add('hidden');
         await load(true);
-      }catch(err){q('#driverAuthStatus').textContent=err.message==='INVALID_CREDENTIALS'?'פרטי כניסה שגויים':err.message;}
+      }catch(err){q('#driverAuthStatus').textContent=err.message==='INVALID_CREDENTIALS'?'פרטי כניסה שגויים':err.message==='OWNER_AUTH_UNAVAILABLE'?'לא ניתן לאמת כרגע את כניסת המנהל הישנה':err.message;}
     };
   }
 }
