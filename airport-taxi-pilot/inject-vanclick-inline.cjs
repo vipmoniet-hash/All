@@ -84,3 +84,6 @@ require('child_process').execFileSync(process.execPath,[path.join(__dirname,'ver
 
 // Role-isolated marketplace authentication gate.
 require('child_process').execFileSync(process.execPath,[path.join(__dirname,'verify-marketplace-auth.mjs'),root],{stdio:'inherit'});
+
+// Concurrent quote and booking spike gate.
+require('child_process').execFileSync(process.execPath,[path.join(__dirname,'verify-marketplace-load.mjs'),root],{stdio:'inherit'});
