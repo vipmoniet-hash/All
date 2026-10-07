@@ -34,6 +34,18 @@ patchFile('src/persistence.js',({replaceOnce})=>{
 
 patchFile('src/service.js',({replaceOnce})=>{
   replaceOnce(
+    "id:id('ord'), bookingCode, bookingGroupId, leg, createdAt:new Date().toISOString(), status:'awaiting_dispatch', tripAt,",
+    "id:id('ord'), serviceType:'taxi_1_4', bookingCode, bookingGroupId, leg, createdAt:new Date().toISOString(), status:'awaiting_dispatch', tripAt,",
+    'small service type'
+  );
+
+  replaceOnce(
+    "orders:orders.map(o=>({id:o.id,leg:o.leg,status:o.status,tripAt:o.tripAt,fromArea:o.fromArea,toArea:o.toArea,quotedFare:o.quotedFare,flightNumber:o.flightNumber}))",
+    "orders:orders.map(o=>({id:o.id,serviceType:o.serviceType,leg:o.leg,status:o.status,tripAt:o.tripAt,fromArea:o.fromArea,toArea:o.toArea,quotedFare:o.quotedFare,flightNumber:o.flightNumber}))",
+    'small booking response service type'
+  );
+
+  replaceOnce(
     "export async function createClientRequest(input){ const b=await createClientBooking(input);",
     `export async function createLargeShadowBooking(input){
   const passengers=Math.round(Number(input.passengers));
@@ -71,8 +83,8 @@ export async function createClientRequest(input){ const b=await createClientBook
 
   replaceOnce(
     "orders:db.orders.slice().sort((a,b)=>new Date(a.tripAt)-new Date(b.tripAt)),",
-    "orders:db.orders.slice().sort((a,b)=>new Date(a.tripAt)-new Date(b.tripAt)),\n    largeOrders:db.largeOrders.slice().sort((a,b)=>new Date(a.tripAt)-new Date(b.tripAt)),",
-    'large shadow staff visibility'
+    "orders:db.orders.slice().sort((a,b)=>new Date(a.tripAt)-new Date(b.tripAt)),\n    largeOrders:db.largeOrders.slice().sort((a,b)=>new Date(a.tripAt)-new Date(b.tripAt)),\n    unifiedOrders:[...db.orders,...db.largeOrders].map(o=>({id:o.id,serviceType:o.serviceType||'taxi_1_4',bookingCode:o.bookingCode,status:o.status,tripAt:o.tripAt,fromArea:o.fromArea,toArea:o.toArea,passengers:o.passengers,largeLuggage:o.largeLuggage,smallLuggage:o.smallLuggage,customerName:o.customerName,customerPhone:o.customerPhone,fare:o.fare??o.quotedFare??null,commission:o.commission??0,assignedDriverId:o.assignedDriverId??null,shadowOnly:Boolean(o.shadowOnly)})).sort((a,b)=>new Date(a.tripAt)-new Date(b.tripAt)),",
+    'large shadow and unified staff visibility'
   );
 });
 
