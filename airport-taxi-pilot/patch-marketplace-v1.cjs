@@ -310,8 +310,8 @@ patchFile('server.js',({replaceOnce})=>{
   );
 
   replaceOnce(
-    "if(req.method==='POST'&&url.pathname==='/api/client/bookings'){const b=await body(req);const route=routeDecisionWithHandoff(b);if(route.target==='vanclick')return json(res,409,{error:'VANCLICK_HANDOFF_REQUIRED',...route});return json(res,201,await createClientBooking(b))}",
-    "if(req.method==='POST'&&url.pathname==='/api/client/bookings'){const b=await body(req);const childExtras=Number(b.childSeatCount||b.childSeats||0)>0||Number(b.boosterCount||b.boosters||0)>0||(['seat','booster'].includes(String(b.childSeat||'').toLowerCase()));if(childExtras)throw new Error('CHILD_RESTRAINTS_REQUIRE_LARGE_VEHICLE');const route=routeDecisionWithHandoff(b);if(route.target==='vanclick')return json(res,409,{error:'VANCLICK_HANDOFF_REQUIRED',...route});return json(res,201,await createClientBooking({...b,childSeats:0}))}",
+    "if(req.method==='POST'&&url.pathname==='/api/client/bookings'){const b=await body(req);const route=routeDecisionWithHandoff(b);if(route.target==='vanclick')return json(res,409,{error:'VANCLICK_HANDOFF_REQUIRED',...route});return json(res,201,await createClientBooking(b));}",
+    "if(req.method==='POST'&&url.pathname==='/api/client/bookings'){const b=await body(req);const childExtras=Number(b.childSeatCount||b.childSeats||0)>0||Number(b.boosterCount||b.boosters||0)>0||(['seat','booster'].includes(String(b.childSeat||'').toLowerCase()));if(childExtras)throw new Error('CHILD_RESTRAINTS_REQUIRE_LARGE_VEHICLE');const route=routeDecisionWithHandoff(b);if(route.target==='vanclick')return json(res,409,{error:'VANCLICK_HANDOFF_REQUIRED',...route});return json(res,201,await createClientBooking({...b,childSeats:0}));}",
     'child restraints require Large 5-6'
   );
 
