@@ -14,6 +14,8 @@ assert(server.includes("s.role!=='admin'"),'reset-demo must require admin role')
 assert(server.includes("authGuard(req,'staff')"),'staff login must be rate-limited');
 assert(server.includes("authGuard(req,'driver')"),'driver login must be rate-limited');
 assert(server.includes("AUTH_MODE"),'runtime auth telemetry must exist');
+assert(server.includes("readyForUnifiedCutover"),'health must expose unified cutover readiness');
+assert(server.includes("readinessReasons"),'health must explain incomplete readiness');
 assert(!/\/api\/(?:debug|demo)\b/.test(server),'debug/demo API routes are forbidden');
 
 assert(auth.includes("MARKETPLACE_AUTH_REQUIRED??'1'"),'auth must default to required');
