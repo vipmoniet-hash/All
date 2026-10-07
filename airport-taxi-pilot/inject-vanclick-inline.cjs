@@ -58,3 +58,15 @@ require('child_process').execFileSync(process.execPath,[path.join(__dirname,'pat
 require('child_process').execFileSync(process.execPath,[path.join(__dirname,'verify-taxi4-policy.mjs'),root],{stdio:'inherit'});
 require('child_process').execFileSync(process.execPath,[path.join(__dirname,'audit-taxi4-market.cjs'),root],{stdio:'inherit'});
 
+
+
+/* VANCLICK_DRIVER_V2_INSTALL */
+{
+  const srcDir=path.join(__dirname,'driver-v2');
+  const dstDir=path.join(root,'apps','driver','public');
+  fs.mkdirSync(dstDir,{recursive:true});
+  for(const name of ['index.html','app.css','app.js','manifest.webmanifest','sw.js','icon.svg']){
+    fs.copyFileSync(path.join(srcDir,name),path.join(dstDir,name));
+  }
+  console.log('VANCLICK DRIVER V2 INSTALLED');
+}
