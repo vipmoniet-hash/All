@@ -54,7 +54,7 @@ try{
 
   let x=await call('/api/client/bookings',{method:'POST',body:{
     passengers:2,largeLuggage:1,smallLuggage:0,paymentMethod:'cash',
-    customerName:'Role Small',customerPhone:'0501111111',
+    customerName:'Role Customer',customerPhone:'0501111111',
     fromArea:'ראשון לציון',toArea:'Ben Gurion Airport',
     tripAt:'2026-10-22T11:00',exactPickup:'Small pickup',exactDropoff:'Ben Gurion Airport'
   }});
@@ -63,7 +63,7 @@ try{
   x=await call('/api/unified/large/bookings',{method:'POST',body:{
     direction:'to',city:'ראשון לציון',tripAt:'2026-10-22T12:00',
     passengers:6,largeLuggage:4,smallLuggage:2,
-    customerName:'Role Large',customerPhone:'0502222222',
+    customerName:'Role Customer',customerPhone:'0501111111',
     exactPickup:'Large pickup',exactDropoff:'Ben Gurion Airport',notes:'role test'
   }});
   assert.equal(x.r.status,201,'large fixture must be created');
@@ -98,6 +98,14 @@ try{
   assert.equal(x.r.status,200,'admin can access unified state');
   assert.ok(x.j.unifiedOrders.some(o=>o.serviceType==='taxi_1_4'),'admin sees 1-4');
   assert.ok(x.j.unifiedOrders.some(o=>o.serviceType==='large_5_6'),'admin sees 5-6');
+  assert.ok(Array.isArray(x.j.customerProfiles),'admin unified state exposes shared customer profiles');
+  const profile=x.j.customerProfiles.find(p=>p.customerPhone==='0501111111');
+  assert.ok(profile,'same customer across both lines must resolve to one profile');
+  assert.equal(profile.totalTrips,2,'shared customer profile must count both 1-4 and 5-6 trips');
+  assert.deepEqual(new Set(profile.serviceTypes),new Set(['taxi_1_4','large_5_6']),'shared customer profile must identify both service lines');
+  assert.ok(Array.isArray(x.j.unifiedJournal),'admin unified state exposes one cross-line journal');
+  assert.ok(x.j.unifiedJournal.some(e=>e.serviceType==='taxi_1_4'),'unified journal contains 1-4 events');
+  assert.ok(x.j.unifiedJournal.some(e=>e.serviceType==='large_5_6'),'unified journal contains 5-6 events');
 
   x=await call('/api/unified/admin/state',{token:small.token});
   assert.equal(x.r.status,403,'dispatcher_1_4 cannot access admin unified state');
