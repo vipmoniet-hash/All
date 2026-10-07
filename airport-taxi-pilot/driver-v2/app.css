@@ -51,3 +51,22 @@ body.test-mode .driver-switch{display:block}
   .bottom-nav{position:fixed;display:grid;grid-template-columns:repeat(4,1fr);z-index:60;left:0;right:0;bottom:0;padding:5px 7px calc(5px + env(safe-area-inset-bottom));background:rgba(255,255,255,.97);border-top:1px solid rgba(16,24,40,.08);box-shadow:0 -8px 24px rgba(20,45,77,.08);backdrop-filter:blur(14px)}
   .bottom-nav button{position:relative;min-height:56px;border:0;border-radius:11px;background:transparent;color:#667085;display:grid;place-items:center;align-content:center;gap:1px}.bottom-nav button span{font-size:17px;font-weight:900;line-height:1}.bottom-nav button b{font-size:10px}.bottom-nav button.active{background:#f2f5f9;color:var(--dark)}.bottom-nav em{position:absolute;top:4px;inset-inline-start:50%;margin-inline-start:9px;min-width:16px;height:16px;padding:0 4px;display:none;place-items:center;border-radius:999px;background:var(--blue);color:#fff;font-size:9px;font-style:normal;font-weight:900}.bottom-nav em.has{display:grid}
 }
+
+.bit-destination{
+  margin:14px 0 12px;padding:13px 14px;display:flex;align-items:center;gap:12px;
+  background:#f7f9fc;border:1px solid var(--line);border-radius:13px
+}
+.bit-destination>div{min-width:0;flex:1}
+.bit-destination small,.bit-destination strong{display:block}
+.bit-destination small{color:var(--muted);font-size:10.5px}
+.bit-destination strong{margin-top:3px;font-size:19px;letter-spacing:.02em;color:var(--ink)}
+.bit-destination button{
+  min-height:40px;padding:0 11px;border-radius:10px;border:1px solid #cfe0f8;
+  background:#fff;color:var(--blue);font-weight:850
+}
+.topup.bit-only{grid-template-columns:1fr auto}
+@media(max-width:680px){
+  .bit-destination{align-items:stretch;flex-direction:column}
+  .bit-destination button{width:100%}
+  .topup.bit-only{grid-template-columns:1fr}
+}
