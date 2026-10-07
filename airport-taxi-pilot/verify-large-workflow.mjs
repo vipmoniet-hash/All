@@ -11,7 +11,7 @@ await fs.rm(dataDir,{recursive:true,force:true});
 const child=spawn(process.execPath,['server.js'],{
   cwd:root,
   env:{
-    ...process.env,PORT:String(port),TAXI4_DATA_DIR:dataDir,MARKETPLACE_AUTH_REQUIRED:'1',
+    ...process.env,PORT:String(port),TAXI4_DATA_DIR:dataDir,MARKETPLACE_AUTH_REQUIRED:'1',UNIFIED_REQUIRE_POSTGRES:'0',UNIFIED_REQUIRE_AUTH:'0',
     MARKETPLACE_ADMIN_PIN:'864200',MARKETPLACE_DISPATCH_1_4_PIN:'753100',MARKETPLACE_DISPATCH_5_6_PIN:'642900'
   },
   stdio:['ignore','pipe','pipe']
