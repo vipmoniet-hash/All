@@ -14,6 +14,9 @@ const audit=JSON.parse(fs.readFileSync(overridePath,'utf8'));
 const aliasAudit=fs.existsSync(aliasPath)?JSON.parse(fs.readFileSync(aliasPath,'utf8')):{aliases:{}};
 const overrides=audit.overrides||{};
 const aliases=aliasAudit.aliases||{};
+if(!Array.isArray(pricing.locations)) throw new Error('Taxi4 pricing.locations must be an array');
+
+const AIRPORT={lat:32.0055,lon:34.8854};
 
 function commission(fare){
   const n=Number(fare||0);
@@ -27,70 +30,121 @@ function coordKey(v){
   if(!Number.isFinite(Number(lat))||!Number.isFinite(Number(lon))) return null;
   return Number(lat).toFixed(6)+','+Number(lon).toFixed(6);
 }
-
-let seen=0, missing=[], safetyErrors=[];
-const changedNames=new Set();
-const locations=[];
-
-function applyMarketFloor(next,benchmark){
-  next=Math.max(next,ceil10(Number(benchmark)*1.10));
-  while(next-commission(next)<Number(benchmark)) next+=10;
-  return next;
+function rad(v){return Number(v)*Math.PI/180;}
+function airKm(v){
+  const lat=Number(v.lat ?? v.latitude ?? v.Latitude);
+  const lon=Number(v.lon ?? v.lng ?? v.longitude ?? v.Longitude ?? v.long);
+  if(!Number.isFinite(lat)||!Number.isFinite(lon)) return null;
+  const dLat=rad(lat-AIRPORT.lat),dLon=rad(lon-AIRPORT.lon);
+  const a=Math.sin(dLat/2)**2+Math.cos(rad(AIRPORT.lat))*Math.cos(rad(lat))*Math.sin(dLon/2)**2;
+  return 6371*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+}
+function median(values){
+  const a=[...values].filter(Number.isFinite).sort((x,y)=>x-y);
+  if(!a.length) return null;
+  const i=Math.floor(a.length/2);
+  return a.length%2?a[i]:(a[i-1]+a[i])/2;
+}
+function marketFloorFare(reference){
+  if(!Number.isFinite(Number(reference))||Number(reference)<=0) return 0;
+  let fare=ceil10(Number(reference)*1.10);
+  while(fare-commission(fare)<Number(reference)) fare+=10;
+  return fare;
+}
+function driverFloorFare(km){
+  return Number.isFinite(Number(km))?ceil10(80+4*Number(km)):0;
+}
+function benchmarkFor(v,o){
+  if(o.reason==='owner_anchor') return null;
+  const direct=(o.benchmark!==null&&o.benchmark!==undefined&&Number.isFinite(Number(o.benchmark)))?Number(o.benchmark):null;
+  const alias=(aliases[v.nameHe]?.benchmark!==null&&aliases[v.nameHe]?.benchmark!==undefined&&Number.isFinite(Number(aliases[v.nameHe]?.benchmark)))?Number(aliases[v.nameHe].benchmark):null;
+  if(direct==null) return alias;
+  if(alias==null) return direct;
+  return Math.max(direct,alias);
 }
 
-function walk(v){
-  if(Array.isArray(v)){for(const x of v) walk(x);return;}
-  if(!v||typeof v!=='object') return;
-
-  if(typeof v.nameHe==='string' && typeof v.fare==='number'){
-    seen++;
-    locations.push(v);
-    const o=overrides[v.nameHe];
-    if(!o){
-      missing.push(v.nameHe);
-    }else{
-      const old=Number(v.fare);
-      let next=Number(o.fare);
-      if(!Number.isFinite(next)||next<old) throw new Error('Invalid fare override for '+v.nameHe);
-
-      let benchmark=(o.reason==='owner_anchor')?null:o.benchmark;
-      const safeAlias=aliases[v.nameHe];
-      if(o.reason!=='owner_anchor' && safeAlias?.benchmark!=null){
-        benchmark=Math.max(Number(benchmark||0),Number(safeAlias.benchmark));
-      }
-
-      if(benchmark!=null && Number.isFinite(Number(benchmark))){
-        next=applyMarketFloor(next,benchmark);
-      }
-
-      v.fare=next;
-      if(old!==next) changedNames.add(v.nameHe);
-
-      if(benchmark!=null && Number.isFinite(Number(benchmark))){
-        const driverNet=next-commission(next);
-        if(driverNet<Number(benchmark)){
-          safetyErrors.push({nameHe:v.nameHe,fare:next,commission:commission(next),driverNet,benchmark});
-        }
-      }
-    }
-  }
-
-  for(const [k,x] of Object.entries(v)){
-    if(k==='nameHe'||k==='fare') continue;
-    walk(x);
-  }
-}
-walk(pricing);
+const missing=[];
+const rows=pricing.locations.map(v=>{
+  const o=overrides[v.nameHe];
+  if(!o){missing.push(v.nameHe);return null;}
+  return {
+    v,o,
+    name:v.nameHe,
+    benchmark:benchmarkFor(v,o),
+    airKm:airKm(v),
+    km:Number(v.roadKm)
+  };
+}).filter(Boolean);
 
 if(missing.length) throw new Error('Pricing overrides missing '+missing.length+' entries: '+missing.slice(0,20).join(', '));
-if(seen!==Object.keys(overrides).length) throw new Error('Pricing coverage mismatch: pricing entries='+seen+' overrides='+Object.keys(overrides).length);
-if(safetyErrors.length) throw new Error('Driver-net benchmark failures: '+JSON.stringify(safetyErrors.slice(0,20)));
+if(rows.length!==Object.keys(overrides).length) throw new Error('Pricing coverage mismatch: pricing entries='+rows.length+' overrides='+Object.keys(overrides).length);
 
-// Same-coordinate aliases must never expose a cheaper fare than another label
-// pointing to the exact same stored place. This catches duplicate spellings
-// without fuzzy-matching different settlements.
+const matched=rows.filter(r=>r.benchmark!=null&&r.o.reason!=='owner_anchor');
+function neighborMedian(row){
+  const d=Number(row.airKm);
+  if(!Number.isFinite(d)) return null;
+  let pool=matched.filter(r=>r.name!==row.name&&Number.isFinite(r.airKm)&&Math.abs(r.airKm-d)<=Math.max(5,d*.08));
+  if(pool.length<15) pool=matched.filter(r=>r.name!==row.name&&Number.isFinite(r.airKm)&&Math.abs(r.airKm-d)<=Math.max(10,d*.15));
+  if(pool.length<8) return null;
+  const vals=pool.map(r=>r.benchmark);
+  const med=median(vals);
+  const mad=median(vals.map(v=>Math.abs(v-med)))||1;
+  const cleaned=pool.filter(r=>Math.abs(r.benchmark-med)<=3.5*mad);
+  return median(cleaned.map(r=>r.benchmark));
+}
+
+const safeTargets=new Map();
+for(const r of matched){
+  const neighbor=neighborMedian(r);
+  const marketReference=Math.max(Number(r.benchmark||0),Number(neighbor||0));
+  const marketFloor=marketFloorFare(marketReference);
+  const kmFloor=driverFloorFare(r.km);
+  safeTargets.set(r.name,{
+    benchmark:r.benchmark,
+    neighborMedian:neighbor,
+    marketReference,
+    marketFloorFare:marketFloor,
+    driverFloorFare:kmFloor,
+    safeTargetFare:Math.max(marketFloor,kmFloor)
+  });
+}
+
+let controlledReductions=0;
+let marketRaises=0;
+const reduced=[];
+const raised=[];
+const originalFares=new Map(pricing.locations.map(v=>[v.nameHe,Number(v.fare)]));
+
+for(const r of rows){
+  const {v,o}=r;
+  let next=Number(o.fare);
+  if(!Number.isFinite(next)||next<=0) throw new Error('Invalid fare override for '+v.nameHe);
+
+  if(o.reason==='owner_anchor'){
+    next=Number(o.fare);
+  }else{
+    const target=safeTargets.get(v.nameHe);
+    if(target){
+      if(next>target.safeTargetFare*1.10){
+        reduced.push({nameHe:v.nameHe,from:next,to:target.safeTargetFare,marketReference:target.marketReference,roadKm:r.km});
+        next=target.safeTargetFare;
+        controlledReductions++;
+      }else if(next<target.safeTargetFare){
+        raised.push({nameHe:v.nameHe,from:next,to:target.safeTargetFare,marketReference:target.marketReference,roadKm:r.km});
+        next=target.safeTargetFare;
+        marketRaises++;
+      }
+    }else{
+      next=Math.max(next,driverFloorFare(r.km));
+    }
+  }
+  v.fare=next;
+}
+
+// Exact-coordinate duplicate labels may inherit the highest safe fare in that
+// coordinate group, but explicit owner anchors are immutable.
 const coordGroups=new Map();
-for(const v of locations){
+for(const v of pricing.locations){
   const key=coordKey(v);
   if(!key) continue;
   if(!coordGroups.has(key)) coordGroups.set(key,[]);
@@ -101,35 +155,50 @@ for(const group of coordGroups.values()){
   if(group.length<2) continue;
   const groupMax=Math.max(...group.map(x=>Number(x.fare)||0));
   for(const v of group){
+    if(overrides[v.nameHe]?.reason==='owner_anchor') continue;
     if(Number(v.fare)<groupMax){
       v.fare=groupMax;
-      changedNames.add(v.nameHe);
       coordinateAliasRaises++;
     }
   }
 }
 
-for(const v of locations){
+const safetyErrors=[];
+for(const r of rows){
+  const v=r.v;
   v.commission=commission(v.fare);
   v.driverNet=Number(v.fare)-v.commission;
+  if(r.benchmark!=null && v.driverNet<Number(r.benchmark)){
+    safetyErrors.push({nameHe:v.nameHe,fare:v.fare,commission:v.commission,driverNet:v.driverNet,benchmark:r.benchmark});
+  }
 }
-const changed=changedNames.size;
+if(safetyErrors.length) throw new Error('Driver-net benchmark failures: '+JSON.stringify(safetyErrors.slice(0,20)));
+
+const changedNames=pricing.locations.filter(v=>Number(v.fare)!==Number(originalFares.get(v.nameHe))).map(v=>v.nameHe);
 fs.writeFileSync(pricingPath,JSON.stringify(pricing,null,2)+'\n');
+
 const report={
   version:audit.version,
   appliedAt:new Date().toISOString(),
-  locations:seen,
-  changed,
-  unchanged:seen-changed,
+  locations:rows.length,
+  changed:changedNames.length,
+  unchanged:rows.length-changedNames.length,
   benchmarkSafetyFailures:0,
   safeCompactAliases:Object.keys(aliases).length,
+  controlledReductions,
+  marketRaises,
   coordinateAliasRaises,
-  coordinateFieldsPresent:locations.filter(v=>coordKey(v)).length,
+  coordinateFieldsPresent:pricing.locations.filter(v=>coordKey(v)).length,
+  reducedExamples:reduced.slice(0,40),
+  raisedExamples:raised.slice(0,40),
   policy:{
     ...audit.policy,
-    commissionAwareGuard:"Raise by 10₪ until fare - platform commission >= matched daytime benchmark",
-    safeAliasGuard:"Punctuation/spacing-only unambiguous aliases inherit the same market benchmark",
-    coordinateAliasGuard:"Exact stored coordinate duplicates use the highest fare in their coordinate group"
+    decreases:true,
+    controlledReductionGuard:"Matched fares are reduced only when more than 10% above the safe target.",
+    safeTargetGuard:"Safe target = max(road-km driver floor, commission-aware market floor from max(iCab/safe-alias benchmark, robust distance-neighbor median)).",
+    commissionAwareGuard:"Final fare minus platform commission must remain at/above the matched benchmark.",
+    safeAliasGuard:"Punctuation/spacing-only unambiguous aliases inherit the same market benchmark.",
+    coordinateAliasGuard:"Exact stored coordinate duplicates may inherit the highest safe fare; explicit owner anchors never change."
   },
   stats:audit.stats
 };
