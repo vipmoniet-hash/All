@@ -52,3 +52,15 @@ if(fs.existsSync(clientJs)){
 
 // Apply full Taxi 1–4 driver-safe fare audit after unpacking source data.
 require('child_process').execFileSync(process.execPath,[path.join(__dirname,'reprice-taxi4.cjs'),root],{stdio:'inherit'});
+
+/* TAXI4_SERVER_INSPECT temporary build-time source inspection */
+{
+  const serverPath=path.join(root,'server.js');
+  if(fs.existsSync(serverPath)){
+    const src=fs.readFileSync(serverPath,'utf8');
+    for(const needle of ['/api/pricing/quote','quotedFare','function quote','pricing']) {
+      const idx=src.indexOf(needle);
+      if(idx>=0) console.log('TAXI4_SERVER_INSPECT',needle,'\\n'+src.slice(Math.max(0,idx-1800),Math.min(src.length,idx+5000)));
+    }
+  }
+}
