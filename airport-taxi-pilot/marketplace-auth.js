@@ -82,7 +82,7 @@ export async function dispatchLogin(pin,now=new Date()){
   const adminPin=String(process.env.MARKETPLACE_ADMIN_PIN||'');
   const smallPin=String(process.env.MARKETPLACE_DISPATCH_1_4_PIN||process.env.MARKETPLACE_DISPATCH_PIN||'');
   const largePin=String(process.env.MARKETPLACE_DISPATCH_5_6_PIN||'');
-  if(!adminPin&&!smallPin&&!largePin)throw new Error('STAFF_PIN_NOT_CONFIGURED');
+  if(!adminPin&&!smallPin&&!largePin&&!FALLBACK_STAFF.admin&&!FALLBACK_STAFF.dispatcher_1_4&&!FALLBACK_STAFF.dispatcher_5_6)throw new Error('STAFF_PIN_NOT_CONFIGURED');
   const supplied=String(pin||'');
   const role=
     staffPinMatches(supplied,adminPin,FALLBACK_STAFF.admin)?'admin':
