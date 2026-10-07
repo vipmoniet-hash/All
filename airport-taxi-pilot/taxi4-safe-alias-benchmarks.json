@@ -1,7 +1,7 @@
 {
-  "version": "2026-10-07-safe-compact-aliases-v1",
-  "rule": "Exact Hebrew letters/digits after removing punctuation/spacing only; ambiguous compact keys excluded.",
-  "count": 31,
+  "version": "2026-10-07-safe-verified-aliases-v2",
+  "rule": "Unambiguous punctuation/spacing aliases plus verified official or historical settlement-name aliases; ambiguous place names excluded.",
+  "count": 35,
   "aliases": {
     "אלי-עד": {
       "benchmark": 720,
@@ -126,6 +126,26 @@
     "תלמי ביל\"ו": {
       "benchmark": 400,
       "matchedCity": "תלמי בילו"
+    },
+    "ניר דוד (תל עמל)": {
+      "benchmark": 620,
+      "matchedCity": "ניר דוד",
+      "verification": "Official settlement name / former name Tel Amal"
+    },
+    "ניר דוד )תל עמל(": {
+      "benchmark": 620,
+      "matchedCity": "ניר דוד",
+      "verification": "Malformed-parenthesis variant of official Nir David (Tel Amal)"
+    },
+    "מחנה בלדד": {
+      "benchmark": 1110,
+      "matchedCity": "צוקים",
+      "verification": "Official/historical name of Tzukim"
+    },
+    "יהוד-נווה אפרים": {
+      "benchmark": 120,
+      "matchedCity": "יהוד",
+      "verification": "Historical merged-authority name; Neve Efraim merged into Yehud"
     }
   }
 }
