@@ -106,3 +106,6 @@ require('child_process').execFileSync(process.execPath,[path.join(__dirname,'ver
 
 // Large 5-6 dispatcher workflow gate.
 require('child_process').execFileSync(process.execPath,[path.join(__dirname,'verify-large-workflow.mjs'),root],{stdio:'inherit'});
+
+// Role-aware unified Control Center UI gate.
+require('child_process').execFileSync(process.execPath,[path.join(__dirname,'verify-unified-control-ui.cjs'),root],{stdio:'inherit'});
