@@ -20,8 +20,17 @@ assert.equal(plain.fare, 170, 'plain fare');
 const morningPeak = pricing.quoteAirportRoute('ראשון לציון','נתב״ג','2026-10-05T08:00');
 assert.equal(morningPeak.fare, 180, 'morning peak +5%, rounded up to 5');
 
+const morningEdge = pricing.quoteAirportRoute('ראשון לציון','נתב״ג','2026-10-05T09:30');
+assert.equal(morningEdge.fare, 180, '09:30 remains peak');
+const morningAfter = pricing.quoteAirportRoute('ראשון לציון','נתב״ג','2026-10-05T09:31');
+assert.equal(morningAfter.fare, 170, '09:31 leaves morning peak');
+
 const afternoonPeak = pricing.quoteAirportRoute('ראשון לציון','נתב״ג','2026-10-05T15:00');
 assert.equal(afternoonPeak.fare, 180, 'afternoon peak +5%, rounded up to 5');
+const eveningEdge = pricing.quoteAirportRoute('ראשון לציון','נתב״ג','2026-10-05T18:00');
+assert.equal(eveningEdge.fare, 180, '18:00 remains peak');
+const eveningAfter = pricing.quoteAirportRoute('ראשון לציון','נתב״ג','2026-10-05T18:01');
+assert.equal(eveningAfter.fare, 170, '18:01 leaves afternoon peak');
 
 const shabbat = pricing.quoteAirportRoute('ראשון לציון','נתב״ג','2026-10-10T11:00');
 assert.equal(shabbat.fare, 200, 'Shabbat +15%, rounded up to 5');
@@ -35,7 +44,11 @@ console.log('TAXI4_POLICY_TEST_OK', JSON.stringify({
   commissionCases:commissionCases.length,
   plain:plain.fare,
   morningPeak:morningPeak.fare,
+  morningEdge:morningEdge.fare,
+  morningAfter:morningAfter.fare,
   afternoonPeak:afternoonPeak.fare,
+  eveningEdge:eveningEdge.fare,
+  eveningAfter:eveningAfter.fare,
   shabbat:shabbat.fare,
   overlap:overlap.fare
 }));
