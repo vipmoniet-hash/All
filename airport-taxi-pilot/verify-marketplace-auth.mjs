@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import crypto from 'node:crypto';
+import http from 'node:http';
 import { spawn, spawnSync } from 'node:child_process';
 
 const root=path.resolve(process.argv[2]||'app');
@@ -10,9 +11,22 @@ const dataDir=path.join(root,'data','auth-e2e');
 const staffHash=pin=>{const salt='auth-e2e-'+pin;return salt+':'+crypto.scryptSync(String(pin),salt,32).toString('hex');};
 await fs.rm(dataDir,{recursive:true,force:true});
 
+const legacyPort=4302;
+const legacyServer=http.createServer(async(req,res)=>{
+  if(req.method!=='POST'||req.url!=='/api/login'){res.writeHead(404,{'content-type':'application/json'});return res.end(JSON.stringify({error:'NOT_FOUND'}));}
+  const chunks=[];for await(const chunk of req)chunks.push(chunk);
+  let body={};try{body=JSON.parse(Buffer.concat(chunks).toString('utf8')||'{}');}catch{}
+  res.setHeader('content-type','application/json');
+  if(body.phone==='owner-phone'&&body.pin==='2468'){res.writeHead(200);return res.end(JSON.stringify({token:'legacy-token-never-forwarded',user:{id:'legacy-owner',role:'owner',name:'Owner'}}));}
+  if(body.phone==='dispatcher-phone'&&body.pin==='2468'){res.writeHead(200);return res.end(JSON.stringify({token:'legacy-dispatcher-token',user:{id:'legacy-dispatcher',role:'dispatcher',name:'Dispatcher'}}));}
+  res.writeHead(401);return res.end(JSON.stringify({error:'INVALID_CREDENTIALS'}));
+});
+await new Promise((resolve,reject)=>legacyServer.once('error',reject).listen(legacyPort,'127.0.0.1',resolve));
+const legacyOwnerAuthUrl='http://127.0.0.1:'+legacyPort+'/api/login';
+
 const child=spawn(process.execPath,['server.js'],{
   cwd:root,
-  env:{...process.env,PORT:String(port),TAXI4_DATA_DIR:dataDir,DATABASE_URL:'',MARKETPLACE_AUTH_REQUIRED:'1',UNIFIED_REQUIRE_POSTGRES:'0',UNIFIED_REQUIRE_AUTH:'0',MARKETPLACE_ADMIN_PIN:'',MARKETPLACE_DISPATCH_1_4_PIN:'',MARKETPLACE_DISPATCH_5_6_PIN:'',MARKETPLACE_DISPATCH_PIN:'',MARKETPLACE_ADMIN_PIN_HASH:staffHash('864200'),MARKETPLACE_DISPATCH_1_4_PIN_HASH:staffHash('753100'),MARKETPLACE_DISPATCH_5_6_PIN_HASH:staffHash('642900')},
+  env:{...process.env,PORT:String(port),TAXI4_DATA_DIR:dataDir,DATABASE_URL:'',MARKETPLACE_AUTH_REQUIRED:'1',UNIFIED_REQUIRE_POSTGRES:'0',UNIFIED_REQUIRE_AUTH:'0',MARKETPLACE_ADMIN_PIN:'',MARKETPLACE_DISPATCH_1_4_PIN:'',MARKETPLACE_DISPATCH_5_6_PIN:'',MARKETPLACE_DISPATCH_PIN:'',MARKETPLACE_ADMIN_PIN_HASH:staffHash('864200'),MARKETPLACE_DISPATCH_1_4_PIN_HASH:staffHash('753100'),MARKETPLACE_DISPATCH_5_6_PIN_HASH:staffHash('642900'),LEGACY_OWNER_AUTH_URL:legacyOwnerAuthUrl},
   stdio:['ignore','pipe','pipe']
 });
 let output='';
@@ -28,20 +42,21 @@ const base='http://127.0.0.1:'+port;
   delete env.MARKETPLACE_ADMIN_PIN_HASH;
   delete env.MARKETPLACE_DISPATCH_1_4_PIN_HASH;
   delete env.MARKETPLACE_DISPATCH_5_6_PIN_HASH;
+  delete env.LEGACY_OWNER_AUTH_URL;
   const probe=spawnSync(process.execPath,['server.js'],{cwd:root,encoding:'utf8',timeout:1500,env});
   assert.equal(probe.status,1,'UNIFIED_REQUIRE_AUTH must refuse startup without Admin credentials');
   assert.match(String(probe.stdout||'')+String(probe.stderr||''),/ADMIN_CREDENTIAL_REQUIRED_MISSING/,'fail-closed auth startup must explain missing Admin credential');
 }
 
 {
-  const env={...process.env,PORT:'4297',DATABASE_URL:'',MARKETPLACE_AUTH_REQUIRED:'1',UNIFIED_REQUIRE_AUTH:'1',UNIFIED_REQUIRE_POSTGRES:'0',MARKETPLACE_ADMIN_PIN:'',MARKETPLACE_ADMIN_PIN_HASH:staffHash('864200')};
+  const env={...process.env,PORT:'4297',DATABASE_URL:'',MARKETPLACE_AUTH_REQUIRED:'1',UNIFIED_REQUIRE_AUTH:'1',UNIFIED_REQUIRE_POSTGRES:'0',MARKETPLACE_ADMIN_PIN:'',MARKETPLACE_ADMIN_PIN_HASH:'',LEGACY_OWNER_AUTH_URL:legacyOwnerAuthUrl};
   delete env.MARKETPLACE_DISPATCH_1_4_PIN;
   delete env.MARKETPLACE_DISPATCH_5_6_PIN;
   delete env.MARKETPLACE_DISPATCH_PIN;
   delete env.MARKETPLACE_DISPATCH_1_4_PIN_HASH;
   delete env.MARKETPLACE_DISPATCH_5_6_PIN_HASH;
   const probe=spawnSync(process.execPath,['server.js'],{cwd:root,encoding:'utf8',timeout:600,env});
-  assert.notEqual(probe.status,1,'Admin-only mode must not fail startup merely because dispatchers are not assigned yet');
+  assert.notEqual(probe.status,1,'Legacy owner bridge must satisfy the required Admin credential even when dispatcher PINs are not assigned yet');
 }
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 
@@ -79,6 +94,19 @@ try{
   const adminToken=x.j.token;
   assert.ok(adminToken,'administrator login returns a token');
 
+  x=await call('/api/auth/dispatch/login',{method:'POST',body:{phone:'owner-phone',pin:'2468'},ip:'198.51.100.22'});
+  assert.equal(x.r.status,200,'legacy owner phone + PIN can log in to the new dispatch');
+  assert.equal(x.j.role,'admin','legacy owner is mapped to the new admin role');
+  assert.equal(x.j.serviceScope,'all','legacy owner admin receives the unified service scope');
+  const legacyAdminToken=x.j.token;
+  assert.ok(legacyAdminToken,'legacy owner bridge returns only a new local session token');
+
+  x=await call('/api/unified/admin/state',{token:legacyAdminToken});
+  assert.equal(x.r.status,200,'legacy owner admin can access the unified admin state');
+
+  x=await call('/api/auth/dispatch/login',{method:'POST',body:{phone:'dispatcher-phone',pin:'2468'},ip:'198.51.100.23'});
+  assert.equal(x.r.status,401,'legacy non-owner credentials must not be promoted to admin');
+
   x=await call('/api/auth/dispatch/login',{method:'POST',body:{pin:'753100'},ip:'198.51.100.21'});
   assert.equal(x.r.status,200,'dispatcher can log in');
   assert.equal(x.j.role,'dispatcher_1_4','dispatcher PIN receives dispatcher_1_4 role');
@@ -95,6 +123,12 @@ try{
 
   x=await call('/api/drivers/drv-001/state');
   assert.equal(x.r.status,401,'driver API is protected when auth is required');
+
+  x=await call('/api/auth/driver/login',{method:'POST',body:{driverId:'owner-phone',pin:'2468'},ip:'198.51.100.24'});
+  assert.equal(x.r.status,200,'owner may enter from the driver PWA with the same old credentials');
+  assert.equal(x.j.role,'admin','owner login from driver PWA resolves to admin instead of driver');
+  assert.ok(x.j.token,'owner login from driver PWA returns a local admin session');
+  assert.equal('driver' in x.j,false,'owner admin response must not be shaped as a driver account');
 
   x=await call('/api/auth/driver/login',{method:'POST',body:{driverId:'drv-001',pin:'1111'}});
   assert.equal(x.r.status,401,'wrong driver PIN is rejected');
@@ -122,6 +156,8 @@ try{
   console.log('MARKETPLACE_V1_AUTH_E2E_OK',JSON.stringify({
     dispatchProtected:true,
     adminAndDispatcherRoles:true,
+    legacyOwnerBridge:true,
+    driverPwaOwnerHandoff:true,
     driverProtected:true,
     roleIsolation:true,
     logout:true,
@@ -132,4 +168,5 @@ try{
   child.kill('SIGTERM');
   await Promise.race([new Promise(r=>child.once('exit',r)),sleep(1000).then(()=>child.kill('SIGKILL'))]);
   await fs.rm(dataDir,{recursive:true,force:true});
+  await new Promise(resolve=>legacyServer.close(()=>resolve()));
 }
