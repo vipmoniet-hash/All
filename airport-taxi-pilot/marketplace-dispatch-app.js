@@ -511,3 +511,37 @@ async function boot(){
 }
 boot();
 setInterval(()=>{if(document.visibilityState==='visible'&&(!authRequired||authToken))load(true)},10000);
+
+
+/* UNIFIED_ADMIN_PARENT_LOGIN */
+const UNIFIED_PARENT_ORIGIN='https://vanclick.co.il';
+async function unifiedParentLogin(phone,pin){
+  try{
+    const response=await fetch(API+'/api/auth/dispatch/login',{
+      method:'POST',
+      headers:{'content-type':'application/json'},
+      body:JSON.stringify({phone:String(phone||''),pin:String(pin||'')})
+    });
+    const payload=await response.json();
+    if(!response.ok)throw Error(payload.error||'INVALID_CREDENTIALS');
+    authToken=payload.token;
+    staffRole=payload.role||'';
+    sessionStorage.setItem('taxi4_dispatch_token',authToken);
+    sessionStorage.setItem('taxi4_staff_role',staffRole);
+    if(staffRole==='dispatcher_5_6')throw Error('FORBIDDEN');
+    q('#dispatchAuthOverlay')?.classList.add('hidden');
+    q('#dispatchLogout')?.classList.remove('hidden');
+    await load(true);
+    window.parent?.postMessage({type:'vanclick-unified-auth-result',surface:'taxi_1_4',ok:true,role:staffRole},UNIFIED_PARENT_ORIGIN);
+  }catch(error){
+    window.parent?.postMessage({type:'vanclick-unified-auth-result',surface:'taxi_1_4',ok:false,error:String(error?.message||error||'AUTH_FAILED')},UNIFIED_PARENT_ORIGIN);
+  }
+}
+window.addEventListener('message',event=>{
+  if(event.origin!==UNIFIED_PARENT_ORIGIN)return;
+  if(event.data?.type!=='vanclick-unified-login')return;
+  unifiedParentLogin(event.data.phone,event.data.pin);
+});
+try{
+  if(window.parent&&window.parent!==window)window.parent.postMessage({type:'vanclick-unified-surface-ready',surface:'taxi_1_4'},UNIFIED_PARENT_ORIGIN);
+}catch{}
