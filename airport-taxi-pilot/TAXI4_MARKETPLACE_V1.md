@@ -13,15 +13,17 @@ This implementation is intentionally isolated from the current VanClick / OneCli
 Taxi 1–4 is a driver marketplace, not a dispatcher-assignment system.
 
 1. A client creates a valid airport-transfer booking.
-2. The final fare and VanClick commission are calculated immediately.
-3. The ride enters `pool` automatically.
-4. Verified active drivers see the ride without private customer details.
-5. A driver claims the ride.
-6. Claim is atomic: one ride can have one winning driver only.
-7. Commission is debited from the winning driver's prepaid wallet.
-8. Private customer/contact/address data is revealed only to the winning driver.
-9. Driver uses the minimal lifecycle: claim → en route → completed.
-10. Dispatcher handles exceptions rather than assigning routine rides.
+2. The final fare and provisional VanClick commission are calculated immediately.
+3. The ride enters `awaiting_dispatch` and is visible only to Admin/Dispatcher.
+4. Admin or Dispatcher reviews the ride and explicitly publishes it to the common driver pool.
+5. Only after publication do verified active drivers see the ride without private customer details.
+6. A driver claims the ride.
+7. Claim is atomic: one ride can have one winning driver only.
+8. Commission is debited only from an ordinary winning driver's prepaid wallet.
+9. Admin and Dispatcher management actions never create a commission debit.
+10. Private customer/contact/address data is revealed only to the winning driver.
+11. Driver uses the minimal lifecycle: claim → en route → completed.
+12. Admin/Dispatcher manage intake, publication and exceptions rather than manually assigning routine rides.
 
 ## Commission
 
@@ -128,7 +130,7 @@ Normal path:
 
 A driver cannot mark a ride completed before `driver_enroute`.
 
-Legacy `awaiting_dispatch` is retained only for backward-compatible records; new valid Taxi 1–4 bookings publish directly to `pool`.
+`awaiting_dispatch` is the normal intake state for every new Taxi 1–4 booking. A ride moves to `pool` only after explicit Admin/Dispatcher publication.
 
 ## Driver UX
 
@@ -169,7 +171,8 @@ The code supports `MARKETPLACE_AUTH_REQUIRED=1`.
 
 When enabled:
 
-- dispatch requires its own PIN/session
+- Admin and Dispatcher are separate privileged roles with their own PINs/sessions
+- both privileged roles can manage the full Taxi 1–4 operational console
 - each driver has a hashed PIN
 - driver can log in by phone or driver ID
 - only a token hash is stored server-side
@@ -204,7 +207,7 @@ Every isolated build currently checks:
 - commission schedule
 - peak boundaries
 - Friday 16:00 / Saturday 20:00 Shabbat boundaries
-- direct pool publication
+- staff-only intake before driver-pool publication
 - idempotent claim
 - schedule conflict protection
 - exception workflow
