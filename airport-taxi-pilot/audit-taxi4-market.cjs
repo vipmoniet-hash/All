@@ -121,9 +121,24 @@ const badRoad=rows.filter(r=>!r.roadValid).sort((a,b)=>(b.airKm??0)-(a.airKm??0)
 const marketCurve=unmatched.map(r=>{
   const synthetic={...r,benchmark:null};
   const n=neighborMedian(synthetic);
-  return {...r,neighborMedian:n?.median??null,vsNeighborPct:n?.median?pct(r.fare,n.median):null,neighborN:n?.n??0};
+  const neighbor=n?.median??null;
+  const marketFloor=marketFloorFare(neighbor);
+  const kmFloor=driverFloorFare(r.km);
+  const safeTargetFare=Math.max(marketFloor,kmFloor);
+  return {...r,
+    neighborMedian:neighbor,
+    vsNeighborPct:neighbor?pct(r.fare,neighbor):null,
+    marketFloorFare:marketFloor,
+    driverFloorFare:kmFloor,
+    safeTargetFare,
+    vsSafeTargetPct:safeTargetFare?pct(r.fare,safeTargetFare):null,
+    neighborN:n?.n??0
+  };
 });
 const unmatchedHigh=marketCurve.filter(r=>(r.vsNeighborPct??0)>25).sort((a,b)=>b.vsNeighborPct-a.vsNeighborPct);
+const unmatchedTrueOverpriced=marketCurve
+  .filter(r=>r.reason!=='owner_anchor' && (r.vsSafeTargetPct??0)>20)
+  .sort((a,b)=>(b.vsSafeTargetPct??-999)-(a.vsSafeTargetPct??-999));
 const unmatchedLow=marketCurve.filter(r=>(r.vsNeighborPct??0)<-10).sort((a,b)=>a.vsNeighborPct-b.vsNeighborPct);
 
 const out={
@@ -138,6 +153,7 @@ const out={
   trueOverpricedCount:trueOverpriced.length,
   underpricedCount:underpriced.length,
   unmatchedHighCount:unmatchedHigh.length,
+  unmatchedTrueOverpricedCount:unmatchedTrueOverpriced.length,
   unmatchedLowCount:unmatchedLow.length,
   badRoadKmCount:badRoad.length,
   topSuspiciousMatches:suspiciousMatches.slice(0,40),
@@ -145,8 +161,9 @@ const out={
   topOverpriced:overpriced.slice(0,40),
   topTrueOverpriced:trueOverpriced.slice(0,200),
   topUnderpriced:underpriced.slice(0,30),
-  topUnmatchedHigh:unmatchedHigh.slice(0,30),
-  topUnmatchedLow:unmatchedLow.slice(0,30),
+  topUnmatchedHigh:unmatchedHigh.slice(0,60),
+  topUnmatchedTrueOverpriced:unmatchedTrueOverpriced.slice(0,200),
+  topUnmatchedLow:unmatchedLow.slice(0,60),
   topBadRoadKm:badRoad.slice(0,40)
 };
 console.log('TAXI4_MARKET_AUDIT',JSON.stringify(out));
