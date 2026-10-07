@@ -55,5 +55,6 @@ require('child_process').execFileSync(process.execPath,[path.join(__dirname,'rep
 require('child_process').execFileSync(process.execPath,[path.join(__dirname,'patch-taxi4-policy.cjs'),root],{stdio:'inherit'});
 
 // Policy regression gate: blocks deploys if surcharge or commission behavior regresses.
-require('child_process').execFileSync(process.execPath,[path.join(__dirname,'verify-taxi4-policy.mjs'),root],{stdio:'inherit'});\nrequire('child_process').execFileSync(process.execPath,[path.join(__dirname,'audit-taxi4-market.cjs'),root],{stdio:'inherit'});
+require('child_process').execFileSync(process.execPath,[path.join(__dirname,'verify-taxi4-policy.mjs'),root],{stdio:'inherit'});
+require('child_process').execFileSync(process.execPath,[path.join(__dirname,'audit-taxi4-market.cjs'),root],{stdio:'inherit'});
 
