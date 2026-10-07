@@ -251,4 +251,53 @@ function normalizeTripAt(value) {
   write(rel,src);
 }
 
+// 7) Taxi 1–4 luggage capacity guard.
+// A regular taxi may accept at most 4 large suitcases.
+// 5+ requires VanClick large taxi and cannot be booked through Taxi 1–4.
+{
+  const htmlRel=path.join('apps','client','public','index.html');
+  let html=read(htmlRel);
+
+  html=mustReplace(
+    html,
+    '<label class="field"><span>מזוודות גדולות</span><select name="largeLuggage"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5+</option></select></label>',
+    '<label class="field"><span>מזוודות גדולות</span><select name="largeLuggage"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5+ — נדרשת מונית גדולה</option></select><div id="largeLuggageWarning" class="large-luggage-warning hidden"><b>מעל 4 מזוודות גדולות נדרשת מונית גדולה</b><span>תא המטען של מונית רגילה אינו מתאים ליותר מ-4 מזוודות גדולות.</span><button type="button" id="largeLuggageHandoff">לעבור למונית גדולה של VanClick</button></div></label>',
+    'Taxi4 large luggage selector'
+  );
+  write(htmlRel,html);
+
+  const clientRel=path.join('apps','client','public','app.js');
+  let client=read(clientRel);
+  client=mustReplace(
+    client,
+    "q('#returnToggle').onchange=()=>{",
+    "const largeBag=q('[name=largeLuggage]');const luggageWarning=q('#largeLuggageWarning');function syncLargeLuggage(){const tooMany=Number(largeBag?.value||0)>4;luggageWarning?.classList.toggle('hidden',!tooMany);q('#submitBtn').disabled=tooMany;if(tooMany){q('#submitBtn span').textContent='נדרשת מונית גדולה';}else{q('#submitBtn span').textContent='אישור הזמנה';}}largeBag?.addEventListener('change',syncLargeLuggage);q('#largeLuggageHandoff')?.addEventListener('click',()=>handoff('large_luggage_requires_large_vehicle').catch(e=>alert(e.message)));q('#returnToggle').onchange=()=>{",
+    'Taxi4 large luggage client guard'
+  );
+  client=mustReplace(
+    client,
+    "b.largeLuggage=Number(b.largeLuggage||0);b.smallLuggage=Number(b.smallLuggage||0);",
+    "b.largeLuggage=Number(b.largeLuggage||0);b.smallLuggage=Number(b.smallLuggage||0);if(b.largeLuggage>4){syncLargeLuggage();return handoff('large_luggage_requires_large_vehicle');}",
+    'Taxi4 large luggage submit guard'
+  );
+  write(clientRel,client);
+
+  const serviceRel='src/service.js';
+  let service=read(serviceRel);
+  service=mustReplace(
+    service,
+    "largeLuggage:Number(input.largeLuggage||0),smallLuggage:Number(input.smallLuggage||0),",
+    "largeLuggage:Number(input.largeLuggage||0),smallLuggage:Number(input.smallLuggage||0),",
+    'Taxi4 locate luggage fields'
+  );
+  if(!service.includes("LARGE_LUGGAGE_REQUIRES_LARGE_VEHICLE")){
+    service=service.replace(
+      "const quote = quoteAirportRoute(input.fromArea, input.toArea, input.tripAt, input.paymentMethod);",
+      "if(Number(input.largeLuggage||0)>4)throw new Error('LARGE_LUGGAGE_REQUIRES_LARGE_VEHICLE');const quote = quoteAirportRoute(input.fromArea, input.toArea, input.tripAt, input.paymentMethod);"
+    );
+  }
+  write(serviceRel,service);
+}
+
+console.log('LARGE_LUGGAGE_LIMIT_TAXI4');
 console.log('TAXI4_POLICY_PATCH_APPLIED');
