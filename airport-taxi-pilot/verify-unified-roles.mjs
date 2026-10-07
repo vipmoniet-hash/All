@@ -75,27 +75,26 @@ try{
   assert.equal(admin.role,'admin','admin PIN must receive admin role');
 
   const small=await login('753100');
-  assert.equal(small.role,'dispatcher_1_4','small dispatcher PIN must receive dispatcher_1_4 role');
+  assert.equal(small.role,'dispatcher','existing 1-4 dispatcher PIN must resolve to unified dispatcher');
 
   const large=await login('642900');
-  assert.equal(large.role,'dispatcher_5_6','large dispatcher PIN must receive dispatcher_5_6 role');
+  assert.equal(large.role,'dispatcher','existing 5-6 dispatcher PIN must resolve to unified dispatcher');
 
   x=await call('/api/dispatch/state',{token:small.token});
   assert.equal(x.r.status,200,'dispatcher_1_4 can access 1-4 dispatch state');
   assert.ok(Array.isArray(x.j.orders)&&x.j.orders.every(o=>(o.serviceType||'taxi_1_4')==='taxi_1_4'),'small state contains only 1-4');
-  assert.equal('largeOrders' in x.j,false,'dispatcher_1_4 must not receive large orders');
-  assert.equal('unifiedOrders' in x.j,false,'dispatcher_1_4 must not receive unified admin view');
+  assert.equal(x.r.status,200,'unified dispatcher can access 1-4 dispatch state');
 
   x=await call('/api/unified/large/state',{token:small.token});
-  assert.equal(x.r.status,403,'dispatcher_1_4 cannot access 5-6 state');
+  assert.equal(x.r.status,200,'unified dispatcher can access 5-6 state');
 
   x=await call('/api/unified/large/state',{token:large.token});
-  assert.equal(x.r.status,200,'dispatcher_5_6 can access 5-6 state');
+  assert.equal(x.r.status,200,'unified dispatcher can access 5-6 state');
   assert.ok(Array.isArray(x.j.orders)&&x.j.orders.length===1,'large dispatcher receives large queue');
   assert.ok(x.j.orders.every(o=>o.serviceType==='large_5_6'),'large state contains only 5-6');
 
   x=await call('/api/dispatch/state',{token:large.token});
-  assert.equal(x.r.status,403,'dispatcher_5_6 cannot access 1-4 state');
+  assert.equal(x.r.status,200,'unified dispatcher can access 1-4 state');
 
   x=await call('/api/unified/admin/state',{token:admin.token});
   assert.equal(x.r.status,200,'admin can access unified state');
@@ -111,14 +110,16 @@ try{
   assert.ok(x.j.unifiedJournal.some(e=>e.serviceType==='large_5_6'),'unified journal contains 5-6 events');
 
   x=await call('/api/unified/admin/state',{token:small.token});
-  assert.equal(x.r.status,403,'dispatcher_1_4 cannot access admin unified state');
+  assert.equal(x.r.status,200,'owner-appointed dispatcher can access the full unified operational state');
+  assert.ok(x.j.unifiedOrders.some(o=>o.serviceType==='taxi_1_4'),'dispatcher sees 1-4 in unified state');
+  assert.ok(x.j.unifiedOrders.some(o=>o.serviceType==='large_5_6'),'dispatcher sees 5-6 in unified state');
   x=await call('/api/unified/admin/state',{token:large.token});
-  assert.equal(x.r.status,403,'dispatcher_5_6 cannot access admin unified state');
+  assert.equal(x.r.status,200,'all existing dispatcher credentials open the same unified operational state');
 
-  console.log('UNIFIED_ROLE_ISOLATION_OK',JSON.stringify({
-    admin:'all',
-    dispatcher1to4:'taxi_1_4_only',
-    dispatcher5to6:'large_5_6_only',
+  console.log('UNIFIED_ROLE_MODEL_OK',JSON.stringify({
+    admin:'owner_all',
+    dispatcher:'both_lines_operational',
+    ownerOnlyAdminControls:true,
     serverEnforced:true
   }));
 }finally{
