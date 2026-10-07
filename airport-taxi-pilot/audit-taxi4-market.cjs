@@ -150,6 +150,15 @@ const out={
   topBadRoadKm:badRoad.slice(0,40)
 };
 console.log('TAXI4_MARKET_AUDIT',JSON.stringify(out));
+if(trueOverpriced.length){
+  throw new Error('TAXI4_EXCESSIVE_FARE_GATE: '+trueOverpriced.length+' matched fares exceed safe target by more than 10%; '+JSON.stringify(trueOverpriced.slice(0,12).map(r=>({name:r.name,fare:r.fare,safeTargetFare:r.safeTargetFare,vsSafeTargetPct:Number(r.vsSafeTargetPct.toFixed(1))}))));
+}
+if(underpriced.length){
+  throw new Error('TAXI4_UNDERPRICED_GATE: '+underpriced.length+' matched fares fall below protected market floor');
+}
+if(badRoad.length){
+  throw new Error('TAXI4_ROAD_DISTANCE_GATE: '+badRoad.length+' invalid road-distance rows');
+}
 
 const coordOf=x=>{
   const lat=x.lat ?? x.latitude ?? x.Latitude;
