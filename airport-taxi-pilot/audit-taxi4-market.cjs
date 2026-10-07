@@ -42,6 +42,19 @@ const rows=pricing.locations.map(x=>{
 
 const matched=rows.filter(r=>r.benchmark!=null && r.reason!=='owner_anchor');
 const pct=(a,b)=>b?((a/b)-1)*100:null;
+function commission(fare){
+  const n=Number(fare||0);
+  if(n<100) return 5;
+  return Math.floor(n/100)*10;
+}
+function ceil10(n){return Math.ceil(Number(n||0)/10)*10;}
+function marketFloorFare(reference){
+  if(!Number.isFinite(Number(reference))||Number(reference)<=0) return 0;
+  let fare=ceil10(Number(reference)*1.10);
+  while(fare-commission(fare)<Number(reference)) fare+=10;
+  return fare;
+}
+function driverFloorFare(km){return Number.isFinite(Number(km))?ceil10(80+4*Number(km)):0;}
 function median(a){
   const x=[...a].filter(Number.isFinite).sort((m,n)=>m-n);
   if(!x.length)return null;
@@ -72,6 +85,9 @@ const analysed=matched.map(r=>{
     benchmarkVsNeighborPct:n?.median?pct(r.benchmark,n.median):null,
     marketReference,
     vsMarketReferencePct:marketReference?pct(r.fare,marketReference):null,
+    marketFloorFare:marketFloorFare(marketReference),
+    driverFloorFare:driverFloorFare(r.km),
+    safeTargetFare:Math.max(marketFloorFare(marketReference),driverFloorFare(r.km)),
     neighborN:n?.n??0
   };
 });
@@ -92,6 +108,10 @@ const rawSignalDisagreements=analysed
 const overpriced=analysed
   .filter(r=>(r.vsMarketReferencePct??0)>25)
   .sort((a,b)=>(b.vsMarketReferencePct??-999)-(a.vsMarketReferencePct??-999));
+const trueOverpriced=analysed
+  .map(r=>({...r,vsSafeTargetPct:r.safeTargetFare?pct(r.fare,r.safeTargetFare):null}))
+  .filter(r=>(r.vsSafeTargetPct??0)>10)
+  .sort((a,b)=>(b.vsSafeTargetPct??-999)-(a.vsSafeTargetPct??-999));
 const underpriced=analysed
   .filter(r=>r.vsBenchmarkPct<0 || (r.vsNeighborPct??0)<-10)
   .sort((a,b)=>Math.min(a.vsBenchmarkPct,a.vsNeighborPct??999)-Math.min(b.vsBenchmarkPct,b.vsNeighborPct??999));
@@ -115,6 +135,7 @@ const out={
   suspiciousMatchCount:suspiciousMatches.length,
   rawSignalDisagreementCount:rawSignalDisagreements.length,
   overpricedCount:overpriced.length,
+  trueOverpricedCount:trueOverpriced.length,
   underpricedCount:underpriced.length,
   unmatchedHighCount:unmatchedHigh.length,
   unmatchedLowCount:unmatchedLow.length,
@@ -122,6 +143,7 @@ const out={
   topSuspiciousMatches:suspiciousMatches.slice(0,40),
   topRawSignalDisagreements:rawSignalDisagreements.slice(0,40),
   topOverpriced:overpriced.slice(0,40),
+  topTrueOverpriced:trueOverpriced.slice(0,200),
   topUnderpriced:underpriced.slice(0,30),
   topUnmatchedHigh:unmatchedHigh.slice(0,30),
   topUnmatchedLow:unmatchedLow.slice(0,30),
