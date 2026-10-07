@@ -1,8 +1,8 @@
 (()=>{
 const C={
 ru:{
-title:'Единый центр управления',lead:'Admin управляет обеими линиями из одного экрана. Каждый диспетчер видит только свою линию.',
-loginTitle:'Вход в VanClick',loginText:'Введите свой PIN. Система сама откроет вашу рабочую линию.',login:'Войти',logout:'Выйти',
+title:'Единый центр управления',lead:'Admin и назначенные диспетчеры управляют обеими линиями из одного экрана. Owner-only настройки остаются только у администратора.',
+loginTitle:'Вход в VanClick',loginText:'Введите телефон и PIN из VanClick. Администратор и назначенные диспетчеры работают в одном центре по обеим линиям.',login:'Войти',logout:'Выйти',
 orders:'Заказы',topups:'Пополнения',drivers:'Водители',customers:'Клиенты',journal:'Журнал',
 small:'Taxi 1–4',smallText:'Новые заказы сначала проверяет персонал, затем публикует в общий пул.',
 large:'Large 5–6',largeText:'Отдельная управляемая очередь больших машин без водительской комиссии.',
@@ -17,13 +17,13 @@ noCustomers:'Клиентов пока нет',noJournal:'Событий пок�
 pending:'Ожидает',approved:'Подтверждено',rejected:'Отклонено',verify:'Проверить',enable:'Включить',disable:'Выключить',resetPin:'Сменить PIN',
 addDriver:'Добавить',driverName:'Имя водителя',driverPhone:'Телефон',vehiclePlate:'Номер машины',driverPin:'PIN 4–12 цифр',
 badPin:'Неверный PIN',forbidden:'Нет доступа к этой линии',notConfigured:'Доступ персонала ещё не настроен в Render',
-roleAdmin:'ADMIN · обе линии',roleSmall:'DISPATCHER · 1–4',roleLarge:'DISPATCHER · 5–6',
+roleAdmin:'ADMIN · обе линии',roleDispatcher:'DISPATCHER · обе линии',
 copied:'Скопировано',copyEmpty:'Нет новых или свободных поездок для отправки',
 ready:'Staging готов к cutover',notReady:'Staging пока не готов к cutover',reasonPostgres:'PostgreSQL не подключён',reasonAdmin:'Не задан Admin PIN',statusAwaiting:'Новый',statusPool:'В пуле',statusAssigned:'Назначен',statusEnroute:'Водитель в пути',statusCompleted:'Завершён',statusCancelled:'Отменён',statusConfirmed:'Подтверждён'
 },
 he:{
-title:'מרכז ניהול מאוחד',lead:'Admin מנהל את שני הקווים ממסך אחד. כל סדרן רואה רק את קו העבודה שלו.',
-loginTitle:'כניסה ל־VanClick',loginText:'הזן PIN. המערכת תפתח אוטומטית את קו העבודה שלך.',login:'כניסה',logout:'יציאה',
+title:'מרכז ניהול מאוחד',lead:'Admin והסדרנים שמונו מנהלים את שני הקווים ממסך אחד. הגדרות Owner-only נשארות רק למנהל.',
+loginTitle:'כניסה ל־VanClick',loginText:'הזן טלפון ו-PIN של VanClick. המנהל והסדרנים שמונו עובדים באותו מרכז בשני הקווים.',login:'כניסה',logout:'יציאה',
 orders:'הזמנות',topups:'טעינות',drivers:'נהגים',customers:'לקוחות',journal:'יומן',
 small:'Taxi 1–4',smallText:'הזמנה חדשה נבדקת קודם על ידי הצוות ורק אחר כך מתפרסמת למאגר הנהגים.',
 large:'Large 5–6',largeText:'תור נפרד לרכב גדול ללא עמלת נהג.',
@@ -38,7 +38,7 @@ noCustomers:'אין לקוחות',noJournal:'אין אירועים',trips:'נס�
 pending:'ממתין',approved:'אושר',rejected:'נדחה',verify:'אמת',enable:'הפעל',disable:'כבה',resetPin:'שנה PIN',
 addDriver:'הוסף',driverName:'שם נהג',driverPhone:'טלפון',vehiclePlate:'מספר רכב',driverPin:'PIN בן 4–12 ספרות',
 badPin:'PIN שגוי',forbidden:'אין גישה לקו הזה',notConfigured:'גישת הצוות עדיין לא הוגדרה ב-Render',
-roleAdmin:'ADMIN · שני הקווים',roleSmall:'סדרן · 1–4',roleLarge:'סדרן · 5–6',
+roleAdmin:'ADMIN · שני הקווים',roleDispatcher:'סדרן · שני הקווים',
 copied:'הועתק',copyEmpty:'אין נסיעות חדשות או פנויות לשליחה',
 ready:'Staging מוכן ל-cutover',notReady:'Staging עדיין לא מוכן ל-cutover',reasonPostgres:'PostgreSQL לא מחובר',reasonAdmin:'Admin PIN לא הוגדר',statusAwaiting:'חדש',statusPool:'במאגר',statusAssigned:'שויך',statusEnroute:'הנהג בדרך',statusCompleted:'הושלם',statusCancelled:'בוטל',statusConfirmed:'אושר'
 }};
@@ -91,29 +91,27 @@ function renderReadiness(){
 }
 function renderRole(){
   const b=$('roleBadge');if(!b)return;
-  b.textContent=role==='admin'?t('roleAdmin'):role==='dispatcher_1_4'?t('roleSmall'):role==='dispatcher_5_6'?t('roleLarge'):'';
+  b.textContent=role==='admin'?t('roleAdmin'):role==='dispatcher'?t('roleDispatcher'):'';
   $('logoutBtn').hidden=!authRequired||!token;
 }
 function showAuth(msg=''){const o=$('staffAuthOverlay');o.hidden=false;$('staffAuthStatus').textContent=msg}
 function hideAuth(){$('staffAuthOverlay').hidden=true}
-function routeRole(){if(role==='dispatcher_1_4'){location.replace('/dispatch/');return true}return false}
-function largeOrders(){return role==='admin'?(state?.largeOrders||[]):role==='dispatcher_5_6'?(state?.orders||[]):[]}
+function routeRole(){return false}
+function largeOrders(){return ['admin','dispatcher'].includes(role)?(state?.largeOrders||[]):[]}
 
 function setAdminTab(tab){
-  if(role!=='admin')tab='orders';
+  if(!['admin','dispatcher'].includes(role))tab='orders';
   const allowed=['orders','topups','drivers','customers','journal'];
   adminTab=allowed.includes(tab)?tab:'orders';
-  if(role==='admin')localStorage.setItem('vcUnifiedAdminTab',adminTab);
+  if(['admin','dispatcher'].includes(role))localStorage.setItem('vcUnifiedAdminTab',adminTab);
   document.querySelectorAll('[data-admin-tab]').forEach(b=>b.classList.toggle('active',b.dataset.adminTab===adminTab));
   for(const name of allowed){const pane=$(name+'Pane');if(pane)pane.hidden=name!==adminTab}
 }
 function renderMetrics(){
   const m=[];
-  if(role==='admin'){
+  if(['admin','dispatcher'].includes(role)){
     const c=state?.counts||{},lc=state?.largeCounts||{};
     m.push([t('newSmall'),c.awaiting_dispatch||0],[t('pool'),c.pool||0],[t('active'),(c.assigned||0)+(c.driver_enroute||0)],[t('largeNew'),lc.awaiting_dispatch||0]);
-  }else if(role==='dispatcher_5_6'){
-    const c=state?.counts||{};m.push([t('largeNew'),c.awaiting_dispatch||0],[t('active'),(c.confirmed||0)+(c.assigned||0)+(c.driver_enroute||0)]);
   }
   $('metrics').innerHTML=m.map(([n,v])=>'<div class="metric"><span>'+esc(n)+'</span><b>'+Number(v||0)+'</b></div>').join('');
 }
@@ -132,7 +130,7 @@ function smallActionButtons(o){
 }
 function renderSmallOrders(){
   const box=$('smallQueue');if(!box)return;
-  if(role!=='admin'){box.innerHTML='';return}
+  if(!['admin','dispatcher'].includes(role)){box.innerHTML='';return}
   const xs=(state?.orders||[]).slice().sort((a,b)=>{
     const final=s=>['completed','cancelled'].includes(s)?1:0;
     return final(a.status)-final(b.status)||new Date(a.tripAt)-new Date(b.tripAt);
@@ -155,7 +153,7 @@ function renderLarge(){
 }
 function renderTopups(){
   const box=$('topupQueue');if(!box)return;
-  if(role!=='admin'){box.innerHTML='';return}
+  if(!['admin','dispatcher'].includes(role)){box.innerHTML='';return}
   const xs=(state?.topups||[]).slice().sort((a,b)=>{
     const pa=a.status==='pending'?0:1,pb=b.status==='pending'?0:1;
     return pa-pb||new Date(b.createdAt||b.at||0)-new Date(a.createdAt||a.at||0);
@@ -164,33 +162,31 @@ function renderTopups(){
 }
 function renderDrivers(){
   const box=$('driverQueue');if(!box)return;
-  if(role!=='admin'){box.innerHTML='';return}
+  if(!['admin','dispatcher'].includes(role)){box.innerHTML='';return}
   const xs=(state?.drivers||[]).slice().sort((a,b)=>String(a.name||'').localeCompare(String(b.name||''),lang==='he'?'he':'ru'));
   box.innerHTML=xs.length?xs.map(d=>'<article class="queue-card driver-card"><div class="order-title"><h3>'+esc(d.name||d.id)+'</h3><span class="status-pill">'+esc(d.verified?(d.active?t('approved'):t('disable')):t('pending'))+'</span></div><div>'+esc(d.phone||'')+(d.vehiclePlate?' · '+esc(d.vehiclePlate):'')+'</div><div class="muted">'+esc(t('wallet'))+': '+money(d.wallet)+' ₪ · '+esc(t('completed'))+': '+Number(d.completedTrips||0)+'</div><div class="actions queue-actions">'+(!d.verified?'<button class="primary" onclick="driverVerify(\''+esc(d.id)+'\')">'+esc(t('verify'))+'</button>':'<button class="secondary" onclick="driverToggle(\''+esc(d.id)+'\','+(d.active?'false':'true')+')">'+esc(d.active?t('disable'):t('enable'))+'</button>')+'<button class="secondary" onclick="driverResetPin(\''+esc(d.id)+'\')">'+esc(t('resetPin'))+'</button></div></article>').join(''):'<div class="muted">'+esc(t('noDrivers'))+'</div>';
 }
 function renderCustomers(){
   const box=$('customerProfiles');if(!box)return;
-  const xs=role==='admin'?(state?.customerProfiles||[]):[];
+  const xs=['admin','dispatcher'].includes(role)?(state?.customerProfiles||[]):[];
   box.innerHTML=xs.length?xs.slice(0,100).map(p=>'<article class="queue-card"><h3>'+esc(p.customerName||p.customerPhone)+'</h3><div>'+esc(p.customerPhone)+' · '+Number(p.totalTrips||0)+' '+esc(t('trips'))+'</div><div class="muted">'+esc((p.serviceTypes||[]).join(' · '))+(p.lastTripAt?' · '+esc(t('lastTrip'))+': '+fmt(p.lastTripAt):'')+'</div></article>').join(''):'<div class="muted">'+esc(t('noCustomers'))+'</div>';
 }
 function renderJournal(){
   const box=$('unifiedJournal');if(!box)return;
-  const xs=role==='admin'?(state?.unifiedJournal||[]):[];
+  const xs=['admin','dispatcher'].includes(role)?(state?.unifiedJournal||[]):[];
   box.innerHTML=xs.length?xs.slice(0,200).map(e=>'<article class="queue-card"><h3>'+esc(e.type||e.kind||e.eventType||'event')+'</h3><div>'+esc(e.serviceType||'system')+(e.orderId?' · '+esc(e.orderId):'')+'</div><div class="muted">'+esc(e.actor||'')+((e.at||e.createdAt||e.timestamp)?' · '+fmt(e.at||e.createdAt||e.timestamp):'')+'</div></article>').join(''):'<div class="muted">'+esc(t('noJournal'))+'</div>';
 }
 function render(){
-  const admin=role==='admin',largeDispatcher=role==='dispatcher_5_6';
-  $('adminTabs').hidden=!admin;
-  $('smallCard').hidden=!admin;
-  $('largeCard').hidden=!(admin||largeDispatcher);
+  const staff=['admin','dispatcher'].includes(role);
+  $('adminTabs').hidden=!staff;
+  $('smallCard').hidden=!staff;
+  $('largeCard').hidden=!staff;
   renderMetrics();renderSmallOrders();renderLarge();renderTopups();renderDrivers();renderCustomers();renderJournal();
-  setAdminTab(admin?adminTab:'orders');
+  setAdminTab(staff?adminTab:'orders');
   apply();
 }
 async function load(){
-  if(role==='admin')state=await api('/api/unified/admin/state');
-  else if(role==='dispatcher_5_6')state=await api('/api/unified/large/state');
-  else if(role==='dispatcher_1_4'){routeRole();return}
+  if(['admin','dispatcher'].includes(role))state=await api('/api/unified/admin/state');
   else throw new Error('NO_ROLE');
   render();
 }
@@ -230,7 +226,7 @@ document.querySelectorAll('[data-lang]').forEach(b=>b.onclick=async()=>{lang=b.d
 $('staffAuthForm').onsubmit=async e=>{
   e.preventDefault();$('staffAuthStatus').textContent='';
   try{
-    const r=await fetch('/api/auth/dispatch/login',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({pin:$('staffPin').value})});
+    const r=await fetch('/api/auth/dispatch/login',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({phone:$('staffPhone').value,pin:$('staffPin').value})});
     let j={};try{j=await r.json()}catch{}
     if(!r.ok){const er=new Error(j.error||'LOGIN');er.status=r.status;throw er}
     token=j.token;role=j.role;sessionStorage.setItem('taxi4_dispatch_token',token);sessionStorage.setItem('taxi4_staff_role',role);
