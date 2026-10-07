@@ -45,6 +45,23 @@ function request(tripAt, customerName='לקוח בדיקה') {
 
 await persistence.resetDb(seed);
 
+const vatTopup = await service.requestDriverTopup('drv-test-001',100,'bit');
+assert.equal(vatTopup.amount,100,'100 requested credits remain 100 credits');
+assert.equal(vatTopup.credits,100,'top-up exposes credited units explicitly');
+assert.equal(vatTopup.vatRate,0.18,'wallet top-up VAT rate is 18%');
+assert.equal(vatTopup.vatAmount,18,'100 credits add 18 ILS VAT');
+assert.equal(vatTopup.totalAmount,118,'100 credits cost 118 ILS including VAT');
+const vatApproved = await service.approveDriverTopup(vatTopup.id,'dispatcher');
+assert.equal(vatApproved.wallet,600,'approval credits only 100 units, never the VAT amount');
+let vatDb = await persistence.readDb();
+const vatLedger = vatDb.ledger.find(x=>x.topupId===vatTopup.id&&x.type==='wallet_topup_approved');
+assert.equal(vatLedger.credits,100,'approved ledger stores credited units');
+assert.equal(vatLedger.vatAmount,18,'approved ledger stores VAT separately');
+assert.equal(vatLedger.totalAmount,118,'approved ledger stores gross payment separately');
+console.log('MARKETPLACE_V1_TOPUP_VAT_OK',JSON.stringify({credits:vatTopup.credits,vat:vatTopup.vatAmount,total:vatTopup.totalAmount,wallet:vatApproved.wallet}));
+
+await persistence.resetDb(seed);
+
 const booking = await service.createClientBooking(request('2026-10-08T11:00'));
 assert.equal(booking.orders.length,1,'single booking creates one ride');
 assert.equal(booking.orders[0].status,'awaiting_dispatch','new Taxi 1-4 booking must stay private to staff until published');
