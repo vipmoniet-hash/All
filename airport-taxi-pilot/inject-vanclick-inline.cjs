@@ -58,3 +58,6 @@ require('child_process').execFileSync(process.execPath,[path.join(__dirname,'pat
 require('child_process').execFileSync(process.execPath,[path.join(__dirname,'verify-taxi4-policy.mjs'),root],{stdio:'inherit'});
 require('child_process').execFileSync(process.execPath,[path.join(__dirname,'audit-taxi4-market.cjs'),root],{stdio:'inherit'});
 
+
+// Marketplace regression gate.
+require('child_process').execFileSync(process.execPath,[path.join(__dirname,'verify-marketplace-v1.mjs'),root],{stdio:'inherit'});
