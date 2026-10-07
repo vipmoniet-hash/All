@@ -25,8 +25,9 @@ assert.ok(dispatch.includes('refundCommission:false'),'dispatch UI must support 
 assert.ok(dispatch.includes('/api/auth/dispatch/login'),'dispatch UI must support protected dispatcher login');
 assert.ok(dispatch.includes('/drivers/${id}/pin'),'dispatch UI must support driver PIN rotation');
 
-assert.ok(client.includes('פורסמה לנהגים מאומתים'),'client confirmation must describe direct driver-pool publication');
-assert.ok(!client.includes('הבקשה עוברת לאישור ושיבוץ נהג.'),'client must not claim routine manual approval is pending');
+assert.ok(client.includes('נמצאת בבדיקת המוקד'),'client confirmation must describe staff review before publication');
+assert.ok(dispatch.includes('Отправить в общий пул'),'dispatch UI must expose explicit staff publication action');
+assert.ok(dispatch.includes("awaiting_dispatch:'Новый'"),'dispatch UI must label private incoming rides as new');
 
 console.log('MARKETPLACE_V1_UI_GATE_OK',JSON.stringify({
   driver:true,
