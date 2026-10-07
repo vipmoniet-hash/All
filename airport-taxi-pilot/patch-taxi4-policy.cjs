@@ -24,7 +24,7 @@ function mustReplace(src,search,replacement,label){
   const n = Number(fare);
   if (!Number.isFinite(n) || n <= 0) throw new Error('FARE_MUST_BE_POSITIVE');
   if (n < 100) return 5;
-  return 10 + Math.floor((n - 100) / 100) * 5;
+  return Math.floor(n / 100) * 10;
 }`,
     'domain commissionForFare'
   );
@@ -41,7 +41,7 @@ function taxi4CommissionForFare(fare) {
   const n = Number(fare);
   if (!Number.isFinite(n) || n <= 0) throw new Error('FARE_MUST_BE_POSITIVE');
   if (n < 100) return 5;
-  return 10 + Math.floor((n - 100) / 100) * 5;
+  return Math.floor(n / 100) * 10;
 }
 
 function israelTripParts(value) {
