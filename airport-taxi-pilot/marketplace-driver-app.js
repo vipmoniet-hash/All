@@ -8,6 +8,17 @@ const pay=m=>m==='bit'?'Bit':'מזומן';
 const fmt=d=>new Date(d).toLocaleString('he-IL',{weekday:'short',day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
 const dayKey=d=>new Date(d).toLocaleDateString('en-CA',{timeZone:'Asia/Jerusalem'});
 const money=n=>Number(n||0).toLocaleString('he-IL',{maximumFractionDigits:2});
+const TOPUP_VAT_RATE=0.18;
+const topupCredits=t=>Number(t?.credits??t?.amount??0);
+const topupVat=t=>Number(t?.vatAmount??(topupCredits(t)*TOPUP_VAT_RATE).toFixed(2));
+const topupTotal=t=>Number(t?.totalAmount??(topupCredits(t)+topupVat(t)).toFixed(2));
+function renderTopupCalc(){
+  const input=q('#topup input[name="amount"]'),credits=Number(input?.value||0),el=q('#topupCalc');
+  if(!el)return;
+  if(!(credits>0)){el.textContent='לדוגמה: 100 קרדיטים = 100 ₪ + מע״מ 18% = 118 ₪ לתשלום';return;}
+  const vat=Number((credits*TOPUP_VAT_RATE).toFixed(2)),total=Number((credits+vat).toFixed(2));
+  el.textContent=`${money(credits)} קרדיטים = ${money(credits)} ₪ + מע״מ 18% (${money(vat)} ₪) = ${money(total)} ₪ לתשלום`;
+}
 
 function authFetch(url,opts={}){
   const headers={...(opts.headers||{})};
@@ -200,7 +211,7 @@ function renderState(){
     <div><span>עמלה נטו ששולמה</span><b>${money(stats.netCommissionPaid)} ₪</b></div>`;
 
   q('#history').innerHTML=s.completed.length?s.completed.map(o=>`<div class="ride"><div class="ride-top"><div><div class="route">${esc(o.fromArea)} ← ${esc(o.toArea)}</div><small>${fmt(o.tripAt)}</small></div><span class="status">הושלם</span></div><div class="moneybar"><div><span>מחיר</span><b>${money(o.fare)} ₪</b></div><div><span>עמלה</span><b>${money(o.commission)} ₪</b></div><div class="net"><span>נטו</span><b>${money(o.driverNet)} ₪</b></div></div></div>`).join(''):'<div class="empty">אין היסטוריה</div>';
-  q('#topupHistory').innerHTML=s.topups.length?'<h3>בקשות אחרונות</h3>'+s.topups.map(t=>`<div>${money(t.amount)} ₪ · ${pay(t.method)} · ${esc(t.status)}</div>`).join(''):'';
+  q('#topupHistory').innerHTML=s.topups.length?'<h3>בקשות אחרונות</h3>'+s.topups.map(t=>`<div>${money(topupCredits(t))} קרדיטים · ${money(topupTotal(t))} ₪ כולל מע״מ 18% · ${pay(t.method)} · ${esc(t.status)}</div>`).join(''):'';
 }
 
 async function load(silent=false){
@@ -253,7 +264,7 @@ window.reportIssue=async(id,type)=>{
 
 q('#topup').onsubmit=async e=>{
   e.preventDefault();const b=Object.fromEntries(new FormData(e.target));b.amount=Number(b.amount);
-  try{await post(`${API}/api/drivers/${driverId}/topups`,b);q('#topupStatus').textContent='הבקשה נשלחה לאישור';e.target.reset();await load(true)}
+  try{const t=await post(`${API}/api/drivers/${driverId}/topups`,b);q('#topupStatus').textContent=`נשלח לאישור: ${money(t.credits??t.amount)} קרדיטים · ${money(t.totalAmount)} ₪ כולל מע״מ`;e.target.reset();renderTopupCalc();await load(true)}
   catch(err){q('#topupStatus').textContent=err.message}
 };
 q('#driver').onchange=()=>{if(!authRequired)load();};
@@ -266,6 +277,7 @@ qa('.tabs button').forEach(b=>b.onclick=()=>{
 async function boot(){
   ensureMarketplaceUi();
   q('#today').textContent=new Date().toLocaleDateString('he-IL',{weekday:'long',day:'2-digit',month:'2-digit',year:'numeric'});
+  const topupInput=q('#topup input[name="amount"]');if(topupInput)topupInput.addEventListener('input',renderTopupCalc);renderTopupCalc();
   const ready=await initDriverAuth();
   if(ready)await load(true);
 }
