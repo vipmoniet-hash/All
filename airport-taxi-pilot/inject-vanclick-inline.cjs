@@ -62,3 +62,6 @@ require('child_process').execFileSync(process.execPath,[path.join(__dirname,'aud
 
 // Marketplace regression gate.
 require('child_process').execFileSync(process.execPath,[path.join(__dirname,'verify-marketplace-v1.mjs'),root],{stdio:'inherit'});
+
+// High-volume marketplace UI regression gate.
+require('child_process').execFileSync(process.execPath,[path.join(__dirname,'verify-marketplace-ui.cjs'),root],{stdio:'inherit'});
