@@ -173,6 +173,9 @@ if(trueOverpriced.length){
 if(underpriced.length){
   throw new Error('TAXI4_UNDERPRICED_GATE: '+underpriced.length+' matched fares fall below protected market floor');
 }
+if(unmatchedTrueOverpriced.length){
+  throw new Error('TAXI4_UNMATCHED_EXCESSIVE_FARE_GATE: '+unmatchedTrueOverpriced.length+' unmatched fares exceed the conservative safe target by more than 20%; '+JSON.stringify(unmatchedTrueOverpriced.slice(0,12).map(r=>({name:r.name,fare:r.fare,safeTargetFare:r.safeTargetFare,vsSafeTargetPct:Number(r.vsSafeTargetPct.toFixed(1))}))));
+}
 if(badRoad.length){
   throw new Error('TAXI4_ROAD_DISTANCE_GATE: '+badRoad.length+' invalid road-distance rows');
 }
