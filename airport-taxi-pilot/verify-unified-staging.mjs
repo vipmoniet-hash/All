@@ -78,6 +78,24 @@ try{
   assert.equal(x.j.orders[0].serviceType,'taxi_1_4','small booking response must expose the shared service type');
   const smallId=x.j.orders[0].id;
 
+  x=await json('/api/client/bookings',{method:'POST',body:{
+    passengers:2,
+    largeLuggage:0,
+    smallLuggage:0,
+    childSeatCount:1,
+    boosterCount:0,
+    paymentMethod:'cash',
+    customerName:'Invalid Small Child Seat',
+    customerPhone:'0501112233',
+    fromArea:'ראשון לציון',
+    toArea:'Ben Gurion Airport',
+    tripAt:'2026-10-20T13:00',
+    exactPickup:'Small test pickup',
+    exactDropoff:'Ben Gurion Airport'
+  }});
+  assert.equal(x.r.status,400,'Taxi 1-4 must reject child-seat or booster extras');
+  assert.equal(x.j.error,'CHILD_RESTRAINTS_REQUIRE_LARGE_VEHICLE','small booking must explain that child restraints require Large 5-6');
+
   x=await json('/api/dispatch/state');
   assert.equal(x.r.status,200,'small dispatch state must remain available');
   assert.ok(Array.isArray(x.j.orders)&&x.j.orders.every(o=>(o.serviceType||'taxi_1_4')==='taxi_1_4'),'small dispatch state stays isolated to Taxi 1-4');
