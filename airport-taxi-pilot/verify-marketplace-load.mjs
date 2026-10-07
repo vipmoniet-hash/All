@@ -49,8 +49,17 @@ try{
   const created=results.filter(x=>x.status===201);
   assert.equal(created.length,120,'all 120 concurrent booking requests must be accepted');
 
+  const overflow=await Promise.all(Array.from({length:20},(_,i)=>post('/api/client/bookings',{
+    passengers:2,largeLuggage:0,smallLuggage:0,paymentMethod:'bit',
+    customerName:'Overflow '+i,customerPhone:'0599'+String(i).padStart(6,'0'),
+    fromArea:'ראשון לציון',toArea:'נתב״ג',
+    tripAt:'2026-10-15T12:00',
+    exactPickup:'Overflow '+i,exactDropoff:'TLV T3'
+  })));
+  assert.equal(overflow.filter(x=>x.status===429).length,20,'excess single-IP booking burst must be rate-limited instead of crashing server');
+
   const health=await fetch(base+'/health');
-  assert.equal(health.status,200,'server remains healthy after concurrent spike');
+  assert.equal(health.status,200,'server remains healthy after concurrent spike and rate-limit overflow');
 
   const state=await fetch(base+'/api/dispatch/state').then(r=>r.json());
   assert.equal(state.counts.awaiting_dispatch,120,'all spike bookings are persisted in staff-only intake');
@@ -60,6 +69,7 @@ try{
     concurrentBookings:120,
     created:created.length,
     awaitingDispatch:state.counts.awaiting_dispatch,
+    overflowRateLimited:overflow.filter(x=>x.status===429).length,
     health:health.status
   }));
 }finally{
