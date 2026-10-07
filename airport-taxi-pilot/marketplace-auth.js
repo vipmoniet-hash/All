@@ -45,8 +45,9 @@ export async function configureDriverPin(driverId,pin){
 
 export async function driverLogin(driverId,pin,now=new Date()){
   const p=validatePin(pin);
+  const identifier=String(driverId||'').trim();
   return transact(db=>{
-    const driver=db.drivers.find(d=>d.id===driverId);
+    const driver=db.drivers.find(d=>d.id===identifier||String(d.phone||'').replace(/\\D/g,'')===identifier.replace(/\\D/g,''));
     if(!driver)throw new Error('DRIVER_NOT_FOUND');
     if(!driver.active||driver.verified===false)throw new Error('DRIVER_NOT_ACTIVE');
     if(!driver.pinHash||!driver.pinSalt)throw new Error('DRIVER_PIN_NOT_CONFIGURED');
