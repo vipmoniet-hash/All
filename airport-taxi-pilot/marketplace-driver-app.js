@@ -48,7 +48,7 @@ function ensureDriverAuthUi(){
         const r=await fetch(API+'/api/auth/driver/login',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(b)});
         const j=await r.json();
         if(!r.ok)throw Error(j.error);
-        if(j.role==='admin'){
+        if(['admin','dispatcher'].includes(j.role)){
           sessionStorage.setItem('taxi4_dispatch_token',j.token);
           sessionStorage.setItem('taxi4_staff_role','admin');
           location.replace('/dispatch/');
