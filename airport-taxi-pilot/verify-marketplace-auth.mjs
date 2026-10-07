@@ -24,8 +24,17 @@ const base='http://127.0.0.1:'+port;
   delete env.MARKETPLACE_DISPATCH_5_6_PIN;
   delete env.MARKETPLACE_DISPATCH_PIN;
   const probe=spawnSync(process.execPath,['server.js'],{cwd:root,encoding:'utf8',timeout:1500,env});
-  assert.equal(probe.status,1,'UNIFIED_REQUIRE_AUTH must refuse startup without all staff credentials');
-  assert.match(String(probe.stdout||'')+String(probe.stderr||''),/STAFF_CREDENTIALS_REQUIRED_MISSING/,'fail-closed auth startup must explain missing staff credentials');
+  assert.equal(probe.status,1,'UNIFIED_REQUIRE_AUTH must refuse startup without Admin credentials');
+  assert.match(String(probe.stdout||'')+String(probe.stderr||''),/ADMIN_CREDENTIAL_REQUIRED_MISSING/,'fail-closed auth startup must explain missing Admin credential');
+}
+
+{
+  const env={...process.env,PORT:'4297',MARKETPLACE_AUTH_REQUIRED:'1',UNIFIED_REQUIRE_AUTH:'1',MARKETPLACE_ADMIN_PIN:'864200'};
+  delete env.MARKETPLACE_DISPATCH_1_4_PIN;
+  delete env.MARKETPLACE_DISPATCH_5_6_PIN;
+  delete env.MARKETPLACE_DISPATCH_PIN;
+  const probe=spawnSync(process.execPath,['server.js'],{cwd:root,encoding:'utf8',timeout:600,env});
+  assert.notEqual(probe.status,1,'Admin-only mode must not fail startup merely because dispatchers are not assigned yet');
 }
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 
