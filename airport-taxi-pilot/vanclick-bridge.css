@@ -1,0 +1,224 @@
+/* VanClick ecosystem visual bridge for separate 4-seat taxi pilot.
+   Presentation only. Does not change pricing, orders, wallet, dispatch or VanClick production. */
+:root{
+  --vc-bg:#f6f7f5;
+  --vc-bg-2:#fbfcfb;
+  --vc-surface:#ffffff;
+  --vc-ink:#142028;
+  --vc-muted:#5b6870;
+  --vc-green:#0b6b50;
+  --vc-green-strong:#07513c;
+  --vc-green-soft:#e8f4ef;
+  --vc-success:#176b3a;
+  --vc-gold:#8c6a31;
+  --vc-gold-light:#e3c378;
+  --vc-gold-soft:#fff8e8;
+  --vc-line:#dce1e5;
+  --vc-line-strong:#cbd2d8;
+  --vc-shadow:0 18px 54px rgba(23,33,42,.085);
+  --vc-shadow-soft:0 8px 26px rgba(23,33,42,.055);
+  --vc-radius-xl:24px;
+  --vc-radius-lg:18px;
+  --vc-radius-md:13px;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html{background:var(--vc-bg);color-scheme:light;scroll-behavior:smooth}
+body.vc-ecosystem,body{
+  margin:0;
+  font-family:system-ui,-apple-system,"Segoe UI",Arial,sans-serif;
+  color:var(--vc-ink);
+  background:
+    radial-gradient(circle at 50% -18%,rgba(184,137,63,.065),transparent 33rem),
+    linear-gradient(180deg,var(--vc-bg-2) 0%,var(--vc-bg) 55%,#f1efe9 100%);
+  -webkit-font-smoothing:antialiased;
+}
+body::before{
+  content:"";
+  position:fixed;
+  inset:0 0 auto;
+  height:3px;
+  z-index:9999;
+  background:linear-gradient(90deg,var(--vc-green) 0 72%,var(--vc-gold-light) 72% 100%);
+}
+a{color:var(--vc-green-strong)}
+header,.header,.topbar,.navbar,[class*="header"]{
+  background:rgba(255,255,255,.96)!important;
+  border-bottom:1px solid rgba(23,33,42,.08)!important;
+  box-shadow:0 7px 24px rgba(23,33,42,.055)!important;
+  backdrop-filter:blur(16px);
+}
+.vc-brand-bridge{
+  display:flex;
+  align-items:center;
+  gap:9px;
+  max-width:1180px;
+  margin:0 auto;
+  padding:10px 16px;
+}
+.vc-brand-mark{
+  width:34px;height:34px;flex:0 0 34px;
+  display:grid;place-items:center;
+  border-radius:10px;
+  background:linear-gradient(145deg,#202a33,#111920);
+  color:var(--vc-gold-light);
+  border:1px solid rgba(23,33,42,.12);
+  box-shadow:0 5px 15px rgba(23,33,42,.13);
+  font-weight:900;
+}
+.vc-brand-copy{display:grid;line-height:1.08}
+.vc-brand-copy strong{font-size:16px;letter-spacing:.01em}
+.vc-brand-copy small{margin-top:4px;color:var(--vc-muted);font-size:11.5px;font-weight:650}
+.vc-brand-spacer{flex:1}
+.vc-brand-chip{
+  display:inline-flex;align-items:center;justify-content:center;
+  min-height:36px;padding:7px 11px;border-radius:12px;
+  color:var(--vc-green-strong);background:var(--vc-green-soft);
+  border:1px solid #b9d9cd;font-size:12px;font-weight:800;text-decoration:none;
+}
+main{color:var(--vc-ink)}
+section{scroll-margin-top:76px}
+[class*="hero"],.hero{
+  color:var(--vc-ink);
+}
+[class*="hero"] h1,.hero h1,h1{
+  color:var(--vc-ink)!important;
+  font-weight:850!important;
+  letter-spacing:-.035em;
+  text-wrap:balance;
+}
+[class*="hero"] p,.hero p{color:#4b5864!important}
+.eyebrow,[class*="eyebrow"],.kicker,[class*="kicker"],.badge,[class*="badge"]{
+  color:#6f531f!important;
+  background:var(--vc-gold-soft)!important;
+  border:1px solid #ead29d!important;
+  border-radius:999px!important;
+  font-weight:800!important;
+}
+.card,[class*="card"],.panel,[class*="panel"],.shell,[class*="shell"],.box,[class*="box"],form{
+  border-color:var(--vc-line)!important;
+}
+main .card,main [class*="card"],main .panel,main [class*="panel"],main .shell,main [class*="shell"],main .box,main [class*="box"]{
+  background:var(--vc-surface);
+  border:1px solid var(--vc-line);
+  box-shadow:var(--vc-shadow-soft);
+}
+.quote-card,.booking-card,.calculator,.calc-box,[class*="booking"],[class*="quote"],[class*="calculator"]{
+  background:#fff!important;
+  border:1px solid var(--vc-line)!important;
+  border-radius:var(--vc-radius-xl)!important;
+  box-shadow:var(--vc-shadow)!important;
+}
+input,select,textarea,.input,.field-control,[class*="input"]{
+  min-height:50px;
+  width:100%;
+  color:var(--vc-ink)!important;
+  background:#fff!important;
+  border:1px solid #d7dde2!important;
+  border-radius:12px!important;
+  box-shadow:0 1px 0 rgba(23,32,42,.015);
+  font:inherit;
+  color-scheme:light!important;
+}
+input:focus,select:focus,textarea:focus{
+  border-color:#b58a43!important;
+  outline:none!important;
+  box-shadow:0 0 0 3px rgba(181,138,67,.10)!important;
+}
+label{color:#34414d!important;font-weight:740!important}
+button,.btn,[class*="btn"],[role="button"]{
+  border-radius:13px!important;
+  font-family:inherit;
+  font-weight:850!important;
+}
+button[type="submit"],.btn-primary,.primary-cta,[class*="primary"]:not(input):not(section){
+  background:var(--vc-green)!important;
+  color:#fff!important;
+  border:1px solid var(--vc-green)!important;
+  box-shadow:0 7px 18px rgba(23,107,58,.14)!important;
+}
+button[type="submit"]:hover,.btn-primary:hover,.primary-cta:hover{
+  background:var(--vc-green-strong)!important;
+}
+.direction-tabs,.tabs,.segmented,[class*="switch"],[class*="tabs"]{
+  background:#f0f2f3!important;
+  border:1px solid var(--vc-line)!important;
+  border-radius:15px!important;
+}
+.direction-tabs .active,.tabs .active,.segmented .active,[class*="switch"] .active,[class*="tabs"] .active{
+  background:linear-gradient(135deg,#e8f4ef,#cfe8de)!important;
+  color:#18362d!important;
+  border-color:#b9d9cd!important;
+  box-shadow:0 3px 10px rgba(11,107,80,.10)!important;
+}
+.price,.price-value,[class*="price"] strong,[class*="price"] .value{
+  color:#75551f!important;
+}
+.price-box,.price-card,[class*="price-box"],[class*="price-card"]{
+  background:#fffaf0!important;
+  border:1px solid #dfc27f!important;
+  border-radius:15px!important;
+}
+.step,[class*="step"]{
+  border-radius:16px!important;
+}
+.step.active,[class*="step"].active,[aria-current="step"]{
+  color:var(--vc-green-strong)!important;
+}
+.trust-row,.trust-grid,[class*="trust"]{
+  color:#46525e;
+}
+.trust-row span,[class*="trust"] span{
+  border-color:#e0e5e2!important;
+}
+.notice,.info,.hint,[class*="notice"],[class*="hint"]{
+  background:#f5f7f6!important;
+  border-color:#e0e5e2!important;
+  color:#46525e!important;
+}
+.success,[class*="success"]{
+  color:var(--vc-success)!important;
+}
+a[href*="vanclick.co.il"]{
+  color:var(--vc-green-strong)!important;
+  font-weight:800;
+}
+footer,.footer{
+  background:#efeee9!important;
+  border-top:1px solid rgba(23,32,42,.08)!important;
+  color:#4e5a66!important;
+}
+.vc-mobile-sticky{
+  display:none;
+}
+@media(max-width:760px){
+  body{padding-bottom:72px}
+  .vc-brand-bridge{min-height:58px;padding:8px 12px}
+  .vc-brand-mark{width:31px;height:31px;flex-basis:31px}
+  .vc-brand-copy strong{font-size:14px}
+  .vc-brand-copy small{font-size:10.5px}
+  .vc-brand-chip{min-height:34px;padding:6px 9px;font-size:11px}
+  h1,[class*="hero"] h1,.hero h1{font-size:30px!important;line-height:1.06!important}
+  main .card,main [class*="card"],main .panel,main [class*="panel"],main .shell,main [class*="shell"],main .box,main [class*="box"],
+  .quote-card,.booking-card,.calculator,.calc-box,[class*="booking"],[class*="quote"],[class*="calculator"]{
+    border-radius:19px!important;
+    box-shadow:0 9px 26px rgba(23,32,42,.055)!important;
+  }
+  input,select,textarea{min-height:50px;font-size:16px!important}
+  button,.btn,[class*="btn"]{min-height:48px}
+  .vc-mobile-sticky{
+    position:fixed;display:block;z-index:9998;
+    left:0;right:0;bottom:0;
+    padding:7px 9px calc(7px + env(safe-area-inset-bottom));
+    background:rgba(255,255,255,.95);
+    border-top:1px solid rgba(23,32,42,.07);
+    box-shadow:0 -8px 26px rgba(23,32,42,.075);
+    backdrop-filter:blur(14px);
+  }
+  .vc-mobile-sticky button{
+    width:min(100%,560px);margin:0 auto;display:block;
+    min-height:48px;border:1px solid var(--vc-green)!important;border-radius:15px!important;
+    background:var(--vc-green)!important;color:#fff!important;font-weight:850;
+  }
+}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
