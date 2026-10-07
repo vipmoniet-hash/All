@@ -89,6 +89,23 @@ function marketplacePoolView(db, driver, order) {
     'decorate driver pool eligibility'
   );
 
+  replaceOnce(
+    "return {driver:{id:driver.id,name:driver.name,wallet:driver.wallet,reliability:driver.reliability,vehiclePlate:driver.vehiclePlate||''},pool,mine,completed,topups};",
+    `const allCompleted=db.orders.filter(o=>o.assignedDriverId===driverId&&o.status==='completed');
+  const commissionDebited=db.ledger.filter(x=>x.driverId===driverId&&x.type==='commission_debit').reduce((s,x)=>s+Number(x.amount||0),0);
+  const commissionRefunded=db.ledger.filter(x=>x.driverId===driverId&&String(x.type||'').startsWith('commission_refund')).reduce((s,x)=>s+Number(x.amount||0),0);
+  const stats={
+    completedTrips:allCompleted.length,
+    completedFare:Number(allCompleted.reduce((s,x)=>s+Number(x.fare||0),0).toFixed(2)),
+    completedDriverNet:Number(allCompleted.reduce((s,x)=>s+Number(x.fare||0)-Number(x.commission||0),0).toFixed(2)),
+    commissionDebited:Number(commissionDebited.toFixed(2)),
+    commissionRefunded:Number(commissionRefunded.toFixed(2)),
+    netCommissionPaid:Number((commissionDebited-commissionRefunded).toFixed(2))
+  };
+  return {driver:{id:driver.id,name:driver.name,wallet:driver.wallet,reliability:driver.reliability,vehiclePlate:driver.vehiclePlate||'',completedTrips:Number(driver.completedTrips||allCompleted.length)},pool,mine,completed,topups,stats};`,
+    'driver finance stats'
+  );
+
 
 
   replaceOnce(
@@ -142,6 +159,16 @@ export async function listAdminState(now = new Date()) {
   const db=await readDb();
   const counts={};for(const o of db.orders)counts[o.status]=(counts[o.status]||0)+1;
   const attention=marketplaceAttention(db,now);
+  const commissionDebited=db.ledger.filter(x=>x.type==='commission_debit').reduce((s,x)=>s+Number(x.amount||0),0);
+  const commissionRefunded=db.ledger.filter(x=>String(x.type||'').startsWith('commission_refund')).reduce((s,x)=>s+Number(x.amount||0),0);
+  const completedOrders=db.orders.filter(x=>x.status==='completed');
+  const finance={
+    commissionDebited:Number(commissionDebited.toFixed(2)),
+    commissionRefunded:Number(commissionRefunded.toFixed(2)),
+    netCommissionCollected:Number((commissionDebited-commissionRefunded).toFixed(2)),
+    completedFare:Number(completedOrders.reduce((s,x)=>s+Number(x.fare||0),0).toFixed(2)),
+    completedDriverNet:Number(completedOrders.reduce((s,x)=>s+Number(x.fare||0)-Number(x.commission||0),0).toFixed(2))
+  };
   return {
     drivers:db.drivers,
     orders:db.orders.slice().sort((a,b)=>new Date(a.tripAt)-new Date(b.tripAt)),
@@ -149,6 +176,7 @@ export async function listAdminState(now = new Date()) {
     ledger:db.ledger.slice(-500).reverse(),
     events:db.events.slice(-500).reverse(),
     counts,
+    finance,
     attention,
     attentionCount:attention.length
   };
@@ -274,5 +302,6 @@ console.log('MARKETPLACE_V1_PATCH_APPLIED', JSON.stringify({
   idempotentClaim:true,
   scheduleConflictGuard:true,
   exceptionQueue:true,
-  completionStateGuard:true
+  completionStateGuard:true,
+  commissionMetrics:true
 }));
