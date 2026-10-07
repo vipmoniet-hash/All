@@ -18,6 +18,14 @@ function patchFile(rel, fn){
   fs.writeFileSync(file,api.get());
 }
 
+patchFile('src/persistence.js',({replaceOnce})=>{
+  replaceOnce(
+    "events: Array.isArray(db?.events) ? db.events : []",
+    "events: Array.isArray(db?.events) ? db.events : [], sessions: Array.isArray(db?.sessions) ? db.sessions : []",
+    'marketplace auth sessions'
+  );
+});
+
 patchFile('src/service.js',({replaceOnce})=>{
   replaceOnce(
     "function activeDriver(db, driverId) { return db.drivers.find(d => d.id === driverId && d.active && d.verified !== false); }",
@@ -284,6 +292,24 @@ export async function registerDriver(input){return transact(db=>{`,
 
 patchFile('server.js',({replaceOnce})=>{
   replaceOnce(
+    "import { ensureDb, readDb, resetDb } from './src/persistence.js';",
+    "import { ensureDb, readDb, resetDb } from './src/persistence.js';\\nimport { marketplaceAuthRequired, configureDriverPin, driverLogin, dispatchLogin, sessionForToken, logoutToken } from './src/auth.js';",
+    'marketplace auth imports'
+  );
+
+  replaceOnce(
+    "const statusFor=code=>({",
+    "const bearerToken=req=>{const h=String(req.headers.authorization||'');const m=h.match(/^Bearer\\s+(.+)$/i);return m?m[1]:'';};\\nasync function enforceMarketplaceAuth(req,url){if(!marketplaceAuthRequired())return;if(url.pathname.startsWith('/api/auth/'))return;if(url.pathname.startsWith('/api/dispatch/')){const s=await sessionForToken(bearerToken(req));if(!s||s.role!=='dispatch')throw new Error('UNAUTHORIZED');return;}const m=url.pathname.match(/^\\/api\\/drivers\\/([^/]+)/);if(m){const s=await sessionForToken(bearerToken(req));if(!s||s.role!=='driver'||s.driverId!==decodeURIComponent(m[1]))throw new Error('UNAUTHORIZED');}}\\nconst statusFor=code=>({",
+    'marketplace auth helpers'
+  );
+
+  replaceOnce(
+    "if(url.pathname.startsWith('/api/')){",
+    "if(url.pathname.startsWith('/api/')){\\n      if(req.method==='GET'&&url.pathname==='/api/auth/status')return json(res,200,{required:marketplaceAuthRequired()});\\n      if(req.method==='POST'&&url.pathname==='/api/auth/driver/login'){const b=await body(req);return json(res,200,await driverLogin(b.driverId,b.pin));}\\n      if(req.method==='POST'&&url.pathname==='/api/auth/dispatch/login'){const b=await body(req);return json(res,200,await dispatchLogin(b.pin));}\\n      if(req.method==='POST'&&url.pathname==='/api/auth/logout')return json(res,200,await logoutToken(bearerToken(req)));\\n      await enforceMarketplaceAuth(req,url);",
+    'marketplace auth routes and guard'
+  );
+
+  replaceOnce(
     "driverConfirmEnRoute, driverCompleteOrder, adminCancelOrder, registerDriver,",
     "driverConfirmEnRoute, driverCompleteOrder, driverReportIssue, adminResolveIssue, adminCancelOrder, registerDriver,",
     'driver issue workflow imports'
@@ -291,8 +317,20 @@ patchFile('server.js',({replaceOnce})=>{
 
   replaceOnce(
     "ORDER_ALREADY_TAKEN:409,INSUFFICIENT_WALLET_BALANCE:402,LATE_CANCEL_REQUIRES_DISPATCH:409,",
-    "ORDER_ALREADY_TAKEN:409,INSUFFICIENT_WALLET_BALANCE:402,DRIVER_SCHEDULE_CONFLICT:409,DRIVER_MUST_BE_ENROUTE:409,ORDER_ISSUE_NOT_OPEN:409,LATE_CANCEL_REQUIRES_DISPATCH:409,",
+    "ORDER_ALREADY_TAKEN:409,INSUFFICIENT_WALLET_BALANCE:402,DRIVER_SCHEDULE_CONFLICT:409,DRIVER_MUST_BE_ENROUTE:409,ORDER_ISSUE_NOT_OPEN:409,UNAUTHORIZED:401,INVALID_CREDENTIALS:401,DRIVER_NOT_ACTIVE:403,DRIVER_PIN_NOT_CONFIGURED:409,PIN_MUST_BE_4_TO_12_DIGITS:400,ADMIN_PIN_NOT_CONFIGURED:503,LATE_CANCEL_REQUIRES_DISPATCH:409,",
     'marketplace HTTP statuses'
+  );
+
+  replaceOnce(
+    "if(req.method==='POST'&&url.pathname==='/api/dispatch/drivers')return json(res,201,await registerDriver(await body(req)));",
+    "if(req.method==='POST'&&url.pathname==='/api/dispatch/drivers'){const b=await body(req);const d=await registerDriver(b);if(b.accessPin)await configureDriverPin(d.id,b.accessPin);return json(res,201,d);}",
+    'driver creation with PIN'
+  );
+
+  replaceOnce(
+    "m=url.pathname.match(/^\\/api\\/dispatch\\/drivers\\/([^/]+)\\/verification$/);if(req.method==='POST'&&m)return json(res,200,await setDriverVerification(m[1],await body(req)));",
+    "m=url.pathname.match(/^\\/api\\/dispatch\\/drivers\\/([^/]+)\\/verification$/);if(req.method==='POST'&&m)return json(res,200,await setDriverVerification(m[1],await body(req)));\\n      m=url.pathname.match(/^\\/api\\/dispatch\\/drivers\\/([^/]+)\\/pin$/);if(req.method==='POST'&&m){const b=await body(req);return json(res,200,await configureDriverPin(m[1],b.pin));}",
+    'driver PIN endpoint'
   );
 
   replaceOnce(
@@ -309,6 +347,8 @@ patchFile('server.js',({replaceOnce})=>{
 });
 
 
+const authModule=fs.readFileSync(path.join(__dirname,'marketplace-auth.js'),'utf8');
+fs.writeFileSync(path.join(root,'src','auth.js'),authModule);
 const driverUi=fs.readFileSync(path.join(__dirname,'marketplace-driver-app.js'),'utf8');
 const dispatchUi=fs.readFileSync(path.join(__dirname,'marketplace-dispatch-app.js'),'utf8');
 const marketplaceCss=fs.readFileSync(path.join(__dirname,'marketplace-ui.css'),'utf8');
@@ -344,6 +384,7 @@ console.log('MARKETPLACE_V1_PATCH_APPLIED', JSON.stringify({
   completionStateGuard:true,
   commissionMetrics:true,
   driverCancellationMetrics:true,
+  roleBasedAuth:true,
   highVolumeDriverUi:true,
   exceptionFirstDispatchUi:true
 }));
