@@ -61,15 +61,18 @@ export async function driverLogin(driverId,pin,now=new Date()){
 }
 
 export async function dispatchLogin(pin,now=new Date()){
-  const expected=String(process.env.MARKETPLACE_ADMIN_PIN||'');
-  if(!expected)throw new Error('ADMIN_PIN_NOT_CONFIGURED');
-  if(!safeEqualText(String(pin||''),expected))throw new Error('INVALID_CREDENTIALS');
+  const adminPin=String(process.env.MARKETPLACE_ADMIN_PIN||'');
+  const dispatchPin=String(process.env.MARKETPLACE_DISPATCH_PIN||'');
+  if(!adminPin&&!dispatchPin)throw new Error('STAFF_PIN_NOT_CONFIGURED');
+  const supplied=String(pin||'');
+  const role=adminPin&&safeEqualText(supplied,adminPin)?'admin':dispatchPin&&safeEqualText(supplied,dispatchPin)?'dispatch':null;
+  if(!role)throw new Error('INVALID_CREDENTIALS');
   return transact(db=>{
     cleanSessions(db,new Date(now).getTime());
     const token=crypto.randomBytes(32).toString('base64url');
-    const session={id:id('ses'),tokenHash:tokenHash(token),role:'dispatch',driverId:null,createdAt:new Date(now).toISOString(),expiresAt:new Date(new Date(now).getTime()+SESSION_MS).toISOString()};
+    const session={id:id('ses'),tokenHash:tokenHash(token),role,driverId:null,createdAt:new Date(now).toISOString(),expiresAt:new Date(new Date(now).getTime()+SESSION_MS).toISOString()};
     db.sessions.push(session);
-    return {token,expiresAt:session.expiresAt,role:'dispatch'};
+    return {token,expiresAt:session.expiresAt,role};
   });
 }
 
