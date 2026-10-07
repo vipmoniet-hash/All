@@ -95,10 +95,14 @@ const HE_REPLACEMENTS=[
   ['пасс.','נוסעים']
 ];
 
+const tr=(ru,he)=>dispatchLang==='he'?he:ru;
 function translateTextValue(value){
-  if(dispatchLang!=='he')return value;
   let out=String(value??'');
-  for(const [ru,he] of HE_REPLACEMENTS)out=out.split(ru).join(he);
+  if(dispatchLang==='he'){
+    for(const [ru,he] of HE_REPLACEMENTS)out=out.split(ru).join(he);
+  }else{
+    for(const [ru,he] of [...HE_REPLACEMENTS].reverse())out=out.split(he).join(ru);
+  }
   return out;
 }
 function applyDispatchLanguage(){
@@ -125,7 +129,7 @@ function setDispatchLang(lang){
   dispatchLang=lang==='he'?'he':'ru';
   localStorage.setItem('taxi4_dispatch_lang',dispatchLang);
   if(state)render();
-  ensureDispatchAuthUi();
+  const auth=q('#dispatchAuthOverlay');if(auth){auth.remove();ensureDispatchAuthUi();}
   applyDispatchLanguage();
 }
 function ensureLanguageSwitch(){
@@ -433,29 +437,29 @@ window.shareRideForGroup=async id=>{
   await shareText(publicRideText(o));
 };
 window.exportVisibleForGroup=async()=>{
-  const xs=visibleGroupOrders();if(!xs.length)return alert('Нет видимых свободных или новых поездок');
+  const xs=visibleGroupOrders();if(!xs.length)return alert(tr('Нет видимых свободных или новых поездок','אין נסיעות חדשות או פנויות מוצגות'));
   const text=xs.map(publicRideText).join('\n\n──────────\n\n');
-  const ok=await copyText(text);if(ok)alert('Скопировано поездок: '+xs.length);
+  const ok=await copyText(text);if(ok)alert(tr('Скопировано поездок: ','מספר נסיעות שהועתקו: ')+xs.length);
 };
 window.shareVisibleForGroup=async()=>{
-  const xs=visibleGroupOrders();if(!xs.length)return alert('Нет видимых свободных или новых поездок');
+  const xs=visibleGroupOrders();if(!xs.length)return alert(tr('Нет видимых свободных или новых поездок','אין נסיעות חדשות או פנויות מוצגות'));
   await shareText(xs.map(publicRideText).join('\n\n──────────\n\n'));
 };
 window.publishOrder=async id=>{try{await post(`/api/dispatch/orders/${id}/publish`,{fare:Number(q(`#fare-${id}`).value)});await load(true)}catch(e){alert(e.message)}};
 window.releaseOrder=async(id,refundCommission)=>{
-  if(!confirm(refundCommission?'Снять водителя и вернуть ему комиссию?':'Снять водителя без возврата комиссии?'))return;
+  if(!confirm(refundCommission?tr('Снять водителя и вернуть ему комиссию?','להסיר את הנהג ולהחזיר לו את העמלה?'):tr('Снять водителя без возврата комиссии?','להסיר את הנהג ללא החזר עמלה?')))return;
   try{await post(`/api/dispatch/orders/${id}/release`,{refundCommission});await load(true)}catch(e){alert(e.message)}
 };
 window.releaseOrderNoRefund=async id=>{
-  if(!confirm('Снять водителя БЕЗ возврата комиссии? Используйте только когда это действительно соответствует ситуации.'))return;
+  if(!confirm(tr('Снять водителя БЕЗ возврата комиссии? Используйте только когда это действительно соответствует ситуации.','להסיר את הנהג ללא החזר עמלה? השתמש רק כאשר זה באמת מתאים למקרה.')))return;
   try{await post(`/api/dispatch/orders/${id}/release`,{refundCommission:false});await load(true)}catch(e){alert(e.message)}
 };
 window.cancelOrder=async id=>{
-  if(!confirm('Отменить заказ? Если водитель назначен, комиссия будет возвращена.'))return;
+  if(!confirm(tr('Отменить заказ? Если водитель назначен, комиссия будет возвращена.','לבטל את ההזמנה? אם הוקצה נהג, העמלה תוחזר.')))return;
   try{await post(`/api/dispatch/orders/${id}/cancel`,{refundCommission:true,reason:'dispatcher_cancelled'});await load(true)}catch(e){alert(e.message)}
 };
 window.resolveIssue=async id=>{
-  const note=prompt('Короткое решение/комментарий диспетчера')||'';
+  const note=prompt(tr('Короткое решение/комментарий диспетчера','פתרון קצר / הערת סדרן'))||'';
   try{await post(`/api/dispatch/orders/${id}/issue/resolve`,{note});await load(true)}catch(e){alert(e.message)}
 };
 window.focusOrder=id=>{
@@ -467,7 +471,7 @@ window.rejectT=async id=>{await post(`/api/dispatch/topups/${id}/reject`,{reject
 window.message=message;
 window.verifyDriver=async id=>{await post(`/api/dispatch/drivers/${id}/verification`,{verified:true,active:true});load(true)};
 window.toggleDriver=async(id,active)=>{await post(`/api/dispatch/drivers/${id}/verification`,{active});load(true)};
-window.resetDriverPin=async id=>{const pin=prompt('Новый PIN водителя (4–12 цифр)')||'';if(!/^\\d{4,12}$/.test(pin))return alert('PIN должен содержать 4–12 цифр');try{await post(`/api/dispatch/drivers/${id}/pin`,{pin});alert('PIN обновлён')}catch(e){alert(e.message)}};
+window.resetDriverPin=async id=>{const pin=prompt(tr('Новый PIN водителя (4–12 цифр)','PIN חדש לנהג (4–12 ספרות)'))||'';if(!/^\\d{4,12}$/.test(pin))return alert(tr('PIN должен содержать 4–12 цифр','ה-PIN חייב להכיל 4–12 ספרות'));try{await post(`/api/dispatch/drivers/${id}/pin`,{pin});alert(tr('PIN обновлён','ה-PIN עודכן'))}catch(e){alert(e.message)}};
 
 q('#filter').onchange=renderOrders;
 q('#refresh').onclick=()=>load();
