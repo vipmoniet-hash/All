@@ -19,7 +19,7 @@ addDriver:'Добавить',driverName:'Имя водителя',driverPhone:'�
 badPin:'Неверный PIN',forbidden:'Нет доступа к этой линии',notConfigured:'Доступ персонала ещё не настроен в Render',
 roleAdmin:'ADMIN · обе линии',roleSmall:'DISPATCHER · 1–4',roleLarge:'DISPATCHER · 5–6',
 copied:'Скопировано',copyEmpty:'Нет новых или свободных поездок для отправки',
-statusAwaiting:'Новый',statusPool:'В пуле',statusAssigned:'Назначен',statusEnroute:'Водитель в пути',statusCompleted:'Завершён',statusCancelled:'Отменён',statusConfirmed:'Подтверждён'
+ready:'Staging готов к cutover',notReady:'Staging пока не готов к cutover',reasonPostgres:'PostgreSQL не подключён',reasonAdmin:'Не задан Admin PIN',reasonSmall:'Не задан PIN диспетчера 1–4',reasonLarge:'Не задан PIN диспетчера 5–6',statusAwaiting:'Новый',statusPool:'В пуле',statusAssigned:'Назначен',statusEnroute:'Водитель в пути',statusCompleted:'Завершён',statusCancelled:'Отменён',statusConfirmed:'Подтверждён'
 },
 he:{
 title:'מרכז ניהול מאוחד',lead:'Admin מנהל את שני הקווים ממסך אחד. כל סדרן רואה רק את קו העבודה שלו.',
@@ -40,13 +40,13 @@ addDriver:'הוסף',driverName:'שם נהג',driverPhone:'טלפון',vehiclePl
 badPin:'PIN שגוי',forbidden:'אין גישה לקו הזה',notConfigured:'גישת הצוות עדיין לא הוגדרה ב-Render',
 roleAdmin:'ADMIN · שני הקווים',roleSmall:'סדרן · 1–4',roleLarge:'סדרן · 5–6',
 copied:'הועתק',copyEmpty:'אין נסיעות חדשות או פנויות לשליחה',
-statusAwaiting:'חדש',statusPool:'במאגר',statusAssigned:'שויך',statusEnroute:'הנהג בדרך',statusCompleted:'הושלם',statusCancelled:'בוטל',statusConfirmed:'אושר'
+ready:'Staging מוכן ל-cutover',notReady:'Staging עדיין לא מוכן ל-cutover',reasonPostgres:'PostgreSQL לא מחובר',reasonAdmin:'Admin PIN לא הוגדר',reasonSmall:'PIN סדרן 1–4 לא הוגדר',reasonLarge:'PIN סדרן 5–6 לא הוגדר',statusAwaiting:'חדש',statusPool:'במאגר',statusAssigned:'שויך',statusEnroute:'הנהג בדרך',statusCompleted:'הושלם',statusCancelled:'בוטל',statusConfirmed:'אושר'
 }};
 let lang=localStorage.getItem('vcUnifiedLang')||'ru';
 let token=sessionStorage.getItem('taxi4_dispatch_token')||'';
 let role=sessionStorage.getItem('taxi4_staff_role')||'';
 let adminTab=localStorage.getItem('vcUnifiedAdminTab')||'orders';
-let authRequired=false,state=null;
+let authRequired=false,state=null,readiness=null;
 const $=id=>document.getElementById(id);
 const t=k=>C[lang]?.[k]||k;
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -76,7 +76,18 @@ function apply(){
   document.querySelectorAll('[data-t]').forEach(el=>{const v=C[lang]?.[el.dataset.t];if(v)el.textContent=v});
   document.querySelectorAll('[data-ph]').forEach(el=>{const v=C[lang]?.[el.dataset.ph];if(v)el.placeholder=v});
   document.querySelectorAll('[data-lang]').forEach(b=>b.classList.toggle('active',b.dataset.lang===lang));
-  renderRole();
+  renderRole();renderReadiness();
+}
+function renderReadiness(){
+  const box=$('readinessBanner');if(!box)return;
+  if(!readiness){box.hidden=true;return}
+  box.hidden=false;
+  const ready=readiness.readyForUnifiedCutover===true;
+  box.classList.toggle('ready',ready);
+  box.classList.toggle('not-ready',!ready);
+  const map={postgres:'reasonPostgres',admin_pin:'reasonAdmin',dispatcher_1_4_pin:'reasonSmall',dispatcher_5_6_pin:'reasonLarge'};
+  const reasons=(readiness.readinessReasons||[]).map(x=>t(map[x]||x));
+  box.innerHTML='<strong>'+esc(ready?t('ready'):t('notReady'))+'</strong>'+(reasons.length?'<span>'+esc(reasons.join(' · '))+'</span>':'');
 }
 function renderRole(){
   const b=$('roleBadge');if(!b)return;
@@ -231,6 +242,7 @@ $('staffAuthForm').onsubmit=async e=>{
 $('logoutBtn').onclick=async()=>{try{await api('/api/auth/logout',{method:'POST'})}catch{}sessionStorage.removeItem('taxi4_dispatch_token');sessionStorage.removeItem('taxi4_staff_role');token='';role='';location.reload()};
 
 async function init(){
+  readiness=await fetch('/health',{cache:'no-store'}).then(r=>r.json()).catch(()=>null);renderReadiness();
   const s=await fetch('/api/auth/status',{cache:'no-store'}).then(r=>r.json()).catch(()=>({required:true}));
   authRequired=s.required!==false;
   if(!authRequired){role='admin';hideAuth();await load();return}
