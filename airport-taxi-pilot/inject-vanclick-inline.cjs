@@ -81,3 +81,19 @@ require('child_process').execFileSync(process.execPath,[path.join(__dirname,'rep
     }
   }
 }
+
+/* TAXI4_SURCHARGE_INSPECT */
+{
+  const files=[
+    [path.join(root,'src','domain.js'),['commissionForFare','function commission','export function commission']],
+    [path.join(root,'apps','client','public','app.js'),['/api/pricing/quote','quoteBtn','tripAt','returnTripAt']]
+  ];
+  for(const [file,needles] of files){
+    if(!fs.existsSync(file)) continue;
+    const src=fs.readFileSync(file,'utf8');
+    for(const needle of needles){
+      const idx=src.indexOf(needle);
+      if(idx>=0) console.log('TAXI4_SURCHARGE_INSPECT',file.replace(root,''),needle,'\\n'+src.slice(Math.max(0,idx-1800),Math.min(src.length,idx+7000)));
+    }
+  }
+}
