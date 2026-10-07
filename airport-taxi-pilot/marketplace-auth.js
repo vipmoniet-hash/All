@@ -2,11 +2,6 @@ import crypto from 'node:crypto';
 import { readDb, transact, id } from './persistence.js';
 
 const SESSION_MS=24*60*60*1000;
-const FALLBACK_STAFF=Object.freeze({
-  admin:{salt:'de9d23f8d364c8b127e782a16d8f06be',hash:'6d093eaa68ab76bdcd3d5f8ef9ad0145f87fd683863ff445a3698e999e19121a'},
-  dispatcher_1_4:{salt:'73e073cd9c4a4cf3e75ab28117d9c00c',hash:'315e76d980fdcfe8c9c7ca6bbcd1ad646587dc0643e3951704a258855e719d34'},
-  dispatcher_5_6:{salt:'e5dbcbab1bfb668993f9d1663a1eaaaa',hash:'e19b043c084b6cff4ea3a062606f97329d47f4d0ecdb3d506a6dff21e68a6f07'}
-});
 
 function tokenHash(token){
   return crypto.createHash('sha256').update(String(token||'')).digest('hex');
@@ -37,15 +32,11 @@ export function marketplaceAuthRequired(){
 export function staffAuthStats(){
   return {
     required:marketplaceAuthRequired(),
-    adminConfigured:Boolean(process.env.MARKETPLACE_ADMIN_PIN)||Boolean(FALLBACK_STAFF.admin),
-    dispatcher1to4Configured:Boolean(process.env.MARKETPLACE_DISPATCH_1_4_PIN||process.env.MARKETPLACE_DISPATCH_PIN)||Boolean(FALLBACK_STAFF.dispatcher_1_4),
-    dispatcher5to6Configured:Boolean(process.env.MARKETPLACE_DISPATCH_5_6_PIN)||Boolean(FALLBACK_STAFF.dispatcher_5_6),
-    fallbackVerifierEnabled:true
+    adminConfigured:Boolean(process.env.MARKETPLACE_ADMIN_PIN),
+    dispatcher1to4Configured:Boolean(process.env.MARKETPLACE_DISPATCH_1_4_PIN||process.env.MARKETPLACE_DISPATCH_PIN),
+    dispatcher5to6Configured:Boolean(process.env.MARKETPLACE_DISPATCH_5_6_PIN),
+    secretSource:'render_environment_only'
   };
-}
-function staffPinMatches(supplied,envPin,fallback){
-  if(envPin)return safeEqualText(supplied,envPin);
-  return safeEqualText(pinHash(String(supplied||''),fallback.salt),fallback.hash);
 }
 
 export async function configureDriverPin(driverId,pin){
@@ -82,12 +73,12 @@ export async function dispatchLogin(pin,now=new Date()){
   const adminPin=String(process.env.MARKETPLACE_ADMIN_PIN||'');
   const smallPin=String(process.env.MARKETPLACE_DISPATCH_1_4_PIN||process.env.MARKETPLACE_DISPATCH_PIN||'');
   const largePin=String(process.env.MARKETPLACE_DISPATCH_5_6_PIN||'');
-  if(!adminPin&&!smallPin&&!largePin&&!FALLBACK_STAFF.admin&&!FALLBACK_STAFF.dispatcher_1_4&&!FALLBACK_STAFF.dispatcher_5_6)throw new Error('STAFF_PIN_NOT_CONFIGURED');
+  if(!adminPin&&!smallPin&&!largePin)throw new Error('STAFF_PIN_NOT_CONFIGURED');
   const supplied=String(pin||'');
   const role=
-    staffPinMatches(supplied,adminPin,FALLBACK_STAFF.admin)?'admin':
-    staffPinMatches(supplied,smallPin,FALLBACK_STAFF.dispatcher_1_4)?'dispatcher_1_4':
-    staffPinMatches(supplied,largePin,FALLBACK_STAFF.dispatcher_5_6)?'dispatcher_5_6':
+    adminPin&&safeEqualText(supplied,adminPin)?'admin':
+    smallPin&&safeEqualText(supplied,smallPin)?'dispatcher_1_4':
+    largePin&&safeEqualText(supplied,largePin)?'dispatcher_5_6':
     null;
   if(!role)throw new Error('INVALID_CREDENTIALS');
   return transact(db=>{
