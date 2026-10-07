@@ -81,7 +81,7 @@ try{
   assert.equal(x.j.payment.status,'already_owned','retry reports existing ownership');
 
   x=await post('/api/drivers/drv-001/orders/'+orderId+'/issue',{type:'client_unreachable',note:'HTTP test'});
-  assert.equal(x.r.status,200,'driver issue endpoint works');
+  assert.equal(x.r.status,200,'driver issue endpoint works: '+JSON.stringify(x.j));
   assert.equal(x.j.status,'open','driver issue opens');
 
   x=await json('/api/dispatch/state');
