@@ -18,7 +18,7 @@ const aliases=aliasAudit.aliases||{};
 function commission(fare){
   const n=Number(fare||0);
   if(n<100) return 5;
-  return 10+Math.floor((n-100)/100)*5;
+  return Math.floor(n/100)*10;
 }
 function ceil10(n){return Math.ceil(Number(n||0)/10)*10;}
 function coordKey(v){
