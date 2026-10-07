@@ -32,7 +32,11 @@ assert.ok(dispatch.includes('publicRideText'),'dispatch UI must build privacy-sa
 assert.ok(dispatch.includes('copyRideForGroup'),'dispatch UI must support one-tap single ride copy');
 assert.ok(dispatch.includes('exportVisibleForGroup'),'dispatch UI must support batch export of visible rides');
 assert.ok(dispatch.includes('navigator.share'),'dispatch UI must support native mobile sharing when available');
-assert.ok(!dispatch.includes('customerPhone)} · ${esc(o.exactPickup)}'),'privacy-safe export must not concatenate customer phone and exact pickup into group text');
+const publicRideTextBody=(dispatch.match(/function publicRideText\(o\)\{([\s\S]*?)\n\}/)||[])[1]||'';
+assert.ok(publicRideTextBody,'privacy-safe group formatter must be extractable');
+for(const forbidden of ['customerName','customerPhone','exactPickup','exactDropoff','notes','bookingCode','flightNumber']){
+  assert.ok(!publicRideTextBody.includes(forbidden),'privacy-safe group formatter must exclude '+forbidden);
+}
 
 console.log('MARKETPLACE_V1_UI_GATE_OK',JSON.stringify({
   driver:true,
