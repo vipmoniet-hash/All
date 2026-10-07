@@ -68,12 +68,6 @@ function marketplacePoolView(db, driver, order) {
   );
 
   replaceOnce(
-    "id:id('ord'), bookingCode, bookingGroupId, leg, createdAt:new Date().toISOString(), status:'awaiting_dispatch', tripAt,",
-    "id:id('ord'), bookingCode, bookingGroupId, leg, createdAt:new Date().toISOString(), status:'pool', tripAt,",
-    'new booking status'
-  );
-
-  replaceOnce(
     "flightNumber, terminal:clean(input.terminal,20), quotedFare:quote.fare, quotedCommission:quote.commission,",
     "flightNumber, terminal:clean(input.terminal,20), quotedFare:quote.fare, quotedCommission:quote.commission, roadKm:Number(quote.roadKm||0),",
     'store route distance'
@@ -83,12 +77,6 @@ function marketplacePoolView(db, driver, order) {
     "quoteVersion:quote.version, fare:null, commission:null, assignedDriverId:null, assignedAt:null,",
     "quoteVersion:quote.version, fare:quote.fare, commission:quote.commission, assignedDriverId:null, assignedAt:null,",
     'final fare and commission at booking'
-  );
-
-  replaceOnce(
-    "return { bookingCode:code, bookingGroupId:group, status:'received', ridePaymentMethod:common.ridePaymentMethod,",
-    "return { bookingCode:code, bookingGroupId:group, status:'pool', ridePaymentMethod:common.ridePaymentMethod,",
-    'booking response status'
   );
 
   replaceOnce(
@@ -299,7 +287,7 @@ patchFile('server.js',({replaceOnce})=>{
 
   replaceOnce(
     "const statusFor=code=>({",
-    "const bearerToken=req=>{const h=String(req.headers.authorization||'');const m=h.match(/^Bearer\\s+(.+)$/i);return m?m[1]:'';};\nasync function enforceMarketplaceAuth(req,url){if(!marketplaceAuthRequired())return;if(url.pathname.startsWith('/api/auth/'))return;if(url.pathname.startsWith('/api/dispatch/')){const s=await sessionForToken(bearerToken(req));if(!s||s.role!=='dispatch')throw new Error('UNAUTHORIZED');return;}const m=url.pathname.match(/^\\/api\\/drivers\\/([^/]+)/);if(m){const s=await sessionForToken(bearerToken(req));if(!s||s.role!=='driver'||s.driverId!==decodeURIComponent(m[1]))throw new Error('UNAUTHORIZED');}}\nconst statusFor=code=>({",
+    "const bearerToken=req=>{const h=String(req.headers.authorization||'');const m=h.match(/^Bearer\\s+(.+)$/i);return m?m[1]:'';};\nasync function enforceMarketplaceAuth(req,url){if(!marketplaceAuthRequired())return;if(url.pathname.startsWith('/api/auth/'))return;if(url.pathname.startsWith('/api/dispatch/')){const s=await sessionForToken(bearerToken(req));if(!s||!['admin','dispatch'].includes(s.role))throw new Error('UNAUTHORIZED');return;}const m=url.pathname.match(/^\\/api\\/drivers\\/([^/]+)/);if(m){const s=await sessionForToken(bearerToken(req));if(!s||s.role!=='driver'||s.driverId!==decodeURIComponent(m[1]))throw new Error('UNAUTHORIZED');}}\nconst statusFor=code=>({",
     'marketplace auth helpers'
   );
 
@@ -317,7 +305,7 @@ patchFile('server.js',({replaceOnce})=>{
 
   replaceOnce(
     "ORDER_ALREADY_TAKEN:409,INSUFFICIENT_WALLET_BALANCE:402,LATE_CANCEL_REQUIRES_DISPATCH:409,",
-    "ORDER_ALREADY_TAKEN:409,INSUFFICIENT_WALLET_BALANCE:402,DRIVER_SCHEDULE_CONFLICT:409,DRIVER_MUST_BE_ENROUTE:409,ORDER_ISSUE_NOT_OPEN:409,UNAUTHORIZED:401,INVALID_CREDENTIALS:401,DRIVER_NOT_ACTIVE:403,DRIVER_PIN_NOT_CONFIGURED:409,PIN_MUST_BE_4_TO_12_DIGITS:400,ADMIN_PIN_NOT_CONFIGURED:503,LATE_CANCEL_REQUIRES_DISPATCH:409,",
+    "ORDER_ALREADY_TAKEN:409,INSUFFICIENT_WALLET_BALANCE:402,DRIVER_SCHEDULE_CONFLICT:409,DRIVER_MUST_BE_ENROUTE:409,ORDER_ISSUE_NOT_OPEN:409,UNAUTHORIZED:401,INVALID_CREDENTIALS:401,DRIVER_NOT_ACTIVE:403,DRIVER_PIN_NOT_CONFIGURED:409,PIN_MUST_BE_4_TO_12_DIGITS:400,STAFF_PIN_NOT_CONFIGURED:503,LATE_CANCEL_REQUIRES_DISPATCH:409,",
     'marketplace HTTP statuses'
   );
 
@@ -367,7 +355,7 @@ for(const rel of [path.join('apps','driver','public','app.css'),path.join('apps'
   const file=path.join(root,'apps','client','public','app.js');
   let client=fs.readFileSync(file,'utf8');
   const old='הבקשה עוברת לאישור ושיבוץ נהג.';
-  const next='ההזמנה פורסמה לנהגים מאומתים. ברגע שנהג ייקח אותה, פרטיו יופיעו כאן.';
+  const next='ההזמנה התקבלה ונמצאת בבדיקת המוקד. לאחר אישור היא תפורסם לנהגים.';
   if(!client.includes(old) && !client.includes(next)) throw new Error('MARKETPLACE_V1_PATCH_MISS: client confirmation copy');
   client=client.replace(old,next);
   client=client.replace("pool:'אושרה · מחפשים נהג'","pool:'מחפשים נהג'");
@@ -375,7 +363,7 @@ for(const rel of [path.join('apps','driver','public','app.css'),path.join('apps'
 }
 
 console.log('MARKETPLACE_V1_PATCH_APPLIED', JSON.stringify({
-  directToPool:true,
+  staffGateBeforePool:true,
   fareFinalizedAtBooking:true,
   commissionFinalizedAtBooking:true,
   idempotentClaim:true,
