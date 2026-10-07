@@ -1,1 +1,45 @@
-<!doctype html><html lang="ru" dir="ltr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>VanClick Unified Control Center</title><link rel="stylesheet" href="/unified/unified.css"></head><body><header class="top"><a class="brand" href="/unified/"><b>V</b><span><strong>VanClick</strong><small>Control Center</small></span></a><div class="langs"><button data-lang="ru" class="active">Русский</button><button data-lang="he">עברית</button></div></header><main class="wrap"><section class="hero"><span class="eyebrow">STAFF ONLY</span><h1 data-t="title">Единый центр управления</h1><p data-t="lead">Две рабочие линии на одном экране, без смешивания пулов и комиссий.</p></section><section id="metrics" class="metrics"></section><section class="split"><div class="card"><h2 data-t="small">Taxi 1–4</h2><p data-t="smallText">Массовый пул водителей: Admin/Dispatcher проверяет и публикует.</p><div id="smallSummary" class="muted"></div><a class="primary" href="/dispatch/" data-t="openSmall">Открыть диспетчерскую 1–4</a></div><div class="card"><h2 data-t="large">Large 5–6 · staging</h2><p data-t="largeText">Теневые заказы большой машины. В production они не отправляются.</p><div id="largeQueue" class="queue"></div></div></section></main><script src="/unified/dispatch/dispatch.js" defer></script></body></html>
+<!doctype html>
+<html lang="ru" dir="ltr">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow"><meta name="theme-color" content="#f4f6f5">
+<title>VanClick Unified Control Center</title><link rel="stylesheet" href="/unified/unified.css">
+</head>
+<body>
+<div id="staffAuthOverlay" class="auth-overlay" hidden>
+  <form id="staffAuthForm" class="auth-card">
+    <span class="eyebrow">VANCLICK STAFF</span>
+    <h2 data-t="loginTitle">Вход в VanClick</h2>
+    <p data-t="loginText">Введите свой PIN. Система сама откроет вашу рабочую линию.</p>
+    <input id="staffPin" inputmode="numeric" pattern="[0-9]*" autocomplete="current-password" placeholder="PIN" required>
+    <button class="primary" type="submit" data-t="login">Войти</button>
+    <div id="staffAuthStatus" class="muted"></div>
+  </form>
+</div>
+<header class="top">
+  <a class="brand" href="/unified/"><b>V</b><span><strong>VanClick</strong><small>Control Center</small></span></a>
+  <div class="actions">
+    <span id="roleBadge" class="role-badge"></span>
+    <button id="logoutBtn" class="secondary" type="button" hidden data-t="logout">Выйти</button>
+    <div class="langs"><button data-lang="ru" class="active">Русский</button><button data-lang="he">עברית</button></div>
+  </div>
+</header>
+<main class="wrap">
+  <section class="hero"><span class="eyebrow">STAFF ONLY</span><h1 data-t="title">Единый центр управления</h1><p data-t="lead">Права определяются сервером: Admin видит всё, каждый диспетчер — только свою линию.</p></section>
+  <section id="metrics" class="metrics"></section>
+  <section class="split">
+    <div class="card" id="smallCard">
+      <h2 data-t="small">Taxi 1–4</h2>
+      <p data-t="smallText">Массовый пул водителей: Admin/Dispatcher 1–4 проверяет и публикует.</p>
+      <div id="smallSummary" class="muted"></div>
+      <a class="primary" href="/dispatch/" data-t="openSmall">Открыть диспетчерскую 1–4</a>
+    </div>
+    <div class="card" id="largeCard">
+      <h2 data-t="large">Large 5–6</h2>
+      <p data-t="largeText">Отдельная управляемая очередь больших машин.</p>
+      <div id="largeQueue" class="queue"></div>
+    </div>
+  </section>
+</main>
+<script src="/unified/dispatch/dispatch.js" defer></script>
+</body></html>
