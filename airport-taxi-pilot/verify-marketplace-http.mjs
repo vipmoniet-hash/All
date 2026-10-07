@@ -60,13 +60,17 @@ try{
   };
   let x=await post('/api/client/bookings',bookingBody);
   assert.equal(x.r.status,201,'booking endpoint returns 201');
-  assert.equal(x.j.orders[0].status,'pool','HTTP booking enters pool');
+  assert.equal(x.j.orders[0].status,'awaiting_dispatch','HTTP booking stays private to staff before publication');
   const orderId=x.j.orders[0].id;
   const bookingCode=x.j.bookingCode;
 
   x=await json('/api/drivers/drv-001/state');
   assert.equal(x.r.status,200,'driver state endpoint works');
-  assert.ok(x.j.pool.some(o=>o.id===orderId),'new booking visible in driver pool');
+  assert.ok(!x.j.pool.some(o=>o.id===orderId),'new booking is hidden from drivers before publication');
+  x=await post('/api/dispatch/orders/'+orderId+'/publish',{fare:170});
+  assert.equal(x.r.status,200,'staff can publish private ride to driver pool');
+  x=await json('/api/drivers/drv-001/state');
+  assert.ok(x.j.pool.some(o=>o.id===orderId),'published booking becomes visible in driver pool');
   const initialWallet=x.j.driver.wallet;
 
   x=await post('/api/drivers/drv-001/orders/'+orderId+'/buy');
