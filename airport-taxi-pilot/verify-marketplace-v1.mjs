@@ -142,3 +142,25 @@ console.log('MARKETPLACE_V1_EXCEPTION_FLOW_OK', JSON.stringify({
   finalStatus:completed.status,
   completedTrips:db.drivers.find(x=>x.id==='drv-test-001').completedTrips
 }));
+
+
+state = await service.listDriverState('drv-test-001');
+assert.equal(state.driver.completedTrips,1,'driver state exposes completed trip counter');
+assert.equal(state.stats.completedFare,170,'driver stats expose completed customer fare');
+assert.equal(state.stats.completedDriverNet,160,'driver stats expose completed net earnings');
+assert.equal(state.stats.netCommissionPaid,10,'driver stats expose net commission paid');
+assert.equal(state.pool.find(x=>x.id===secondOrderId).canClaim,true,'schedule slot becomes claimable after previous trip is completed');
+
+admin = await service.listAdminState(new Date('2026-10-08T07:45:00Z'));
+assert.equal(admin.finance.commissionDebited,10,'dispatch finance counts commission debit');
+assert.equal(admin.finance.commissionRefunded,0,'dispatch finance counts refunds separately');
+assert.equal(admin.finance.netCommissionCollected,10,'dispatch finance exposes net collected commission');
+assert.ok(admin.attention.some(x=>x.orderId===secondOrderId&&x.kind==='unclaimed_soon'),'unclaimed ride approaching pickup enters attention queue');
+
+console.log('MARKETPLACE_V1_FINANCE_ATTENTION_OK', JSON.stringify({
+  driverCompletedFare:state.stats.completedFare,
+  driverNet:state.stats.completedDriverNet,
+  netCommissionPaid:state.stats.netCommissionPaid,
+  vanClickCommission:admin.finance.netCommissionCollected,
+  attention:admin.attention.filter(x=>x.orderId===secondOrderId).map(x=>x.kind)
+}));
