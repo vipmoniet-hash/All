@@ -90,9 +90,13 @@ export function id(prefix) { return \`\${prefix}_\${crypto.randomBytes(6).toStri
 patchFile('server.js',({replaceOnce})=>{
   replaceOnce(
     "await ensureDb();",
-    `await ensureDb();
+    `if(process.env.UNIFIED_REQUIRE_POSTGRES==='1'&&!process.env.DATABASE_URL){
+  console.error('PERSISTENCE_REQUIRED_POSTGRES_MISSING');
+  process.exit(1);
+}
+await ensureDb();
 console.log('PERSISTENCE_BACKEND',JSON.stringify(persistenceStats()));`,
-    'startup persistence backend telemetry'
+    'startup persistence backend telemetry and fail-closed cutover guard'
   );
 });
 
