@@ -1,0 +1,767 @@
+{
+  "version": "2026-10-07-stars-current-v1",
+  "source": "stars-taxi.co.il",
+  "capturedAt": "2026-10-07",
+  "rows": {
+    "אביעזר": {
+      "toDay": 260,
+      "toNight": 290,
+      "fromDay": 260,
+      "fromNight": 290,
+      "dayBenchmark": 260,
+      "url": "https://stars-taxi.co.il/airport-taxi/%D7%90%D7%91%D7%99%D7%A2%D7%96%D7%A8"
+    },
+    "אבן ספיר": {
+      "toDay": 250,
+      "toNight": 275,
+      "fromDay": 275,
+      "fromNight": 295,
+      "dayBenchmark": 275,
+      "url": "https://stars-taxi.co.il/airport-taxi/%D7%90%D7%91%D7%9F-%D7%A1%D7%A4%D7%99%D7%A8"
+    },
+    "אדרת": {
+      "toDay": 285,
+      "toNight": 305,
+      "fromDay": 285,
+      "fromNight": 305,
+      "dayBenchmark": 285,
+      "url": "https://stars-taxi.co.il/airport-taxi/%D7%90%D7%93%D7%A8%D7%AA"
+    },
+    "אורה": {
+      "toDay": 250,
+      "toNight": 275,
+      "fromDay": 275,
+      "fromNight": 295,
+      "dayBenchmark": 275,
+      "url": "https://stars-taxi.co.il/airport-taxi/%D7%90%D7%95%D7%A8%D7%94"
+    },
+    "אלי-עד": {
+      "toDay": 725,
+      "toNight": 725,
+      "fromDay": 725,
+      "fromNight": 725,
+      "dayBenchmark": 725,
+      "url": "https://stars-taxi.co.il/airport-taxi/%D7%90%D7%9C%D7%99%D7%A2%D7%93"
+    },
+    "אסד": {
+      "toDay": 470,
+      "toNight": 550,
+      "fromDay": 470,
+      "fromNight": 550,
+      "dayBenchmark": 470,
+      "url": "https://stars-taxi.co.il/airport-taxi/%D7%90%D7%A1%D7%93"
+    },
+    "אעצם": {
+      "toDay": 440,
+      "toNight": 490,
+      "fromDay": 440,
+      "fromNight": 490,
+      "dayBenchmark": 440,
+      "url": "https://stars-taxi.co.il/airport-taxi/%D7%90%D7%A2%D7%A6%D7%9D"
+    },
+    "אתגר": {
+      "toDay": 525,
+      "toNight": 525,
+      "fromDay": 525,
+      "fromNight": 525,
+      "dayBenchmark": 525,
+      "url": "https://stars-taxi.co.il/airport-taxi/%D7%90%D7%AA%D7%92%D7%A8"
+    },
+    "באקה אל-גרביה": {
+      "toDay": 350,
+      "toNight": 355,
+      "fromDay": 350,
+      "fromNight": 355,
+      "dayBenchmark": 350,
+      "url": "https://stars-taxi.co.il/airport-taxi/%D7%91%D7%90%D7%A7%D7%94-%D7%90%D7%9C-%D7%92%D7%A8%D7%91%D7%99%D7%94"
+    },
+    "בטחה": {
+      "toDay": 445,
+      "toNight": 500,
+      "fromDay": 445,
+      "fromNight": 500,
+      "dayBenchmark": 445,
+      "url": "https://stars-taxi.co.il/airport-taxi/%D7%91%D7%98%D7%97%D7%94"
+    },
+    "בית זיד": {
+      "toDay": 440,
+      "toNight": 440,
+      "fromDay": 440,
+      "fromNight": 440,
+      "dayBenchmark": 440,
+      "url": "https://stars-taxi.co.il/airport-taxi/%D7%91%D7%99%D7%AA-%D7%96%D7%99%D7%93"
+    },
+    "בית זית": {
+      "toDay": 240,
+      "toNight": 260,
+      "fromDay": 240,
+      "fromNight": 260,
+      "dayBenchmark": 240,
+      "url": "https://stars-taxi.co.il/airport-taxi/%D7%91%D7%99%D7%AA-%D7%96%D7%99%D7%AA"
+    },
+    "בית צבי": {
+      "toDay": 440,
+      "toNight": 440,
+      "fromDay": 440,
+      "fromNight": 440,
+      "dayBenchmark": 440,
+      "url": "https://stars-taxi.co.il/airport-taxi/%D7%91%D7%99%D7%AA-%D7%A6%D7%91%D7%99"
+    },
+    "בית רבן": {
+      "toDay": 200,
+      "toNight": 220,
+      "fromDay": 200,
+      "fromNight": 230,
+      "dayBenchmark": 200,
+      "url": "https://stars-taxi.co.il/airport-taxi/%D7%91%D7%99%D7%AA-%D7%A8%D7%91%D7%9F"
+    },
+    "בני עי\"ש": {
+      "toDay": 200,
+      "toNight": 220,
+      "fromDay": 220,
+      "fromNight": 235,
+      "dayBenchmark": 220,
+      "url": "https://stars-taxi.co.il/airport-taxi/%D7%91%D7%A0%D7%99-%D7%A2%D7%99%D7%A9"
+    },
+    "בקוע": {
+      "toDay": 165,
+      "toNight": 175,
+      "fromDay": 165,
+      "fromNight": 175,
+      "dayBenchmark": 165,
+      "url": "https://stars-taxi.co.il/airport-taxi/%D7%91%D7%A7%D7%95%D7%A2"
+    },
+    "בת חצור": {
+      "toDay": 415,
+      "toNight": 495,
+      "fromDay": 415,
+      "fromNight": 495,
+      "dayBenchmark": 415,
+      "url": "https://stars-taxi.co.il/airport-taxi/%D7%91%D7%AA-%D7%97%D7%A6%D7%95%D7%A8"
+    },
+    "גבעת ח\"ן": {
+      "toDay": 200,
+      "toNight": 220,
+      "fromDay": 200,
+      "fromNight": 220,
+      "dayBenchmark": 200,
+      "url": "https://stars-taxi.co.il/airport-taxi/%D7%92%D7%91%D7%A2%D7%AA-%D7%97%D7%9F"
+    },
+    "גבעת כ\"ח": {
+      "toDay": 100,
+      "toNight": 110,
+      "fromDay": 100,
+      "fromNight": 110,
+      "dayBenchmark": 100,
+      "url": "https://stars-taxi.co.il/airport-taxi/%D7%92%D7%91%D7%A2%D7%AA-%D7%9B%D7%97"
+    },
+    "גבעת ניל\"י": {
+      "toDay": 385,
+      "toNight": 440,
+      "fromDay": 385,
+      "fromNight": 440,
+      "dayBenchmark": 385,
+      "url": "https://stars-taxi.co.il/airport-taxi/%D7%92%D7%91%D7%A2%D7%AA-%D7%A0%D7%99%D7%9C%D7%99"
+    },
+    "גבעת שמש": {
+      "toDay": 210,
+      "toNight": 220,
+      "fromDay": 215,
+      "fromNight": 230,
+      "dayBenchmark": 215,
+      "url": "https://stars-taxi.co.il/airport-taxi/%D7%92%D7%91%D7%A2%D7%AA-%D7%A9%D7%9E%D7%A9"
+    },
+    "גיניגר": {
+      "toDay": 440,
+      "toNight": 440,
+      "fromDay": 440,
+      "fromNight": 440,
+      "dayBenchmark": 440,
+      "url": "https://stars-taxi.co.il/airport-taxi/%D7%92%D7%99%D7%A0%D7%99%D7%92%D7%A8"
+    },
+    "גלגל": {
+      "toDay": 500,
+      "toNight": 530,
+      "fromDay": 500,
+      "fromNight": 530,
+      "dayBenchmark": 500,
+      "url": "https://stars-taxi.co.il/airport-taxi/%D7%92%D7%9C%D7%92%D7%9C"
+    },
+    "גליל ים": {
+      "toDay": 185,
+      "toNight": 200,
+      "fromDay": 190,
+      "fromNight": 200,
+      "dayBenchmark": 190,
+      "url": "https://stars-taxi.co.il/airport-taxi/%D7%92%D7%9C%D7%99%D7%9C-%D7%99%D7%9D"
+    },
+    "גלעד (אבן -יצחק)": {
+      "toDay": 360,
+      "toNight": 360,
+      "fromDay": 360,
+      "fromNight": 360,
+      "dayBenchmark": 360,
+      "url": "https://stars-taxi.co.il/airport-taxi/%D7%92%D7%9C%D7%A2%D7%93-)%D7%90%D7%91%D7%9F-%D7%99%D7%A6%D7%97%D7%A7("
+    },
+    "גלעד (אבן יצחק)": {
+      "toDay": 360,
+      "toNight": 360,
+      "fromDay": 360,
+      "fromNight": 360,
+      "dayBenchmark": 360,
+      "url": "https://stars-taxi.co.il/airport-taxi/%D7%92%D7%9C%D7%A2%D7%93-)%D7%90%D7%91%D7%9F-%D7%99%D7%A6%D7%97%D7%A7("
+    },
+    "דגניה א": {
+      "toDay": 550,
+      "toNight": 550,
+      "fromDay": 550,
+      "fromNight": 550,
+      "dayBenchmark": 550,
+      "url": "https://stars-taxi.co.il/airport-taxi/%D7%93%D7%92%D7%A0%D7%99%D7%94-%D7%90"
+    },
+    "דגניה ב": {
+      "toDay": 550,
+      "toNight": 550,
+      "fromDay": 550,
+      "fromNight": 550,
+      "dayBenchmark": 550,
+      "url": "https://stars-taxi.co.il/airport-taxi/%D7%93%D7%92%D7%A0%D7%99%D7%94-%D7%91"
+    },
+    "דוב\"ב": {
+      "toDay": 770,
+      "toNight": 770,
+      "fromDay": 770,
+      "fromNight": 770,
+      "dayBenchmark": 770,
+      "url": "https://stars-taxi.co.il/airport-taxi/%D7%93%D7%95%D7%91%D7%91"
+    },
+    "הילה": {
+      "toDay": 550,
+      "toNight": 550,
+      "fromDay": 550,
+      "fromNight": 550,
+      "dayBenchmark": 550,
+      "url": "https://stars-taxi.co.il/airport-taxi/%D7%94%D7%99%D7%9C%D7%94"
+    },
+    "חלוץ": {
+      "toDay": 550,
+      "toNight": 550,
+      "fromDay": 550,
+      "fromNight": 550,
+      "dayBenchmark": 550,
+      "url": "https://stars-taxi.co.il/airport-taxi/%D7%97%D7%9C%D7%95%D7%A5"
+    },
+    "חפצי-בה": {
+      "toDay": 610,
+      "toNight": 645,
+      "fromDay": 610,
+      "fromNight": 645,
+      "dayBenchmark": 610,
+      "url": "https://stars-taxi.co.il/airport-taxi/%D7%97%D7%A4%D7%A6%D7%99%D7%91%D7%94"
+    },
+    "חצרות חולדה": {
+      "toDay": 175,
+      "toNight": 185,
+      "fromDay": 185,
+      "fromNight": 190,
+      "dayBenchmark": 185,
+      "url": "https://stars-taxi.co.il/airport-taxi/%D7%97%D7%A6%D7%A8%D7%95%D7%AA-%D7%97%D7%95%D7%9C%D7%93%D7%94"
+    },
+    "חצרות כ\"ח": {
+      "toDay": 750,
+      "toNight": 795,
+      "fromDay": 750,
+      "fromNight": 795,
+      "dayBenchmark": 750,
+      "url": "https://stars-taxi.co.il/airport-taxi/%D7%97%D7%A6%D7%A8%D7%95%D7%AA-%D7%9B%D7%97"
+    },
+    "טנא": {
+      "toDay": 480,
+      "toNight": 570,
+      "fromDay": 480,
+      "fromNight": 570,
+      "dayBenchmark": 480,
+      "url": "https://stars-taxi.co.il/airport-taxi/%D7%98%D7%A0%D7%90"
+    },
+    "יד השמונה": {
+      "toDay": 220,
+      "toNight": 240,
+      "fromDay": 220,
+      "fromNight": 240,
+      "dayBenchmark": 220,
+      "url": "https://stars-taxi.co.il/airport-taxi/%D7%99%D7%93-%D7%94%D7%A9%D7%9E%D7%95%D7%A0%D7%94"
+    },
+    "יד רמב\"ם": {
+      "toDay": 130,
+      "toNight": 140,
+      "fromDay": 135,
+      "fromNight": 145,
+      "dayBenchmark": 135,
+      "url": "https://stars-taxi.co.il/airport-taxi/%D7%99%D7%93-%D7%A8%D7%9E%D7%91%D7%9D"
+    },
+    "ידידה": {
+      "toDay": 220,
+      "toNight": 240,
+      "fromDay": 220,
+      "fromNight": 240,
+      "dayBenchmark": 220,
+      "url": "https://stars-taxi.co.il/airport-taxi/%D7%99%D7%93%D7%99%D7%93%D7%94"
+    },
+    "יתיר": {
+      "toDay": 550,
+      "toNight": 615,
+      "fromDay": 550,
+      "fromNight": 615,
+      "dayBenchmark": 550,
+      "url": "https://stars-taxi.co.il/airport-taxi/%D7%99%D7%AA%D7%99%D7%A8"
+    },
+    "כדורי": {
+      "toDay": 525,
+      "toNight": 525,
+      "fromDay": 525,
+      "fromNight": 525,
+      "dayBenchmark": 525,
+      "url": "https://stars-taxi.co.il/airport-taxi/%D7%9B%D7%93%D7%95%D7%A8%D7%99"
+    },
+    "כפר ביל\"ו": {
+      "toDay": 150,
+      "toNight": 150,
+      "fromDay": 150,
+      "fromNight": 155,
+      "dayBenchmark": 150,
+      "url": "https://stars-taxi.co.il/airport-taxi/%D7%9B%D7%A4%D7%A8-%D7%91%D7%99%D7%9C%D7%95"
+    },
+    "כפר הנוער הדתי": {
+      "toDay": 440,
+      "toNight": 440,
+      "fromDay": 440,
+      "fromNight": 440,
+      "dayBenchmark": 440,
+      "url": "https://stars-taxi.co.il/airport-taxi/%D7%9B%D7%A4%D7%A8-%D7%94%D7%A0%D7%95%D7%A2%D7%A8-%D7%94%D7%93%D7%AA%D7%99"
+    },
+    "כפר הרא\"ה": {
+      "toDay": 305,
+      "toNight": 305,
+      "fromDay": 305,
+      "fromNight": 305,
+      "dayBenchmark": 305,
+      "url": "https://stars-taxi.co.il/airport-taxi/%D7%9B%D7%A4%D7%A8-%D7%94%D7%A8%D7%90%D7%94"
+    },
+    "כפר הרי\"ף": {
+      "toDay": 220,
+      "toNight": 230,
+      "fromDay": 235,
+      "fromNight": 245,
+      "dayBenchmark": 235,
+      "url": "https://stars-taxi.co.il/airport-taxi/%D7%9B%D7%A4%D7%A8-%D7%94%D7%A8%D7%99%D7%A3"
+    },
+    "כפר חב\"ד": {
+      "toDay": 130,
+      "toNight": 140,
+      "fromDay": 130,
+      "fromNight": 140,
+      "dayBenchmark": 130,
+      "url": "https://stars-taxi.co.il/airport-taxi/%D7%9B%D7%A4%D7%A8-%D7%97%D7%91%D7%93"
+    },
+    "כפר חסידים א": {
+      "toDay": 440,
+      "toNight": 440,
+      "fromDay": 440,
+      "fromNight": 440,
+      "dayBenchmark": 440,
+      "url": "https://stars-taxi.co.il/airport-taxi/%D7%9B%D7%A4%D7%A8-%D7%97%D7%A1%D7%99%D7%93%D7%99%D7%9D-%D7%90"
+    },
+    "כפר חסידים ב": {
+      "toDay": 440,
+      "toNight": 440,
+      "fromDay": 440,
+      "fromNight": 440,
+      "dayBenchmark": 440,
+      "url": "https://stars-taxi.co.il/airport-taxi/%D7%9B%D7%A4%D7%A8-%D7%97%D7%A1%D7%99%D7%93%D7%99%D7%9D-%D7%91"
+    },
+    "כפר מל\"ל": {
+      "toDay": 175,
+      "toNight": 185,
+      "fromDay": 180,
+      "fromNight": 190,
+      "dayBenchmark": 180,
+      "url": "https://stars-taxi.co.il/airport-taxi/%D7%9B%D7%A4%D7%A8-%D7%9E%D7%9C%D7%9C"
+    },
+    "כפר עבודה": {
+      "toDay": 250,
+      "toNight": 275,
+      "fromDay": 250,
+      "fromNight": 275,
+      "dayBenchmark": 250,
+      "url": "https://stars-taxi.co.il/airport-taxi/%D7%9B%D7%A4%D7%A8-%D7%A2%D7%91%D7%95%D7%93%D7%94"
+    },
+    "כרי דשא": {
+      "toDay": 635,
+      "toNight": 635,
+      "fromDay": 635,
+      "fromNight": 635,
+      "dayBenchmark": 635,
+      "url": "https://stars-taxi.co.il/airport-taxi/%D7%9B%D7%A8%D7%99-%D7%93%D7%A9%D7%90"
+    },
+    "כרם מהר\"ל": {
+      "toDay": 440,
+      "toNight": 440,
+      "fromDay": 440,
+      "fromNight": 440,
+      "dayBenchmark": 440,
+      "url": "https://stars-taxi.co.il/airport-taxi/%D7%9B%D7%A8%D7%9D-%D7%9E%D7%94%D7%A8%D7%9C"
+    },
+    "כרמים": {
+      "toDay": 440,
+      "toNight": 490,
+      "fromDay": 440,
+      "fromNight": 490,
+      "dayBenchmark": 440,
+      "url": "https://stars-taxi.co.il/airport-taxi/%D7%9B%D7%A8%D7%9E%D7%99%D7%9D"
+    },
+    "כרמל": {
+      "toDay": 550,
+      "toNight": 660,
+      "fromDay": 550,
+      "fromNight": 660,
+      "dayBenchmark": 550,
+      "url": "https://stars-taxi.co.il/airport-taxi/%D7%9B%D7%A8%D7%9E%D7%9C"
+    },
+    "לוחמי הגיטאות": {
+      "toDay": 480,
+      "toNight": 480,
+      "fromDay": 480,
+      "fromNight": 480,
+      "dayBenchmark": 480,
+      "url": "https://stars-taxi.co.il/airport-taxi/%D7%9C%D7%95%D7%97%D7%9E%D7%99-%D7%94%D7%92%D7%99%D7%98%D7%90%D7%95%D7%AA"
+    },
+    "מגאר": {
+      "toDay": 550,
+      "toNight": 550,
+      "fromDay": 550,
+      "fromNight": 550,
+      "dayBenchmark": 550,
+      "url": "https://stars-taxi.co.il/airport-taxi/%D7%9E%D7%92%D7%90%D7%A8"
+    },
+    "מדרשת רופין": {
+      "toDay": 275,
+      "toNight": 295,
+      "fromDay": 275,
+      "fromNight": 295,
+      "dayBenchmark": 275,
+      "url": "https://stars-taxi.co.il/airport-taxi/%D7%9E%D7%93%D7%A8%D7%A9%D7%AA-%D7%A8%D7%95%D7%A4%D7%99%D7%9F"
+    },
+    "מחנה תל נוף": {
+      "toDay": 180,
+      "toNight": 185,
+      "fromDay": 185,
+      "fromNight": 200,
+      "dayBenchmark": 185,
+      "url": "https://stars-taxi.co.il/airport-taxi/%D7%9E%D7%97%D7%A0%D7%94-%D7%AA%D7%9C-%D7%A0%D7%95%D7%A3"
+    },
+    "מעלה החמישה": {
+      "toDay": 220,
+      "toNight": 240,
+      "fromDay": 220,
+      "fromNight": 240,
+      "dayBenchmark": 220,
+      "url": "https://stars-taxi.co.il/airport-taxi/%D7%9E%D7%A2%D7%9C%D7%94-%D7%94%D7%97%D7%9E%D7%99%D7%A9%D7%94"
+    },
+    "מענית": {
+      "toDay": 340,
+      "toNight": 360,
+      "fromDay": 340,
+      "fromNight": 360,
+      "dayBenchmark": 340,
+      "url": "https://stars-taxi.co.il/airport-taxi/%D7%9E%D7%A2%D7%A0%D7%99%D7%AA"
+    },
+    "מעש": {
+      "toDay": 110,
+      "toNight": 115,
+      "fromDay": 110,
+      "fromNight": 115,
+      "dayBenchmark": 110,
+      "url": "https://stars-taxi.co.il/airport-taxi/%D7%9E%D7%A2%D7%A9"
+    },
+    "מצדות יהודה": {
+      "toDay": 550,
+      "toNight": 615,
+      "fromDay": 550,
+      "fromNight": 615,
+      "dayBenchmark": 550,
+      "url": "https://stars-taxi.co.il/airport-taxi/%D7%9E%D7%A6%D7%93%D7%95%D7%AA-%D7%99%D7%94%D7%95%D7%93%D7%94"
+    },
+    "מצפה אבי\"ב": {
+      "toDay": 440,
+      "toNight": 440,
+      "fromDay": 440,
+      "fromNight": 440,
+      "dayBenchmark": 440,
+      "url": "https://stars-taxi.co.il/airport-taxi/%D7%9E%D7%A6%D7%A4%D7%94-%D7%90%D7%91%D7%99%D7%91"
+    },
+    "מצפה שלם": {
+      "toDay": 600,
+      "toNight": 700,
+      "fromDay": 600,
+      "fromNight": 700,
+      "dayBenchmark": 600,
+      "url": "https://stars-taxi.co.il/airport-taxi/%D7%9E%D7%A6%D7%A4%D7%94-%D7%A9%D7%9C%D7%9D"
+    },
+    "מרחביה (מושב)": {
+      "toDay": 440,
+      "toNight": 440,
+      "fromDay": 440,
+      "fromNight": 440,
+      "dayBenchmark": 440,
+      "url": "https://stars-taxi.co.il/airport-taxi/%D7%9E%D7%A8%D7%97%D7%91%D7%99%D7%94-%D7%9E%D7%95%D7%A9%D7%91"
+    },
+    "מרחביה (קיבוץ)": {
+      "toDay": 440,
+      "toNight": 440,
+      "fromDay": 440,
+      "fromNight": 440,
+      "dayBenchmark": 440,
+      "url": "https://stars-taxi.co.il/airport-taxi/%D7%9E%D7%A8%D7%97%D7%91%D7%99%D7%94-%D7%A7%D7%99%D7%91%D7%95%D7%A5"
+    },
+    "מרחביה-מושב": {
+      "toDay": 440,
+      "toNight": 440,
+      "fromDay": 440,
+      "fromNight": 440,
+      "dayBenchmark": 440,
+      "url": "https://stars-taxi.co.il/airport-taxi/%D7%9E%D7%A8%D7%97%D7%91%D7%99%D7%94-%D7%9E%D7%95%D7%A9%D7%91"
+    },
+    "מרחביה-קיבוץ": {
+      "toDay": 440,
+      "toNight": 440,
+      "fromDay": 440,
+      "fromNight": 440,
+      "dayBenchmark": 440,
+      "url": "https://stars-taxi.co.il/airport-taxi/%D7%9E%D7%A8%D7%97%D7%91%D7%99%D7%94-%D7%A7%D7%99%D7%91%D7%95%D7%A5"
+    },
+    "נווה שלום": {
+      "toDay": 170,
+      "toNight": 180,
+      "fromDay": 170,
+      "fromNight": 180,
+      "dayBenchmark": 170,
+      "url": "https://stars-taxi.co.il/airport-taxi/%D7%A0%D7%95%D7%95%D7%94-%D7%A9%D7%9C%D7%95%D7%9D"
+    },
+    "נח\"ל עוז": {
+      "toDay": 415,
+      "toNight": 460,
+      "fromDay": 415,
+      "fromNight": 460,
+      "dayBenchmark": 415,
+      "url": "https://stars-taxi.co.il/airport-taxi/%D7%A0%D7%97%D7%9C-%D7%A2%D7%95%D7%96"
+    },
+    "נטף": {
+      "toDay": 225,
+      "toNight": 245,
+      "fromDay": 225,
+      "fromNight": 245,
+      "dayBenchmark": 225,
+      "url": "https://stars-taxi.co.il/airport-taxi/%D7%A0%D7%98%D7%A3"
+    },
+    "ניל\"י": {
+      "toDay": 185,
+      "toNight": 200,
+      "fromDay": 190,
+      "fromNight": 210,
+      "dayBenchmark": 190,
+      "url": "https://stars-taxi.co.il/airport-taxi/%D7%A0%D7%99%D7%9C%D7%99"
+    },
+    "ניר דוד (תל עמל)": {
+      "toDay": 620,
+      "toNight": 655,
+      "fromDay": 620,
+      "fromNight": 655,
+      "dayBenchmark": 620,
+      "url": "https://stars-taxi.co.il/airport-taxi/%D7%A0%D7%99%D7%A8-%D7%93%D7%95%D7%93-%D7%AA%D7%9C-%D7%A2%D7%9E%D7%9C"
+    },
+    "ניר דוד )תל עמל(": {
+      "toDay": 620,
+      "toNight": 655,
+      "fromDay": 620,
+      "fromNight": 655,
+      "dayBenchmark": 620,
+      "url": "https://stars-taxi.co.il/airport-taxi/%D7%A0%D7%99%D7%A8-%D7%93%D7%95%D7%93-%D7%AA%D7%9C-%D7%A2%D7%9E%D7%9C"
+    },
+    "ניר ח\"ן": {
+      "toDay": 340,
+      "toNight": 380,
+      "fromDay": 340,
+      "fromNight": 380,
+      "dayBenchmark": 340,
+      "url": "https://stars-taxi.co.il/airport-taxi/%D7%A0%D7%99%D7%A8-%D7%97%D7%9F"
+    },
+    "ניר עם": {
+      "toDay": 370,
+      "toNight": 405,
+      "fromDay": 370,
+      "fromNight": 405,
+      "dayBenchmark": 370,
+      "url": "https://stars-taxi.co.il/airport-taxi/%D7%A0%D7%99%D7%A8%D7%A2%D7%9D"
+    },
+    "נתיב הל\"ה": {
+      "toDay": 260,
+      "toNight": 285,
+      "fromDay": 260,
+      "fromNight": 285,
+      "dayBenchmark": 260,
+      "url": "https://stars-taxi.co.il/airport-taxi/%D7%A0%D7%AA%D7%99%D7%91-%D7%94%D7%9C%D7%94"
+    },
+    "עיילבון": {
+      "toDay": 550,
+      "toNight": 550,
+      "fromDay": 550,
+      "fromNight": 550,
+      "dayBenchmark": 550,
+      "url": "https://stars-taxi.co.il/airport-taxi/%D7%A2%D7%99%D7%99%D7%9C%D7%91%D7%95%D7%9F"
+    },
+    "עין הנצי\"ב": {
+      "toDay": 670,
+      "toNight": 705,
+      "fromDay": 670,
+      "fromNight": 705,
+      "dayBenchmark": 670,
+      "url": "https://stars-taxi.co.il/airport-taxi/%D7%A2%D7%99%D7%9F-%D7%94%D7%A0%D7%A6%D7%99%D7%91"
+    },
+    "עמינדב": {
+      "toDay": 250,
+      "toNight": 275,
+      "fromDay": 275,
+      "fromNight": 295,
+      "dayBenchmark": 275,
+      "url": "https://stars-taxi.co.il/airport-taxi/%D7%A2%D7%9E%D7%99%D7%A0%D7%93%D7%91"
+    },
+    "ערערה": {
+      "toDay": 380,
+      "toNight": 405,
+      "fromDay": 380,
+      "fromNight": 405,
+      "dayBenchmark": 380,
+      "url": "https://stars-taxi.co.il/airport-taxi/%D7%A2%D7%A8%D7%A2%D7%A8%D7%94"
+    },
+    "עתניאל": {
+      "toDay": 360,
+      "toNight": 400,
+      "fromDay": 360,
+      "fromNight": 400,
+      "dayBenchmark": 360,
+      "url": "https://stars-taxi.co.il/airport-taxi/%D7%A2%D7%AA%D7%A0%D7%99%D7%90%D7%9C"
+    },
+    "פני חבר": {
+      "toDay": 440,
+      "toNight": 525,
+      "fromDay": 440,
+      "fromNight": 525,
+      "dayBenchmark": 440,
+      "url": "https://stars-taxi.co.il/airport-taxi/%D7%A4%D7%A0%D7%99-%D7%97%D7%91%D7%A8"
+    },
+    "פעמי תש\"ז": {
+      "toDay": 390,
+      "toNight": 410,
+      "fromDay": 390,
+      "fromNight": 410,
+      "dayBenchmark": 390,
+      "url": "https://stars-taxi.co.il/airport-taxi/%D7%A4%D7%A2%D7%9E%D7%99-%D7%AA%D7%A9%D7%96"
+    },
+    "פקיעין חדשה": {
+      "toDay": 605,
+      "toNight": 605,
+      "fromDay": 605,
+      "fromNight": 605,
+      "dayBenchmark": 605,
+      "url": "https://stars-taxi.co.il/airport-taxi/%D7%A4%D7%A7%D7%99%D7%A2%D7%99%D7%9F-%D7%97%D7%93%D7%A9%D7%94"
+    },
+    "צביה": {
+      "toDay": 550,
+      "toNight": 550,
+      "fromDay": 550,
+      "fromNight": 550,
+      "dayBenchmark": 550,
+      "url": "https://stars-taxi.co.il/airport-taxi/%D7%A6%D7%91%D7%99%D7%94"
+    },
+    "צור יגאל": {
+      "toDay": 220,
+      "toNight": 230,
+      "fromDay": 235,
+      "fromNight": 240,
+      "dayBenchmark": 235,
+      "url": "https://stars-taxi.co.il/airport-taxi/%D7%A6%D7%95%D7%A8-%D7%99%D7%92%D7%90%D7%9C"
+    },
+    "קלע": {
+      "toDay": 770,
+      "toNight": 770,
+      "fromDay": 770,
+      "fromNight": 770,
+      "dayBenchmark": 770,
+      "url": "https://stars-taxi.co.il/airport-taxi/%D7%A7%D7%9C%D7%A2"
+    },
+    "רומת הייב": {
+      "toDay": 480,
+      "toNight": 480,
+      "fromDay": 480,
+      "fromNight": 480,
+      "dayBenchmark": 480,
+      "url": "https://stars-taxi.co.il/airport-taxi/%D7%A8%D7%95%D7%9E%D7%AA-%D7%94%D7%99%D7%99%D7%91"
+    },
+    "רותם": {
+      "toDay": 745,
+      "toNight": 790,
+      "fromDay": 745,
+      "fromNight": 790,
+      "dayBenchmark": 745,
+      "url": "https://stars-taxi.co.il/airport-taxi/%D7%A8%D7%95%D7%AA%D7%9D"
+    },
+    "רמת אפעל": {
+      "toDay": 140,
+      "toNight": 140,
+      "fromDay": 150,
+      "fromNight": 150,
+      "dayBenchmark": 150,
+      "url": "https://stars-taxi.co.il/airport-taxi/%D7%A8%D7%9E%D7%AA-%D7%90%D7%A4%D7%A2%D7%9C"
+    },
+    "רמת רחל": {
+      "toDay": 250,
+      "toNight": 275,
+      "fromDay": 275,
+      "fromNight": 295,
+      "dayBenchmark": 275,
+      "url": "https://stars-taxi.co.il/airport-taxi/%D7%A8%D7%9E%D7%AA-%D7%A8%D7%97%D7%9C"
+    },
+    "שעורים": {
+      "toDay": 480,
+      "toNight": 480,
+      "fromDay": 480,
+      "fromNight": 480,
+      "dayBenchmark": 480,
+      "url": "https://stars-taxi.co.il/airport-taxi/%D7%A9%D7%A2%D7%95%D7%A8%D7%99%D7%9D"
+    },
+    "שער מנשה": {
+      "toDay": 340,
+      "toNight": 360,
+      "fromDay": 340,
+      "fromNight": 360,
+      "dayBenchmark": 340,
+      "url": "https://stars-taxi.co.il/airport-taxi/%D7%A9%D7%A2%D7%A8-%D7%9E%D7%A0%D7%A9%D7%94"
+    },
+    "שריגים": {
+      "toDay": 270,
+      "toNight": 300,
+      "fromDay": 270,
+      "fromNight": 300,
+      "dayBenchmark": 270,
+      "url": "https://stars-taxi.co.il/airport-taxi/%D7%A9%D7%A8%D7%99%D7%92%D7%99%D7%9D"
+    },
+    "תלמי ביל\"ו": {
+      "toDay": 415,
+      "toNight": 440,
+      "fromDay": 415,
+      "fromNight": 440,
+      "dayBenchmark": 415,
+      "url": "https://stars-taxi.co.il/airport-taxi/%D7%AA%D7%9C%D7%9E%D7%99-%D7%91%D7%99%D7%9C%D7%95"
+    }
+  }
+}
