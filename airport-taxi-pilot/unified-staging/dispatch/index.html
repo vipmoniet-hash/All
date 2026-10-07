@@ -20,35 +20,66 @@
   <a class="brand" href="/unified/"><b>V</b><span><strong>VanClick</strong><small>Control Center</small></span></a>
   <div class="actions">
     <span id="roleBadge" class="role-badge"></span>
-    <button id="logoutBtn" class="secondary" type="button" hidden data-t="logout">Выйти</button>
+    <button id="logoutBtn" class="secondary compact-btn" type="button" hidden data-t="logout">Выйти</button>
     <div class="langs"><button data-lang="ru" class="active">Русский</button><button data-lang="he">עברית</button></div>
   </div>
 </header>
 <main class="wrap">
-  <section class="hero"><span class="eyebrow">STAFF ONLY</span><h1 data-t="title">Единый центр управления</h1><p data-t="lead">Права определяются сервером: Admin видит всё, каждый диспетчер — только свою линию.</p></section>
+  <section class="hero"><span class="eyebrow">STAFF ONLY</span><h1 data-t="title">Единый центр управления</h1><p data-t="lead">Admin управляет обеими линиями из одного экрана. Каждый диспетчер видит только свою линию.</p></section>
   <section id="metrics" class="metrics"></section>
-  <section class="split">
-    <div class="card" id="smallCard">
-      <h2 data-t="small">Taxi 1–4</h2>
-      <p data-t="smallText">Массовый пул водителей: Admin/Dispatcher 1–4 проверяет и публикует.</p>
-      <div id="smallSummary" class="muted"></div>
-      <a class="primary" href="/dispatch/" data-t="openSmall">Открыть диспетчерскую 1–4</a>
-    </div>
-    <div class="card" id="largeCard">
-      <h2 data-t="large">Large 5–6</h2>
-      <p data-t="largeText">Отдельная управляемая очередь больших машин.</p>
-      <div id="largeQueue" class="queue"></div>
+
+  <nav id="adminTabs" class="admin-tabs" hidden>
+    <button data-admin-tab="orders" class="active" data-t="orders">Заказы</button>
+    <button data-admin-tab="topups" data-t="topups">Пополнения</button>
+    <button data-admin-tab="drivers" data-t="drivers">Водители</button>
+    <button data-admin-tab="customers" data-t="customers">Клиенты</button>
+    <button data-admin-tab="journal" data-t="journal">Журнал</button>
+  </nav>
+
+  <section id="ordersPane" class="admin-pane">
+    <div class="split">
+      <div class="card" id="smallCard">
+        <div class="section-head">
+          <div><span class="tag-line">TAXI 1–4</span><h2 data-t="small">Taxi 1–4</h2><p data-t="smallText">Новые заказы сначала проверяет персонал, затем публикует в общий пул.</p></div>
+          <div class="section-actions">
+            <button id="copySmallPool" class="secondary compact-btn" type="button" data-t="copyPool">Для WhatsApp</button>
+            <a class="secondary compact-btn" href="/dispatch/" data-t="advancedSmall">Расширенный режим</a>
+          </div>
+        </div>
+        <div id="smallQueue" class="queue"></div>
+      </div>
+      <div class="card" id="largeCard">
+        <div class="section-head"><div><span class="tag-line">LARGE 5–6</span><h2 data-t="large">Large 5–6</h2><p data-t="largeText">Отдельная управляемая очередь больших машин без водительской комиссии.</p></div></div>
+        <div id="largeQueue" class="queue"></div>
+      </div>
     </div>
   </section>
-  <section id="adminData" class="split" hidden>
-    <div class="card">
-      <h2 data-t="customers">Клиенты</h2>
-      <div id="customerProfiles" class="queue"></div>
-    </div>
-    <div class="card">
-      <h2 data-t="journal">Журнал</h2>
-      <div id="unifiedJournal" class="queue"></div>
-    </div>
+
+  <section id="topupsPane" class="admin-pane card" hidden>
+    <div class="section-head"><div><h2 data-t="topups">Пополнения</h2><p data-t="topupsText">Заявки водителей 1–4 на пополнение баланса.</p></div></div>
+    <div id="topupQueue" class="queue"></div>
+  </section>
+
+  <section id="driversPane" class="admin-pane card" hidden>
+    <div class="section-head"><div><h2 data-t="drivers">Водители</h2><p data-t="driversText">Проверка, включение, отключение и PIN водителей 1–4.</p></div></div>
+    <form id="addDriverForm" class="inline-form">
+      <input name="name" data-ph="driverName" placeholder="Имя водителя" required>
+      <input name="phone" inputmode="tel" data-ph="driverPhone" placeholder="Телефон" required>
+      <input name="vehiclePlate" data-ph="vehiclePlate" placeholder="Номер машины">
+      <input name="accessPin" inputmode="numeric" pattern="[0-9]{4,12}" data-ph="driverPin" placeholder="PIN 4–12 цифр">
+      <button class="primary" type="submit" data-t="addDriver">Добавить</button>
+    </form>
+    <div id="driverQueue" class="queue"></div>
+  </section>
+
+  <section id="customersPane" class="admin-pane card" hidden>
+    <div class="section-head"><div><h2 data-t="customers">Клиенты</h2><p data-t="customersText">Единый профиль по поездкам 1–4 и 5–6.</p></div></div>
+    <div id="customerProfiles" class="queue"></div>
+  </section>
+
+  <section id="journalPane" class="admin-pane card" hidden>
+    <div class="section-head"><div><h2 data-t="journal">Журнал</h2><p data-t="journalText">Общий аудит действий и событий обеих линий.</p></div></div>
+    <div id="unifiedJournal" class="queue"></div>
   </section>
 </main>
 <script src="/unified/dispatch/dispatch.js" defer></script>
