@@ -56,6 +56,14 @@ require('child_process').execFileSync(process.execPath,[path.join(__dirname,'pat
 require('child_process').execFileSync(process.execPath,[path.join(__dirname,'patch-marketplace-v1.cjs'),root],{stdio:'inherit'});
 require('child_process').execFileSync(process.execPath,['--check',path.join(root,'server.js')],{stdio:'inherit'});
 console.log('MARKETPLACE_SERVER_SYNTAX_OK');
+for(const rel of [
+  path.join('apps','client','public','app.js'),
+  path.join('apps','driver','public','app.js'),
+  path.join('apps','dispatch','public','app.js')
+]){
+  require('child_process').execFileSync(process.execPath,['--check',path.join(root,rel)],{stdio:'inherit'});
+}
+console.log('MARKETPLACE_BROWSER_SYNTAX_OK');
 
 // Policy regression gate: blocks deploys if surcharge or commission behavior regresses.
 require('child_process').execFileSync(process.execPath,[path.join(__dirname,'verify-taxi4-policy.mjs'),root],{stdio:'inherit'});
