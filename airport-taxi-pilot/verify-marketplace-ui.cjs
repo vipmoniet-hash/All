@@ -39,6 +39,10 @@ for(const needle of ['vanclick-unified-login','vanclick-unified-session-probe','
   assert.ok(dispatch.includes(needle),'working Taxi 1-4 dispatch bridge missing '+needle);
 }
 assert.ok(dispatch.includes('UNIFIED_EMBED'),'working Taxi 1-4 dispatch must detect iframe embed mode');
+for(const needle of ['safeSessionGet','safeSessionSet','safeSessionRemove','safeLocalGet','safeLocalSet']){
+  assert.ok(dispatch.includes(needle),'working Taxi 1-4 dispatch must tolerate blocked browser storage: '+needle);
+}
+
 assert.ok(dispatch.includes("!UNIFIED_EMBED&&['admin','dispatcher'].includes(staffRole)"),'embedded Taxi 1-4 must not redirect itself out of the unified shell');
 
 assert.ok(dispatch.includes('/drivers/${id}/pin'),'dispatch UI must support driver PIN rotation');
