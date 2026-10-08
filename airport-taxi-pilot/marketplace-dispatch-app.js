@@ -2,7 +2,12 @@
 const API=window.TAXI4_API_BASE||location.origin;
 const UNIFIED_EMBED=window.parent!==window||new URLSearchParams(location.search).get('embed')==='1';
 const q=s=>document.querySelector(s),qa=s=>[...document.querySelectorAll(s)];
-let state=null,authRequired=false,authToken=sessionStorage.getItem('taxi4_dispatch_token')||'',staffRole=sessionStorage.getItem('taxi4_staff_role')||'',dispatchLang=localStorage.getItem('taxi4_dispatch_lang')||'ru';
+function safeSessionGet(key){try{return sessionStorage.getItem(key)||''}catch{return''}}
+function safeSessionSet(key,value){try{sessionStorage.setItem(key,value)}catch{}}
+function safeSessionRemove(key){try{sessionStorage.removeItem(key)}catch{}}
+function safeLocalGet(key){try{return localStorage.getItem(key)||''}catch{return''}}
+function safeLocalSet(key,value){try{localStorage.setItem(key,value)}catch{}}
+let state=null,authRequired=false,authToken=safeSessionGet('taxi4_dispatch_token'),staffRole=safeSessionGet('taxi4_staff_role'),dispatchLang=safeLocalGet('taxi4_dispatch_lang')||'ru';
 
 const esc=v=>String(v??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
 const pay=m=>m==='bit'?'Bit':'наличные';
@@ -138,7 +143,7 @@ function applyDispatchLanguage(){
 }
 function setDispatchLang(lang){
   dispatchLang=lang==='he'?'he':'ru';
-  localStorage.setItem('taxi4_dispatch_lang',dispatchLang);
+  safeLocalSet('taxi4_dispatch_lang',dispatchLang);
   if(state)render();
   const auth=q('#dispatchAuthOverlay');if(auth){auth.remove();ensureDispatchAuthUi();}
   applyDispatchLanguage();
@@ -224,8 +229,8 @@ function ensureDispatchAuthUi(){
         if(!r.ok)throw Error(j.error);
         authToken=j.token;
         staffRole=j.role||'';
-        sessionStorage.setItem('taxi4_dispatch_token',authToken);
-        sessionStorage.setItem('taxi4_staff_role',staffRole);
+        safeSessionSet('taxi4_dispatch_token',authToken);
+        safeSessionSet('taxi4_staff_role',staffRole);
         if(!UNIFIED_EMBED&&['admin','dispatcher'].includes(staffRole)){location.replace('/unified/dispatch/');return;}
         q('#dispatchAuthOverlay').classList.add('hidden');
         q('#dispatchLogout')?.classList.remove('hidden');
@@ -237,14 +242,14 @@ function ensureDispatchAuthUi(){
 function showDispatchLogin(message=''){
   ensureDispatchAuthUi();
   authToken='';staffRole='';
-  sessionStorage.removeItem('taxi4_dispatch_token');
-  sessionStorage.removeItem('taxi4_staff_role');
+  safeSessionRemove('taxi4_dispatch_token');
+  safeSessionRemove('taxi4_staff_role');
   q('#dispatchAuthStatus').textContent=dispatchLang==='he'?translateTextValue(message):message;
   q('#dispatchAuthOverlay').classList.remove('hidden');
 }
 async function dispatchLogout(){
   try{if(authToken)await authFetch(API+'/api/auth/logout',{method:'POST'});}catch{}
-  authToken='';staffRole='';sessionStorage.removeItem('taxi4_dispatch_token');sessionStorage.removeItem('taxi4_staff_role');showDispatchLogin();
+  authToken='';staffRole='';safeSessionRemove('taxi4_dispatch_token');safeSessionRemove('taxi4_staff_role');showDispatchLogin();
 }
 async function initDispatchAuth(){
   ensureDispatchAuthUi();
@@ -527,8 +532,8 @@ async function unifiedParentLogin(phone,pin){
     if(!response.ok)throw Error(payload.error||'INVALID_CREDENTIALS');
     authToken=payload.token;
     staffRole=payload.role||'';
-    sessionStorage.setItem('taxi4_dispatch_token',authToken);
-    sessionStorage.setItem('taxi4_staff_role',staffRole);
+    safeSessionSet('taxi4_dispatch_token',authToken);
+    safeSessionSet('taxi4_staff_role',staffRole);
     if(!['admin','dispatcher'].includes(staffRole))throw Error('FORBIDDEN');
     q('#dispatchAuthOverlay')?.classList.add('hidden');
     q('#dispatchLogout')?.classList.remove('hidden');
