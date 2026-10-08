@@ -9,6 +9,7 @@ const driver=read('apps/driver/public/app.js');
 const dispatch=read('apps/dispatch/public/app.js');
 const client=read('apps/client/public/app.js');
 const driverHtml=read('apps/driver/public/index.html');
+const dispatchHtml=read('apps/dispatch/public/index.html');
 
 assert.ok(driver.includes('MARKETPLACE_V1_DRIVER_UI'),'driver UI must carry marketplace v1 marker');
 assert.ok(driver.includes('poolFilters'),'driver UI must provide high-volume pool filters');
@@ -27,6 +28,7 @@ assert.ok(driverHtml.includes('קרדיטים'),'driver wallet UI must label bal
 assert.ok(driverHtml.includes('מע״מ 18%'),'driver wallet UI must disclose 18% VAT');
 
 assert.ok(dispatch.includes('MARKETPLACE_V1_DISPATCH_UI'),'dispatch UI must carry marketplace v1 marker');
+assert.ok(dispatchHtml.includes('app.js?v=20261008-mobileauth1'),'dispatch HTML must cache-bust the mobile-safe auth bundle');
 assert.ok(dispatch.includes('state.attention'),'dispatch UI must render attention queue');
 assert.ok(dispatch.includes('netCommissionCollected'),'dispatch UI must expose net commission metric');
 assert.ok(dispatch.includes('/issue/resolve'),'dispatch UI must resolve driver issues');
