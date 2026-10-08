@@ -104,6 +104,11 @@ try{
   x=await call('/api/unified/admin/state',{token:legacyAdminToken});
   assert.equal(x.r.status,200,'legacy owner admin can access the unified admin state');
 
+  x=await call('/api/unified/admin/driver-preview/drv-001',{token:legacyAdminToken});
+  assert.equal(x.r.status,200,'admin can open a read-only driver preview');
+  assert.equal(x.j.previewMode,true,'driver preview is explicitly marked read-only');
+  assert.equal(x.j.driver.id,'drv-001','driver preview returns the selected real driver state');
+
   x=await call('/api/auth/dispatch/login',{method:'POST',body:{phone:'dispatcher-phone',pin:'2468'},ip:'198.51.100.23'});
   assert.equal(x.r.status,200,'legacy owner-appointed dispatcher credentials are accepted');
   assert.equal(x.j.role,'dispatcher','legacy dispatcher maps to unified dispatcher role');
@@ -115,6 +120,8 @@ try{
   const dispatchToken=x.j.token;
   x=await call('/api/dispatch/reset-demo',{method:'POST',token:dispatchToken});
   assert.equal(x.r.status,403,'dispatcher cannot reset persistent business state');
+  x=await call('/api/unified/admin/driver-preview/drv-001',{token:dispatchToken});
+  assert.equal(x.r.status,403,'dispatcher cannot use owner-only driver impersonation preview');
   x=await call('/api/dispatch/reset-demo',{method:'POST',token:adminToken});
   assert.equal(x.r.status,403,'demo reset is disabled unless an explicit environment flag enables it');
   x=await call('/api/dispatch/state',{token:dispatchToken});
@@ -165,7 +172,8 @@ try{
     roleIsolation:true,
     logout:true,
     authRateLimit:true,
-    destructiveResetGuard:true
+    destructiveResetGuard:true,
+    adminDriverPreview:true
   }));
 }finally{
   child.kill('SIGTERM');
