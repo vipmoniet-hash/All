@@ -19,6 +19,10 @@ assert.ok(driver.includes('/api/auth/driver/login'),'driver UI must support prot
 assert.ok(driver.includes('sessionStorage'),'driver UI must persist only browser-session auth token');
 assert.ok(driver.includes('TOPUP_VAT_RATE'),'driver UI must calculate VAT for credit top-ups');
 assert.ok(driver.includes('totalAmount'),'driver UI must show total payment including VAT');
+assert.ok(driver.includes('admin_preview'),'driver UI must support admin preview mode');
+assert.ok(driver.includes('/api/unified/admin/driver-preview/'),'admin preview must load through the protected read-only preview endpoint');
+assert.ok(driver.includes('previewMode'),'driver UI must mark preview state explicitly');
+assert.ok(driver.includes('חזרה לניהול'),'driver UI must provide a return-to-admin control in preview mode');
 assert.ok(driverHtml.includes('קרדיטים'),'driver wallet UI must label balance and purchases as credits');
 assert.ok(driverHtml.includes('מע״מ 18%'),'driver wallet UI must disclose 18% VAT');
 
