@@ -3,6 +3,8 @@ import { readDb, transact, id } from './persistence.js';
 
 const SESSION_MS=24*60*60*1000;
 const LEGACY_STAFF_HOST='vanclick-dispatch.netlify.app';
+const LEGACY_SESSION_ME_URL='https://vanclick-dispatch.netlify.app/api/me';
+const LEGACY_SESSION_COMPLIANCE_URL='https://vanclick-dispatch.netlify.app/api/my-compliance';
 
 function tokenHash(token){
   return crypto.createHash('sha256').update(String(token||'')).digest('hex');
@@ -39,6 +41,77 @@ function cleanSessions(db,now=Date.now()){
 }
 function publicDriver(d){
   return {id:d.id,name:d.name,phone:d.phone,vehiclePlate:d.vehiclePlate||'',active:!!d.active,verified:!!d.verified};
+}
+function phoneKey(value){
+  const digits=String(value||'').replace(/\D/g,'');
+  if(digits.startsWith('972')&&digits.length>=11)return '0'+digits.slice(3);
+  return digits;
+}
+async function legacySessionIdentity(token){
+  const raw=String(token||'').trim();
+  if(!raw)return null;
+  let response;
+  try{
+    response=await fetch(LEGACY_SESSION_ME_URL,{
+      headers:{authorization:'Bearer '+raw,accept:'application/json'},
+      redirect:'error',
+      signal:AbortSignal.timeout(5000)
+    });
+  }catch{return null;}
+  if(response.status===401||response.status===403)return null;
+  if(!response.ok)return null;
+  let payload=null;
+  try{payload=await response.json();}catch{return null;}
+  const user=payload?.user;
+  const legacyRole=String(user?.role||'').toLowerCase();
+  if(!user?.id||!user?.phone||!['owner','dispatcher','driver'].includes(legacyRole))return null;
+  if(legacyRole==='owner')return {role:'admin',serviceScope:'all',driverId:null,external:true,userId:user.id};
+  if(legacyRole==='dispatcher')return {role:'dispatcher',serviceScope:'all_ops',driverId:null,external:true,userId:user.id};
+  if(!user?.active||!user?.canDrive)return null;
+
+  let profile={};
+  try{
+    const compliance=await fetch(LEGACY_SESSION_COMPLIANCE_URL,{
+      headers:{authorization:'Bearer '+raw,accept:'application/json'},
+      redirect:'error',
+      signal:AbortSignal.timeout(5000)
+    });
+    if(compliance.ok)profile=(await compliance.json())?.profile||{};
+  }catch{}
+
+  const mapped=await transact(db=>{
+    let driver=(db.drivers||[]).find(d=>String(d.externalUserId||'')===String(user.id))
+      ||(db.drivers||[]).find(d=>phoneKey(d.phone)===phoneKey(user.phone));
+    if(!driver){
+      driver={
+        id:String(user.id),
+        externalUserId:String(user.id),
+        name:String(user.name||'VanClick Driver'),
+        phone:String(user.phone),
+        wallet:0,
+        reliability:100,
+        active:true,
+        verified:true,
+        licenseNumber:'',
+        vehiclePlate:String(profile.plate||''),
+        vehicleModel:String(profile.vehicleModel||''),
+        completedTrips:0
+      };
+      db.drivers.push(driver);
+    }else{
+      driver.externalUserId=String(user.id);
+      driver.name=String(user.name||driver.name||'VanClick Driver');
+      driver.phone=String(user.phone||driver.phone||'');
+      driver.active=true;
+      driver.verified=true;
+      if(profile.plate)driver.vehiclePlate=String(profile.plate);
+      if(profile.vehicleModel)driver.vehicleModel=String(profile.vehicleModel);
+      if(!Number.isFinite(Number(driver.wallet)))driver.wallet=0;
+      if(!Number.isFinite(Number(driver.reliability)))driver.reliability=100;
+    }
+    return {driverId:driver.id};
+  });
+  return {role:'driver',serviceScope:'driver_self',driverId:mapped.driverId,external:true,userId:user.id};
 }
 function legacyStaffAuthUrl(){
   const raw=String(process.env.LEGACY_OWNER_AUTH_URL||'').trim();
@@ -188,7 +261,9 @@ export async function sessionForToken(token,now=new Date()){
   if(!token)return null;
   const db=await readDb();
   const hash=tokenHash(token);
-  return (db.sessions||[]).find(s=>s.tokenHash===hash&&new Date(s.expiresAt).getTime()>new Date(now).getTime())||null;
+  const local=(db.sessions||[]).find(s=>s.tokenHash===hash&&new Date(s.expiresAt).getTime()>new Date(now).getTime())||null;
+  if(local)return local;
+  return legacySessionIdentity(token);
 }
 
 export async function logoutToken(token){
