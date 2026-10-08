@@ -538,11 +538,14 @@ async function unifiedParentLogin(phone,pin){
     window.parent?.postMessage({type:'vanclick-unified-auth-result',surface:'taxi_1_4',ok:false,error:String(error?.message||error||'AUTH_FAILED')},UNIFIED_PARENT_ORIGIN);
   }
 }
+function sendUnifiedReady(){
+  try{
+    if(window.parent&&window.parent!==window)window.parent.postMessage({type:'vanclick-unified-surface-ready',surface:'taxi_1_4',authenticated:Boolean(authToken),role:staffRole||''},UNIFIED_PARENT_ORIGIN);
+  }catch{}
+}
 window.addEventListener('message',event=>{
   if(event.origin!==UNIFIED_PARENT_ORIGIN)return;
-  if(event.data?.type!=='vanclick-unified-login')return;
-  unifiedParentLogin(event.data.phone,event.data.pin);
+  if(event.data?.type==='vanclick-unified-login')unifiedParentLogin(event.data.phone,event.data.pin);
+  if(event.data?.type==='vanclick-unified-session-probe')sendUnifiedReady();
 });
-try{
-  if(window.parent&&window.parent!==window)window.parent.postMessage({type:'vanclick-unified-surface-ready',surface:'taxi_1_4',authenticated:Boolean(authToken),role:staffRole||''},UNIFIED_PARENT_ORIGIN);
-}catch{}
+sendUnifiedReady();
