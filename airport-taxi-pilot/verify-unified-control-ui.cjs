@@ -34,10 +34,10 @@ for(const id of ['adminTabs','ordersPane','topupsPane','driversPane','customersP
 for(const needle of [
   'renderSmallOrders','smallPublish','smallRelease','smallCancel',
   'renderTopups','topupApprove','topupReject',
-  'renderDrivers','driverVerify','driverToggle','driverResetPin',
+  'renderDrivers','driverVerify','driverToggle','driverResetPin','driverPreview',
   'vcUnifiedAdminTab'
 ]) assert.ok(ui.includes(needle),'unified Admin workflow missing '+needle);
-for(const needle of ['Заказы','Пополнения','Водители','Клиенты','Журнал','הזמנות','טעינות','נהגים','לקוחות','יומן']){
+for(const needle of ['Заказы','Пополнения','Водители','Клиенты','Журнал','Как водитель','הזמנות','טעינות','נהגים','לקוחות','יומן','תצוגת נהג']){
   assert.ok(ui.includes(needle),'unified Admin bilingual navigation missing '+needle);
 }
 
