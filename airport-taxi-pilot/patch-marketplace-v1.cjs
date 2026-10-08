@@ -412,6 +412,15 @@ const marketplaceCss=fs.readFileSync(path.join(__dirname,'marketplace-ui.css'),'
 
 fs.writeFileSync(path.join(root,'apps','driver','public','app.js'),driverUi);
 fs.writeFileSync(path.join(root,'apps','dispatch','public','app.js'),dispatchUi);
+{
+  const file=path.join(root,'apps','dispatch','public','index.html');
+  let html=fs.readFileSync(file,'utf8');
+  const oldRef='./app.js';
+  const newRef='./app.js?v=20261008-mobileauth1';
+  if(!html.includes(oldRef) && !html.includes(newRef)) throw new Error('MARKETPLACE_V1_PATCH_MISS: dispatch app.js cache-bust');
+  html=html.replace(oldRef,newRef);
+  fs.writeFileSync(file,html);
+}
 
 for(const rel of [path.join('apps','driver','public','app.css'),path.join('apps','dispatch','public','app.css')]){
   const file=path.join(root,rel);
