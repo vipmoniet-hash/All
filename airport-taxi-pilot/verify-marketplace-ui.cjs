@@ -35,6 +35,12 @@ assert.ok(dispatch.includes('/api/auth/dispatch/login'),'dispatch UI must suppor
 assert.ok(dispatch.includes('taxi4_staff_role'),'small dispatch UI must remember the authenticated staff role');
 assert.ok(dispatch.includes("['admin','dispatcher'].includes(staffRole)"),'small dispatch UI must recognize unified staff roles');
 assert.ok(dispatch.includes('/unified/dispatch/'),'authenticated staff must be redirected to the unified dispatch');
+for(const needle of ['vanclick-unified-login','vanclick-unified-session-probe','vanclick-unified-surface-ready','vanclick-unified-auth-result','UNIFIED_PARENT_ORIGIN']){
+  assert.ok(dispatch.includes(needle),'working Taxi 1-4 dispatch bridge missing '+needle);
+}
+assert.ok(dispatch.includes('UNIFIED_EMBED'),'working Taxi 1-4 dispatch must detect iframe embed mode');
+assert.ok(dispatch.includes("!UNIFIED_EMBED&&['admin','dispatcher'].includes(staffRole)"),'embedded Taxi 1-4 must not redirect itself out of the unified shell');
+
 assert.ok(dispatch.includes('/drivers/${id}/pin'),'dispatch UI must support driver PIN rotation');
 assert.ok(dispatch.includes('dispatchLang'),'dispatch UI must persist selected Russian/Hebrew language');
 assert.ok(dispatch.includes('setDispatchLang'),'dispatch UI must expose language switch');
