@@ -1,7 +1,10 @@
 /* MARKETPLACE_V1_DRIVER_UI */
 const API=window.TAXI4_API_BASE||location.origin;
 const q=s=>document.querySelector(s),qa=s=>[...document.querySelectorAll(s)];
-let driverId=sessionStorage.getItem('taxi4_driver_id')||q('#driver')?.value||'',marketState=null,poolFilter='all',authRequired=false,authToken=sessionStorage.getItem('taxi4_driver_token')||'';
+const previewMode=new URLSearchParams(location.search).get('admin_preview')==='1';
+const previewDriverId=sessionStorage.getItem('taxi4_preview_driver_id')||'';
+const previewStaffToken=sessionStorage.getItem('taxi4_dispatch_token')||'';
+let driverId=previewMode?previewDriverId:(sessionStorage.getItem('taxi4_driver_id')||q('#driver')?.value||''),marketState=null,poolFilter='all',authRequired=false,authToken=previewMode?previewStaffToken:(sessionStorage.getItem('taxi4_driver_token')||'');
 
 const esc=v=>String(v??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
 const pay=m=>m==='bit'?'Bit':'מזומן';
@@ -50,8 +53,8 @@ function ensureDriverAuthUi(){
         if(!r.ok)throw Error(j.error);
         if(['admin','dispatcher'].includes(j.role)){
           sessionStorage.setItem('taxi4_dispatch_token',j.token);
-          sessionStorage.setItem('taxi4_staff_role','admin');
-          location.replace('/dispatch/');
+          sessionStorage.setItem('taxi4_staff_role',j.role);
+          location.replace('/unified/dispatch/');
           return;
         }
         authToken=j.token;driverId=j.driver.id;
@@ -75,13 +78,25 @@ function showDriverLogin(message=''){
   q('#driverAuthStatus').textContent=message;
   q('#driverAuthOverlay').classList.remove('hidden');
 }
+function exitDriverPreview(){
+  sessionStorage.removeItem('taxi4_preview_driver_id');
+  location.href='/unified/dispatch/';
+}
 async function driverLogout(){
+  if(previewMode){exitDriverPreview();return;}
   try{if(authToken)await authFetch(API+'/api/auth/logout',{method:'POST'});}catch{}
   authToken='';driverId='';
   sessionStorage.removeItem('taxi4_driver_token');sessionStorage.removeItem('taxi4_driver_id');
   showDriverLogin();
 }
 async function initDriverAuth(){
+  if(previewMode){
+    authRequired=true;
+    if(!authToken||!driverId){location.replace('/unified/dispatch/');return false;}
+    q('#driver')?.classList.add('hidden');
+    q('#driverAuthOverlay')?.classList.add('hidden');
+    return true;
+  }
   ensureDriverAuthUi();
   const r=await fetch(API+'/api/auth/status',{cache:'no-store'});
   const j=await r.json();
@@ -97,6 +112,13 @@ async function initDriverAuth(){
 }
 
 function ensureMarketplaceUi(){
+  if(previewMode&&!q('#driverPreviewBanner')){
+    const banner=document.createElement('div');
+    banner.id='driverPreviewBanner';
+    banner.className='marketplace-dev-badge';
+    banner.innerHTML='<b>תצוגת מנהל לקריאה בלבד</b> · כך הנהג רואה את האפליקציה <button type="button" class="secondary" onclick="exitDriverPreview()">חזרה לניהול</button>';
+    q('.shell')?.prepend(banner);
+  }
   if(!q('#marketplaceDevBadge')){
     const badge=document.createElement('div');
     badge.id='marketplaceDevBadge';
@@ -108,7 +130,7 @@ function ensureMarketplaceUi(){
     const logout=document.createElement('button');
     logout.id='driverLogout';
     logout.className='secondary hidden';
-    logout.textContent='יציאה';
+    logout.textContent=previewMode?'חזרה לניהול':'יציאה';
     logout.onclick=driverLogout;
     q('.top-actions')?.appendChild(logout);
   }
@@ -152,27 +174,29 @@ function issueButtons(o){
   if(o.issue?.status==='open'){
     return '<div class="issue-open">⚠ דווחה בעיה: '+esc(o.issue.type)+'</div>';
   }
+  const dis=previewMode?' disabled aria-disabled="true"':'';
   return `<div class="issue-menu hidden" id="issue-${o.id}">
-    <button onclick="reportIssue('${o.id}','client_unreachable')">לקוח לא עונה</button>
-    <button onclick="reportIssue('${o.id}','customer_not_ready')">לקוח לא מוכן</button>
-    <button onclick="reportIssue('${o.id}','client_no_show')">לקוח לא הגיע</button>
-    <button onclick="reportIssue('${o.id}','flight_delay')">בעיה בטיסה</button>
-    <button onclick="reportIssue('${o.id}','pickup_problem')">בעיה באיסוף</button>
-    <button onclick="reportIssue('${o.id}','vehicle_problem')">בעיה ברכב</button>
-    <button onclick="reportIssue('${o.id}','other')">אחר</button>
+    <button${dis} onclick="reportIssue('${o.id}','client_unreachable')">לקוח לא עונה</button>
+    <button${dis} onclick="reportIssue('${o.id}','customer_not_ready')">לקוח לא מוכן</button>
+    <button${dis} onclick="reportIssue('${o.id}','client_no_show')">לקוח לא הגיע</button>
+    <button${dis} onclick="reportIssue('${o.id}','flight_delay')">בעיה בטיסה</button>
+    <button${dis} onclick="reportIssue('${o.id}','pickup_problem')">בעיה באיסוף</button>
+    <button${dis} onclick="reportIssue('${o.id}','vehicle_problem')">בעיה ברכב</button>
+    <button${dis} onclick="reportIssue('${o.id}','other')">אחר</button>
   </div>`;
 }
 
 function card(o,owned=false){
   const blocked=!owned&&o.canClaim===false;
+  const ro=previewMode?' disabled aria-disabled="true"':'';
   const action=owned
     ? `<div class="actions compact-actions">
-        ${o.canConfirmEnRoute?`<button class="secondary" onclick="enroute('${o.id}')">אני בדרך</button>`:''}
-        ${o.status==='driver_enroute'?`<button class="buy" onclick="completeTrip('${o.id}')">הנסיעה הושלמה</button>`:''}
-        <button class="secondary" onclick="toggleIssue('${o.id}')">בעיה</button>
-        ${o.canSelfCancel?`<button class="danger" onclick="cancelOrder('${o.id}')">החזר לפול</button>`:''}
+        ${o.canConfirmEnRoute?`<button class="secondary"${ro} onclick="enroute('${o.id}')">אני בדרך</button>`:''}
+        ${o.status==='driver_enroute'?`<button class="buy"${ro} onclick="completeTrip('${o.id}')">הנסיעה הושלמה</button>`:''}
+        <button class="secondary"${ro} onclick="toggleIssue('${o.id}')">בעיה</button>
+        ${o.canSelfCancel?`<button class="danger"${ro} onclick="cancelOrder('${o.id}')">החזר לפול</button>`:''}
       </div>${issueButtons(o)}`
-    : `<div class="actions"><button class="buy ${blocked?'claim-blocked':''}" ${blocked?'disabled':''} onclick="buy('${o.id}')">קח נסיעה · עמלה ${o.commission} ₪</button>${blocked?`<div class="claim-reason">${claimReason(o.claimBlockReason)}</div>`:''}</div>`;
+    : `<div class="actions"><button class="buy ${blocked?'claim-blocked':''}" ${blocked||previewMode?'disabled':''} aria-disabled="${blocked||previewMode?'true':'false'}" onclick="buy('${o.id}')">קח נסיעה · עמלה ${o.commission} ₪</button>${blocked?`<div class="claim-reason">${claimReason(o.claimBlockReason)}</div>`:''}</div>`;
 
   return `<article class="ride ${owned?'owned':''} ${blocked?'blocked':''}" data-order-id="${o.id}">
     <div class="ride-top">
@@ -223,9 +247,14 @@ function renderState(){
 
 async function load(silent=false){
   if(!authRequired)driverId=q('#driver')?.value||driverId;
-  if(authRequired&&!authToken){showDriverLogin();return;}
+  if(authRequired&&!authToken){
+    if(previewMode){location.replace('/unified/dispatch/');return;}
+    showDriverLogin();return;
+  }
   try{
-    const r=await authFetch(`${API}/api/drivers/${encodeURIComponent(driverId)}/state`,{cache:'no-store'}),s=await r.json();
+    const url=previewMode?`${API}/api/unified/admin/driver-preview/${encodeURIComponent(driverId)}`:`${API}/api/drivers/${encodeURIComponent(driverId)}/state`;
+    const r=await authFetch(url,{cache:'no-store'}),s=await r.json();
+    if((r.status===401||r.status===403)&&previewMode){location.replace('/unified/dispatch/');return;}
     if(r.status===401&&authRequired){showDriverLogin('נדרש להתחבר מחדש');return;}
     if(!r.ok)throw Error(s.error);
     marketState=s;renderState();
@@ -233,6 +262,7 @@ async function load(silent=false){
 }
 
 async function post(url,body={}){
+  if(previewMode)throw Error('PREVIEW_READ_ONLY');
   const r=await authFetch(url,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body)}),j=await r.json();
   if(r.status===401&&authRequired){showDriverLogin('נדרש להתחבר מחדש');throw Error('UNAUTHORIZED');}
   if(!r.ok)throw Error(j.error);return j;
@@ -285,6 +315,9 @@ async function boot(){
   ensureMarketplaceUi();
   q('#today').textContent=new Date().toLocaleDateString('he-IL',{weekday:'long',day:'2-digit',month:'2-digit',year:'numeric'});
   const topupInput=q('#topup input[name="amount"]');if(topupInput)topupInput.addEventListener('input',renderTopupCalc);renderTopupCalc();
+  if(previewMode){
+    q('#topup')?.querySelectorAll('input,select,button').forEach(el=>{el.disabled=true;el.setAttribute('aria-disabled','true')});
+  }
   const ready=await initDriverAuth();
   if(ready)await load(true);
 }
