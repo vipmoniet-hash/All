@@ -15,7 +15,7 @@ publish:'В общий пул',release:'Снять водителя',resolve:'З
 advancedSmall:'Расширенный режим',noOrders:'Заказов нет',noTopups:'Нет ожидающих пополнений',noDrivers:'Водителей нет',
 noCustomers:'Клиентов пока нет',noJournal:'Событий пока нет',trips:'поездок',lastTrip:'Последняя',
 pending:'Ожидает',approved:'Подтверждено',rejected:'Отклонено',verify:'Проверить',enable:'Включить',disable:'Выключить',resetPin:'Сменить PIN',
-addDriver:'Добавить',driverName:'Имя водителя',driverPhone:'Телефон',vehiclePlate:'Номер машины',driverPin:'PIN 4–12 цифр',
+addDriver:'Добавить',driverName:'Имя водителя',driverPhone:'Телефон',vehiclePlate:'Номер машины',driverPin:'PIN 4–12 цифр',driverView:'Как водитель',
 badPin:'Неверный PIN',forbidden:'Нет доступа к этой линии',notConfigured:'Доступ персонала ещё не настроен в Render',
 roleAdmin:'ADMIN · обе линии',roleDispatcher:'DISPATCHER · обе линии',
 copied:'Скопировано',copyEmpty:'Нет новых или свободных поездок для отправки',
@@ -36,7 +36,7 @@ publish:'שלח למאגר',release:'הסר נהג',resolve:'סגור בעיה',
 advancedSmall:'מצב מתקדם',noOrders:'אין הזמנות',noTopups:'אין טעינות ממתינות',noDrivers:'אין נהגים',
 noCustomers:'אין לקוחות',noJournal:'אין אירועים',trips:'נסיעות',lastTrip:'אחרונה',
 pending:'ממתין',approved:'אושר',rejected:'נדחה',verify:'אמת',enable:'הפעל',disable:'כבה',resetPin:'שנה PIN',
-addDriver:'הוסף',driverName:'שם נהג',driverPhone:'טלפון',vehiclePlate:'מספר רכב',driverPin:'PIN בן 4–12 ספרות',
+addDriver:'הוסף',driverName:'שם נהג',driverPhone:'טלפון',vehiclePlate:'מספר רכב',driverPin:'PIN בן 4–12 ספרות',driverView:'תצוגת נהג',
 badPin:'PIN שגוי',forbidden:'אין גישה לקו הזה',notConfigured:'גישת הצוות עדיין לא הוגדרה ב-Render',
 roleAdmin:'ADMIN · שני הקווים',roleDispatcher:'סדרן · שני הקווים',
 copied:'הועתק',copyEmpty:'אין נסיעות חדשות או פנויות לשליחה',
@@ -164,7 +164,7 @@ function renderDrivers(){
   const box=$('driverQueue');if(!box)return;
   if(!['admin','dispatcher'].includes(role)){box.innerHTML='';return}
   const xs=(state?.drivers||[]).slice().sort((a,b)=>String(a.name||'').localeCompare(String(b.name||''),lang==='he'?'he':'ru'));
-  box.innerHTML=xs.length?xs.map(d=>'<article class="queue-card driver-card"><div class="order-title"><h3>'+esc(d.name||d.id)+'</h3><span class="status-pill">'+esc(d.verified?(d.active?t('approved'):t('disable')):t('pending'))+'</span></div><div>'+esc(d.phone||'')+(d.vehiclePlate?' · '+esc(d.vehiclePlate):'')+'</div><div class="muted">'+esc(t('wallet'))+': '+money(d.wallet)+' ₪ · '+esc(t('completed'))+': '+Number(d.completedTrips||0)+'</div><div class="actions queue-actions">'+(!d.verified?'<button class="primary" onclick="driverVerify(\''+esc(d.id)+'\')">'+esc(t('verify'))+'</button>':'<button class="secondary" onclick="driverToggle(\''+esc(d.id)+'\','+(d.active?'false':'true')+')">'+esc(d.active?t('disable'):t('enable'))+'</button>')+'<button class="secondary" onclick="driverResetPin(\''+esc(d.id)+'\')">'+esc(t('resetPin'))+'</button></div></article>').join(''):'<div class="muted">'+esc(t('noDrivers'))+'</div>';
+  box.innerHTML=xs.length?xs.map(d=>'<article class="queue-card driver-card"><div class="order-title"><h3>'+esc(d.name||d.id)+'</h3><span class="status-pill">'+esc(d.verified?(d.active?t('approved'):t('disable')):t('pending'))+'</span></div><div>'+esc(d.phone||'')+(d.vehiclePlate?' · '+esc(d.vehiclePlate):'')+'</div><div class="muted">'+esc(t('wallet'))+': '+money(d.wallet)+' ₪ · '+esc(t('completed'))+': '+Number(d.completedTrips||0)+'</div><div class="actions queue-actions">'+(!d.verified?'<button class="primary" onclick="driverVerify(\''+esc(d.id)+'\')">'+esc(t('verify'))+'</button>':'<button class="secondary" onclick="driverToggle(\''+esc(d.id)+'\','+(d.active?'false':'true')+')">'+esc(d.active?t('disable'):t('enable'))+'</button>')+'<button class="secondary" onclick="driverResetPin(\''+esc(d.id)+'\')">'+esc(t('resetPin'))+'</button>'+(role==='admin'?'<button class="secondary" onclick="driverPreview(\''+esc(d.id)+'\')">'+esc(t('driverView'))+'</button>':'')+'</div></article>').join(''):'<div class="muted">'+esc(t('noDrivers'))+'</div>';
 }
 function renderCustomers(){
   const box=$('customerProfiles');if(!box)return;
@@ -212,6 +212,7 @@ window.topupReject=async id=>{await api('/api/dispatch/topups/'+id+'/reject',{me
 window.driverVerify=async id=>{await api('/api/dispatch/drivers/'+id+'/verification',{method:'POST',body:{verified:true,active:true}});await load()};
 window.driverToggle=async(id,active)=>{await api('/api/dispatch/drivers/'+id+'/verification',{method:'POST',body:{active}});await load()};
 window.driverResetPin=async id=>{const pin=prompt(t('driverPin'))||'';if(!/^\d{4,12}$/.test(pin))return;await api('/api/dispatch/drivers/'+id+'/pin',{method:'POST',body:{pin}});alert(t('approved'))};
+window.driverPreview=id=>{if(role!=='admin')return;sessionStorage.setItem('taxi4_preview_driver_id',id);location.href='/driver/?admin_preview=1'};
 
 window.largeApprove=async id=>{const raw=prompt(t('fare'));if(raw==null)return;const fare=Number(raw);if(!Number.isFinite(fare)||fare<=0)return;await api('/api/unified/large/orders/'+id+'/approve',{method:'POST',body:{fare}});await load()};
 window.largeAssign=async id=>{const driverName=prompt(t('driver'));if(!driverName)return;const driverPhone=prompt(t('driverPhone'));if(!driverPhone)return;const vehiclePlate=prompt(t('vehiclePlate'))||'';await api('/api/unified/large/orders/'+id+'/assign',{method:'POST',body:{driverName,driverPhone,vehiclePlate}});await load()};
