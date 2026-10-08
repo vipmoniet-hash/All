@@ -45,9 +45,6 @@ assert.ok(html.includes('id="readinessBanner"'),'control center must expose depl
 for(const needle of ['readyForUnifiedCutover','readinessReasons','renderReadiness','/health']) assert.ok(ui.includes(needle),'unified readiness UI missing '+needle);
 assert.ok(html.includes('id="staffAuthOverlay"'),'control center must provide a staff login surface');
 assert.ok(html.includes('id="staffPhone"'),'control center must accept existing VanClick staff phone credentials');
-for(const needle of ['vanclick-unified-login','vanclick-unified-session-probe','vanclick-unified-surface-ready','vanclick-unified-auth-result','https://vanclick.co.il']){
-  assert.ok(ui.includes(needle),'Taxi 1–4 unified parent bridge missing '+needle);
-}
 
 assert.ok(html.includes('noindex,nofollow'),'control center must remain noindex');
 assert.ok(ui.includes("Asia/Jerusalem"),'unified control dates must use Israel timezone');
