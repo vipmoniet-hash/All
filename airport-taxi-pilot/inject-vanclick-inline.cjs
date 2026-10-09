@@ -1,5 +1,6 @@
 const fs=require('fs');
 const path=require('path');
+const {normalizePublicClientFooter}=require('./public-client-footer.cjs');
 
 const root=process.argv[2]||'app';
 const css=fs.readFileSync('vanclick-bridge.css','utf8');
@@ -18,7 +19,7 @@ function walk(dir,out=[]){
 const htmls=walk(root).filter(file=>/apps[\\/]client[\\/]public[\\/]/i.test(file));
 let changed=[];
 for(const file of htmls){
-  let html=fs.readFileSync(file,'utf8');
+  let html=normalizePublicClientFooter(fs.readFileSync(file,'utf8'));
 
   // Taxi 1–4: standard small-taxi drivers do not carry child seats/boosters.
   // Remove the option from the customer form entirely.
@@ -86,6 +87,7 @@ verify('verify-marketplace-v1.mjs',[root]);
 
 // High-volume marketplace UI regression gate.
 verify('verify-marketplace-ui.cjs',[root]);
+verify('verify-public-client-footer.cjs',[root]);
 
 // Full isolated API workflow gate.
 verify('verify-marketplace-http.mjs',[root]);
