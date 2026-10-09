@@ -124,3 +124,20 @@ verify('verify-unified-security-surface.cjs',[root]);
 
 // Render Blueprint must keep private Postgres wiring and fail-closed security.
 verify('verify-render-blueprint.cjs',[path.join(__dirname,'..','render.yaml')]);
+
+
+// Owner directive 2026-10-09: retire NEW Taxi 1–4 intake directly on Render.
+// Existing completed/accepted bookings, staff logins, historical lookup,
+// driver fulfilment and financial ledgers are untouched by this HTTP guard.
+// Run legacy regression tests above against isolated data BEFORE disabling new intake.
+const retirementServerPath=path.join(root,'server.js');
+let retirementServer=fs.readFileSync(retirementServerPath,'utf8');
+const retirementAnchor="if(url.pathname.startsWith('/api/')){";
+const retirementAnchorCount=retirementServer.split(retirementAnchor).length-1;
+if(retirementAnchorCount!==1)throw new Error('TAXI4_RETIREMENT_PATCH_ANCHOR_COUNT_'+retirementAnchorCount);
+const retirementGuard=`if(req.method==='POST'&&['/api/client/bookings','/api/client/bookings/','/api/unified/small/bookings','/api/unified/small/bookings/'].includes(url.pathname))return json(res,410,{ok:false,error:'SERVICE_RETIRED',code:'taxi_1_4_retired',redirectUrl:'https://vanclick.co.il/app/',message:'VanClick offers only large airport vehicles for 1–6 passengers.'});`;
+retirementServer=retirementServer.replace(retirementAnchor,retirementGuard+'\n    '+retirementAnchor);
+fs.writeFileSync(retirementServerPath,retirementServer);
+require('child_process').execFileSync(process.execPath,['--check',retirementServerPath],{stdio:'inherit'});
+verify('verify-retired-taxi4-http.mjs',[root]);
+console.log('TAXI4_PRODUCTION_NEW_INTAKE_RETIRED');

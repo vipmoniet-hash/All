@@ -1,0 +1,32 @@
+name: Taxi 1-4 retirement guard
+on:
+  pull_request:
+    branches: [taxi4-marketplace-scale]
+    paths:
+      - "airport-taxi-pilot/**"
+      - ".github/workflows/taxi4-retirement.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  guard:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Unpack isolated marketplace bundle and run complete contract suite
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd airport-taxi-pilot
+          mkdir -p app
+          cat payload.00 payload.01 payload.02 payload.03 payload.04 | tr -d '\n\r ' | base64 -d > app.tar.xz
+          tar -xJf app.tar.xz -C app
+          cat override.00 override.01 override.02 | tr -d '\n\r ' | base64 -d > override.tar.xz
+          tar -xJf override.tar.xz -C app
+          node inject-vanclick-inline.cjs app
+          test -f app/server.js
+          node --check app/server.js
