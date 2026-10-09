@@ -139,7 +139,7 @@ const retirementGuard=`if(req.method==='POST'&&['/api/client/bookings','/api/cli
 // Redirect only the former small-car client root. Keep direct deep links
 // accessible for managing historical accepted rides and receipts.
 const legacyClientRedirect="if(req.method==='GET'&&['/client','/client/'].includes(url.pathname)){res.writeHead(302,{location:'https://vanclick.co.il/app/','cache-control':'no-store'});return res.end();}";
-retirementServer=retirementServer.replace(retirementAnchor,legacyClientRedirect+'\\n    '+retirementGuard+'\\n    '+retirementAnchor);
+retirementServer=retirementServer.replace(retirementAnchor,legacyClientRedirect+'\n    '+retirementGuard+'\n    '+retirementAnchor);
 fs.writeFileSync(retirementServerPath,retirementServer);
 require('child_process').execFileSync(process.execPath,['--check',retirementServerPath],{stdio:'inherit'});
 verify('verify-retired-taxi4-http.mjs',[root]);
