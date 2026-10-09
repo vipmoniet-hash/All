@@ -16,6 +16,11 @@ async function ready(){for(let i=0;i<50;i++){try{if((await fetch(base+'/health')
 async function post(url){const r=await fetch(base+url,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({passengers:2,customerName:'Retirement Guard Test',customerPhone:'0501112233',tripAt:'2026-10-18T12:00',fromArea:'ראשון לציון',toArea:'נתב״ג'})});let body=await r.json();assert.equal(r.status,410,url+' must reject NEW small orders');assert.equal(body.error,'SERVICE_RETIRED');return body}
 try{
  await ready();
+ const direct=await fetch(base+'/client/',{redirect:'manual'});
+ assert.equal(direct.status,302,'old direct marketplace client entry must redirect to large VanClick booking');
+ assert.equal(direct.headers.get('location'),'https://vanclick.co.il/app/');
+ const statusPage=await fetch(base+'/client/existing-order-test',{redirect:'manual'});
+ assert.notEqual(statusPage.status,302,'historical deep links must not be redirected by root-only retirement');
  await post('/api/client/bookings');
  await post('/api/client/bookings/');
  await post('/api/unified/small/bookings');

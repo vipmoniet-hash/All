@@ -136,7 +136,10 @@ const retirementAnchor="if(url.pathname.startsWith('/api/')){";
 const retirementAnchorCount=retirementServer.split(retirementAnchor).length-1;
 if(retirementAnchorCount!==1)throw new Error('TAXI4_RETIREMENT_PATCH_ANCHOR_COUNT_'+retirementAnchorCount);
 const retirementGuard=`if(req.method==='POST'&&['/api/client/bookings','/api/client/bookings/','/api/unified/small/bookings','/api/unified/small/bookings/'].includes(url.pathname))return json(res,410,{ok:false,error:'SERVICE_RETIRED',code:'taxi_1_4_retired',redirectUrl:'https://vanclick.co.il/app/',message:'VanClick offers only large airport vehicles for 1–6 passengers.'});`;
-retirementServer=retirementServer.replace(retirementAnchor,retirementGuard+'\n    '+retirementAnchor);
+// Redirect only the former small-car client root. Keep direct deep links
+// accessible for managing historical accepted rides and receipts.
+const legacyClientRedirect="if(req.method==='GET'&&['/client','/client/'].includes(url.pathname)){res.writeHead(302,{location:'https://vanclick.co.il/app/','cache-control':'no-store'});return res.end();}";
+retirementServer=retirementServer.replace(retirementAnchor,legacyClientRedirect+'\n    '+retirementGuard+'\n    '+retirementAnchor);
 fs.writeFileSync(retirementServerPath,retirementServer);
 require('child_process').execFileSync(process.execPath,['--check',retirementServerPath],{stdio:'inherit'});
 verify('verify-retired-taxi4-http.mjs',[root]);
